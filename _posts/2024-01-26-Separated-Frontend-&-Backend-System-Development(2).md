@@ -85,21 +85,34 @@ export default {
 </style>
 ```
 - 在Vue項目中，一個.vue文件就默認是一個組件，而所有的組件都是挂載在 `App.vue` 這個根組件上；組件與組件之間並沒有聯係，可以通過在一個組件中導入另一個組件來實現父子組件。
-- 一個.vue文件基本由三個部分組成: `<template></template>`、`<script></script>` 和 `<style></style>`。`<template>` 是聲明最基礎的html標簽和整體佈局，`<template>`標簽内至少需要一個標簽作爲根標簽，因爲前面提到的組件導入就是從這個根標簽作爲嵌入點。例如左邊的A組件導入B組件最終就會變爲A(右邊):
+- 一個.vue文件基本由三個部分組成: `<template></template>`、`<script></script>` 和 `<style></style>`。`<template>` 是聲明最基礎的html標簽和整體佈局，`<template>`標簽内至少需要一個標簽作爲根標簽，因爲前面提到的組件導入就是從這個根標簽作爲嵌入點。例如左邊的A組件導入B組件最終就會變爲A(下面):
+- A.vue
+```                                    
+<template>                                  
+    <div class="A">                                         
+        <B></B>                                     
+    </div>      
+</template>                             
 ```
-A.vue                                        A.vue
-<template>                                  <template>
-    <div class="A">                             <div class="A">            
-        <B></B>                                     <div class="B">
-    </div>                                          </div>
-</template>                                     </div>
-                                            </template>
-B.vue
+
+- B.vue
+```
 <template>
     <div class="B">
     </div>
 </template>
 ```
+
+- A.vue
+```
+<template>                                  
+    <div class="A">                                         
+        <div class="B">
+        </div>                                   
+    </div>      
+</template>   
+```
+
 - `<script>`是為整個組件提供脚本的地方，最外層包含了一個組件的聲明，同時裏面還有很多實用的屬性: `components`聲明從外部導入組件；`props`允許父組件傳遞數據給子組件；`mounted()`在每個組件加載時會調用的方法(類似JAVA中的構造函數，詳情見[Vue Lifecycle](https://vuejs.org/guide/essentials/lifecycle))；`data`聲明這個組件内使用到的數據；`methods`聲明組件内使用到的方法
 - `<style>`與基礎的寫法相同
 #### 2.3.2 main.js
