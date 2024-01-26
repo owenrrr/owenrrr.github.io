@@ -86,7 +86,7 @@ export default {
 ```
 - 在Vue項目中，一個.vue文件就默認是一個組件，而所有的組件都是挂載在 `App.vue` 這個根組件上；組件與組件之間並沒有聯係，可以通過在一個組件中導入另一個組件來實現父子組件。
 - 一個.vue文件基本由三個部分組成: `<template></template>`、`<script></script>` 和 `<style></style>`。`<template>` 是聲明最基礎的html標簽和整體佈局，`<template>`標簽内至少需要一個標簽作爲根標簽，因爲前面提到的組件導入就是從這個根標簽作爲嵌入點。例如上面的A組件導入B組件最終就會變爲A(下面):
-- 
+
 ```                                    
 <template>                                  
     <div class="A">                                         
