@@ -85,37 +85,32 @@ export default {
 </style>
 ```
 - 在Vue項目中，一個.vue文件就默認是一個組件，而所有的組件都是挂載在 `App.vue` 這個根組件上；組件與組件之間並沒有聯係，可以通過在一個組件中導入另一個組件來實現父子組件。
-- 一個.vue文件基本由三個部分組成: `<template></template>`、`<script></script>` 和 `<style></style>`。`<template>` 是聲明最基礎的html標簽和整體佈局，`<template>`標簽内至少需要一個標簽作爲根標簽，因爲前面提到的組件導入就是從這個根標簽作爲嵌入點。例如左邊的A組件導入B組件最終就會變爲A(下面):
-- A.vue
+- 一個.vue文件基本由三個部分組成: `<template></template>`、`<script></script>` 和 `<style></style>`。`<template>` 是聲明最基礎的html標簽和整體佈局，`<template>`標簽内至少需要一個標簽作爲根標簽，因爲前面提到的組件導入就是從這個根標簽作爲嵌入點。例如上面的A組件導入B組件最終就會變爲A(下面):
+- 
 ```                                    
 <template>                                  
     <div class="A">                                         
         <B></B>                                     
     </div>      
-</template>                             
-```
+</template>
 
-- B.vue
-```
 <template>
     <div class="B">
     </div>
 </template>
-```
 
-- A.vue
-```
 <template>                                  
     <div class="A">                                         
         <div class="B">
         </div>                                   
     </div>      
-</template>   
+</template>                        
 ```
 
 - `<script>`是為整個組件提供脚本的地方，最外層包含了一個組件的聲明，同時裏面還有很多實用的屬性: `components`聲明從外部導入組件；`props`允許父組件傳遞數據給子組件；`mounted()`在每個組件加載時會調用的方法(類似JAVA中的構造函數，詳情見[Vue Lifecycle](https://vuejs.org/guide/essentials/lifecycle))；`data`聲明這個組件内使用到的數據；`methods`聲明組件内使用到的方法
 - `<style>`與基礎的寫法相同
 #### 2.3.2 main.js
+
 ```
 import Vue from 'vue'
 import App from './App.vue'
@@ -133,10 +128,11 @@ new Vue({
   store: store,
   render: h => h(App),
 }).$mount('#app')
-
 ```
+
 - 負責導入Vue.js庫和其他使用到的全局庫和組件
 - 創建Vue實例，並將其掛載到HTML文檔中的一個DOM元素上，通常是一個div元素。可由下列例子(App.vue)中看出，`main.js`把整個Vue實例掛載到`App.vue`中的`<div id="app">`上，把這個`<div>`當作最外層的HTML元素:
+- 
 ```
 <template>
   <div id="app">
@@ -177,6 +173,7 @@ const store = new Vuex.Store({
 })
 export default store
 ```
+
 - `Vue.use(Vuex)` 是讓 `Vuex` 挂載在 `Vue` 實例上，在 `main.js`上導入即可使得全局都可以使用這個配置
 - `state` 是Vuex的基本狀態，通過定義在 `state` 裏可以在各個組件内部通過 `this.$store.state` 調用，非常方便
 - `mutations` 是爲了解決很多組件若要調用相同的方法都需要再寫一遍，若是現在 `store/index.js` 中定義就能在各個組件中直接調用方法
