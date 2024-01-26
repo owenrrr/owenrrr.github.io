@@ -224,7 +224,9 @@ public class LinkVO {
     }
 }
 ```
+
 - 有個好用的庫可以簡化手動生成Get/Set方法`lombok`: 使用時在maven中添加依賴
+
 ```
 <dependency>
 	<groupId>org.projectlombok</groupId>
@@ -232,7 +234,9 @@ public class LinkVO {
 	<version>1.18.20</version>
 </dependency>
 ```
+
 簡化項目中的DAO/PO/VO.etc，`LinkVO`便可簡化為:
+
 ```
 @Data
 public class LinkVO {
@@ -241,7 +245,9 @@ public class LinkVO {
     private String rela;
 }
 ```
+
 - 值得一提的是，`ResponseVO`是默認返回給前端的類，使得前端處理後端返回的數據時不會因爲不同API而有不同的預處理方法，下面是`ResponseVO`的設計可供參考:
+
 ```
 public class ResponseVO {
     // 表示這次請求是否成功
@@ -271,9 +277,11 @@ public class ResponseVO {
     }
 }
 ```
+
 #### 1.4.2 Service層
 也就是Business Logic層，是主要處理數據邏輯的模塊。所有的處理都在這層實現，並不會延申到Controller層(也就是說Controller層只是負責處理Http Request)。設計思路有很多，但是大體可以分爲兩部分: Service Interface和Service Implementation。Interface主要聲明要完成的方法，白話說就是TODO List；Implementation是實現Interface的模塊，下面提供一個例子:
 - LinkService(Interface)
+
 ```
 public interface LinkService {
     ResponseVO getLinks(String lawTitle);
@@ -283,7 +291,9 @@ public interface LinkService {
     ResponseVO deleteLink(String source);
 }
 ```
+
 - LinkServiceImpl(Implementaiton)
+
 ```
 @Service
 public class LinkServiceImpl implements LinkService {
@@ -297,10 +307,12 @@ public class LinkServiceImpl implements LinkService {
     ...
 }
 ```
+
 - `@Service`表示這個類屬於Service層
 - `LinkRepository`類為DAO層，所以在Service層中注入並使用
 #### 1.4.3 Model (PO)
 在介紹Model和Repository之前，要先介紹Spring Data JPA與其餘ORM的關係。本次介紹使用Spring Data JPA并非傳統JPA Provider(如hibernate)，論層級來説它應該處於JPA之上JPA Provider之下，它默認使用hibernate來實現細節(可以在pom依賴下看到spring-data-jpa有子依賴hibernate-core)。它是獨立于Spring framework上的技術，并且不需要開發者實現細節，只需要根據規則套用注解即可。
+
 ```
 @Entity
 @Table(name = "link")
@@ -322,12 +334,14 @@ public class Link {
     private String relation;
 }
 ```
+
 - `@Entity` 是Spring Data JPA中的注解，通常來説添加這個注解就默認生成一個表(這個注解下的類)為表名
 - `@Table(name = "link")`如果要指定特定表名則可以使用此注解
 - `@Id` `@GeneratedValue` 是每個表必要的Id列，`@GeneratedValue`則制定Id列生成規則
 - `@Column`聲明列
 #### 1.4.4 Repository (DAO)
 Spring Data JPA需要我們設計Repository的Interface，在運行過程中它會自動生成這個Repository的實現，避免我們手動生成冗長的代碼如Connection等。因此我們只需專注在SQL語句即可。另外，它兼容原生的SQL語句
+
 ```
 public interface LinkRepository extends JpaRepository<Link, Integer> {
 
@@ -350,7 +364,9 @@ public interface LinkRepository extends JpaRepository<Link, Integer> {
     void deleteLinksBySource(String source);
 }
 ```
+
 - `LinkRepository`繼承`JpaRepository`，它提供很多默認方法如基礎的CRUD: 即使在`LinkRepository`中沒有聲明find方法，在繼承`JpaRepository`后仍可依照規則調用。簡單來説，Spring Data JPA是可以讓使用者使用Interface和特定的Function Design來完成ORM的使用。例如在上述例子中，`JpaRepository<Link, Integer>`使用`Link`表(1-3-3), ID為Integer類型。`Link`類中有id, source, target, relation四列；則LinkRepository默認就擁有下列方法:
+
 ```
 findById(Integer id)
 ...
@@ -363,11 +379,11 @@ deleteAll()
 save(Link link)
 ...
 ```
+
 - 可以節省很多時間并且非常直觀，同時也接受Override改變其方法實現
 - `@Transactional`表示將此方法視爲一個事務，當此方法失敗則不會影響到其他的事務，若是此方法中其中一個操作失敗則全部一起失敗並rollback數據(可以定義rollback rules)
 - `@Query`表示詳細的SQL語句，有很多屬性和規則，可在[官方文檔](https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html)查詢
 - `@Param`可以指定在SQL中使用`:name`來代替`?1`
-
 
 ## 2. 前端
 ### 2.1 前置工作
@@ -377,6 +393,7 @@ save(Link link)
 - 如果需要可見 [Vue官網](https://vuejs.org/) 查詢各種API和框架介紹
 
 ### 2.2 整體框架
+
 ```
 -node_modules
 -public
@@ -395,6 +412,7 @@ save(Link link)
 -vue.config.js
 ...
 ```
+
 - `node_modules`是所有依賴存放目錄
 - `package.json`是npm用來管理這個vue項目依賴的配置文件；借由`package.json`來生成更加全面的依賴樹`package-lock.json`。若要更改或添加依賴可通過手動加入`package.json`或執行`npm install xxx`
 - `vue.config.js`是一個可選的配置文件，會被`vue-cli`加載
@@ -405,6 +423,7 @@ save(Link link)
 
 ### 2.3 模塊/文件介紹
 #### 2.3.1 .vue 文件基本介紹
+
 ```
 <template>
     <div class="outer">
