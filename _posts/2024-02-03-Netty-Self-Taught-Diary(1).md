@@ -37,9 +37,7 @@ as TCP and UDP socket server.
 - Bootstrap: Server端的啓動流程，包括綁定端口、初始化EventLoopGroup，以及各種定義如若是Connection生成后Channel的類/ChannelPipeline上有哪些ChannelHandler以及他們的順序等等
 
 不多說，直接看代碼來學習是最快的方法，下面實現的是一個返回Client端發送訊息的Server:
-- EchoServerHandler.java
-
-
+#### EchoServerHandler.java
 ```
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -72,9 +70,7 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter{
 }
 ```
 
-- EchoServer.java
-
-
+#### EchoServer.java
 ```
 import java.net.InetSocketAddress;
 
