@@ -38,6 +38,8 @@ as TCP and UDP socket server.
 
 不多說，直接看代碼來學習是最快的方法，下面實現的是一個返回Client端發送訊息的Server:
 - EchoServerHandler.java
+
+
 ```
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -71,6 +73,8 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter{
 ```
 
 - EchoServer.java
+
+
 ```
 import java.net.InetSocketAddress;
 
@@ -111,6 +115,7 @@ public class EchoServer {
     }
 }
 ```
+
 首先代碼非常簡單，如同前面所説分爲兩個部分：**ChannelHandler** 實現了一個 **ChannelInboundHandlerAdapter** 類用於幫助生成其他基本的方法，
 這裏覆寫了三個方法分別是: 
 - **channelRead()** 用於處理接收到的數據
