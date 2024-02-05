@@ -34,6 +34,7 @@ compBuf.getBytes(compBuf.readerIndex(), array);
 ```
 
 介紹完不同種類的Buffer后，讓我們把是視角拉回Buffer内部。若是要訪問Buffer的數據，Netty又與原生Java做出區別，這邊爲了簡化流程故而用表格做對比，相信也會更加直觀的看出差異，由於ByteBuffer設計不同，故而使用方法也差距甚大，這邊先不琢磨細節，等到後續使用時再詳細説明：
+
 | Java NIO | Netty |
 | :---- | :---- |
 | ByteBuffer擁有四個基礎屬性: `capacity/limit/position/mark`。`capacity` 表示這個buffer定義大小，一但聲明了便不可更改；`limit` 表示不應該被讀取/寫入資料的位置，例如 [0,limit) 可以被讀取，而 [limit, capacity] 則棄用；`position` 表示目前讀取/寫入的指針；`mark`被用來保存當前的`position`屬性用於後續的重置| 擁有兩個主要屬性: `writerIndex` 和 `readerIndex` 用於分別表示在讀寫中的指針|
