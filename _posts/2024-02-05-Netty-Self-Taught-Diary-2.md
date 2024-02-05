@@ -8,7 +8,7 @@ categories: jekyll update
 ### ByteBuffer(Java)/ByteBuf(Netty)
 先來介紹數據類型ByteBuf，這個ByteBuf類是Netty根據Java的ByteBuffer所演化而來的，兩者都是爲了處理數據而產生。因爲在ChannelHandler中所接收到的數據只能保證順序而沒辦法保證接收到的段落。例如Client中按順序發送: "Hello", "World"；但是到了Server端的ChannelHandler可能會被分成"He","lloW","orld"，因此需要設計一種數據類型來處理這類情況。前面所述的情況是因爲傳輸協議本身沒辦法保證，而并非是受到Netty框架所影響。
 
-在介紹這個數據類之前還要先知道在Java NIO中是如何設計的，這樣方便做直觀的比較而且兩者也有相似之處。`java.nio.bytebuffer` 是 `java.nio.buffer` 的子類，而ByteBuffer中分爲兩種Buffer: `Direct Buffer` 和 `None-Direct Buffer`。就如同名字所述，direct buffer被分配在heap之外，能直接被程序訪問，所以速度較none-direct快；而none-direct buffer被存放在heap中，也就是大部分程序訪問數據的流程，而通常Java會為這個buffer再額外分配一個array用來備份數據，這個array被稱爲 `Backing Array`。因此，可以在程序中透過 `hasArray()` 來檢查這個buffer是否擁有backing array，若是有就代表這個buffer屬於none-direct(heap buffer)，反之為direct buffer。
+在介紹這個數據類之前還要先知道在Java NIO中是如何設計的，這樣方便做直觀的比較而且兩者也有相似之處。`java.nio.bytebuffer` 是 `java.nio.buffer` 的子類，而ByteBuffer中分爲兩種Buffer: `Direct Buffer` 和 `None-Direct Buffer`。就如同名字所述，direct buffer被分配在heap之外，能直接被程序訪問，所以速度較none-direct快；而none-direct buffer被存放在heap中，也就是大部分程序訪問數據的流程，而通常Java會為這個buffer再額外分配一個array用來備份數據，這個array被稱爲 `Backing Array`。因此，可以在程序中透過 `hasArray()` 來檢查這個buffer是否擁有backing array，若是有就代表這個buffer屬於none-direct(heap buffer)，反之為direct buffer: 
 
 | Direct Buffer | None-Direct buffer |
 | :---- | :---- |
