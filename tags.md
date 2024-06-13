@@ -4,15 +4,15 @@ title: tags
 permalink: /tags/
 ---
 <html>
-    <style>
-        .li-expo-posts {
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            width: 100px;
-            display: inline-block;
-            overflow: hidden
-        }
-    </style>
+<style>
+    .li-expo-posts {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        width: 200px;
+        display: inline-block;
+        overflow: hidden
+    }
+</style>
 <body>
     <div class="tags-expo">
         <div class="tags-expo-section">
