@@ -7,6 +7,7 @@ tags: Algorithm
 ---
 <html>
 <body>
+<div markdown="1">
 
 ```java
 import java.time.Duration;
@@ -73,6 +74,7 @@ class Solution {
     }
 }
 ```
-   
+
+</div>   
 </body>
 </html>
