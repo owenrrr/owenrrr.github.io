@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Merge Sort Java Implementation"
+title:  "Merge Sort"
 date:   2024-06-13 09:44:32 +0800
 categories: jekyll update
 tags: Algorithm
@@ -8,12 +8,11 @@ tags: Algorithm
 <html>
 <style>
     .tag-style {
-        background-color: orange;
+        background-color: green;
         border-radius: 5px;
         padding-left: 4px;
         padding-right: 4px;
         display: inline-block;
-        color: white;
         cursor: pointer;
     }
 </style>
