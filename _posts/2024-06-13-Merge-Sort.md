@@ -8,7 +8,7 @@ tags: Algorithm
 <html>
 <body>
 
-    ```java
+```java
 import java.time.Duration;
 import java.time.Instant;
 
