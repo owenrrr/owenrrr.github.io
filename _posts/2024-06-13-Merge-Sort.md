@@ -5,11 +5,14 @@ date:   2024-06-13 09:44:32 +0800
 categories: jekyll update
 tags: Algorithm
 ---
-{% for tag in site.tags %}
+<html>
+<body>
+    {% for tag in site.tags %}
     <div style="cursor: pointer; display: inline-block; width: 100px;">
         {{ tag }}
     </div>
-{% endfor %}
+    {% endfor %}
+
 ```java
 import java.time.Duration;
 import java.time.Instant;
@@ -75,3 +78,5 @@ class Solution {
     }
 }
 ```
+</body>
+</html>
