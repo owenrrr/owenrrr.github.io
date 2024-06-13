@@ -7,13 +7,10 @@ tags: Algorithm
 ---
 <html>
 <body>
-    {% for tag in site.tags %}
-    <div style="cursor: pointer; display: inline-block; width: 100px;">
-        {{ tag }}
-    </div>
-    {% endfor %}
-
-```java
+    
+    
+    <div markdown="1">
+        ```java
 import java.time.Duration;
 import java.time.Instant;
 
@@ -78,5 +75,7 @@ class Solution {
     }
 }
 ```
+    </div>
+
 </body>
 </html>
