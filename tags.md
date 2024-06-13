@@ -8,6 +8,9 @@ permalink: /tags/
         .li-expo-posts {
             display: inline-block;
             width: 30%;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow:hidden;
         }
     </style>
 <body>
