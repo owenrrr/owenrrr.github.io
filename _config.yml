@@ -16,7 +16,7 @@
 title: Owen's Blog
 email: abcd0112014@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
-  This website is for educational purposes. I primarily post some leetcode solutions and a few tech related articles.
+  This website is for educational purposes. Primarily posting some leetcode solutions and a few tech related articles.
   If you have any questions please contact me with emails provided.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://ownrrr.github.io" # the base hostname & protocol for your site, e.g. http://example.com
