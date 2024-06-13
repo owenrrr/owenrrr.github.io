@@ -6,10 +6,11 @@ permalink: /tags/
 <html>
     <style>
         .li-expo-posts {
-            width: 30%;
+            display: inline-block;
+            width: 250px;
             text-overflow: ellipsis;
             white-space: nowrap;
-            overflow:hidden;
+            overflow: hidden;
         }
     </style>
 <body>
