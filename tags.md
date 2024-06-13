@@ -20,8 +20,8 @@ permalink: /tags/
             <h2 id="{{ tag[0] | slugify }}">{{ tag[0] }}</h2>
             <ul class="tags-expo-posts">
                 {% for post in tag[1] %}
-                <a href="{{ site.baseurl }}{{ post.url }}" class="li-expo-posts">
-                    <li>
+                <a href="{{ site.baseurl }}{{ post.url }}">
+                    <li class="li-expo-posts">
                         {{ post.title }}
                     </li>
                 </a>
