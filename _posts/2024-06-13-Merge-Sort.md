@@ -12,8 +12,6 @@ tags: Algorithm
         border-radius: 5px;
         padding-left: 4px;
         padding-right: 4px;
-        padding-top: 2px;
-        padding-bottom: 2px;
         display: inline-block;
         color: white;
         cursor: pointer;
@@ -23,7 +21,6 @@ tags: Algorithm
 <a href="/tags/">
     <div class="tag-style">Algorithm</div>
 </a>
-
 <div markdown="block" style="margin-top: 10px">
 
 ```java
