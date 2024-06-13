@@ -6,7 +6,14 @@ categories: jekyll update
 tags: Algorithm
 ---
 <html>
+<style>
+    .tag-style {
+        width: 100px;
+        background-color: orange;
+    }
+</style>
 <body>
+<div class="tag-style">Algorithm</div>
 <div markdown="block">
 
 ```java
