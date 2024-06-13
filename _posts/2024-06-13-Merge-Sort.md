@@ -8,12 +8,19 @@ tags: Algorithm
 <html>
 <style>
     .tag-style {
-        width: 100px;
         background-color: orange;
+        border-radius: 5px;
+        padding-left: 4px;
+        padding-right: 4px;
+        padding-top: 2px;
+        padding-bottom: 2px;
+        display: inline-block;
+        color: white;
+        cursor: pointer;
     }
 </style>
 <body>
-<div class="tag-style">Algorithm</div>
+<div class="tag-style" href="{{ site.baseurl }}/tags/">Algorithm</div>
 <div markdown="block">
 
 ```java
