@@ -6,7 +6,7 @@ categories: jekyll update
 tags: Algorithm
 ---
 
-```
+```java
 import java.time.Duration;
 import java.time.Instant;
 
