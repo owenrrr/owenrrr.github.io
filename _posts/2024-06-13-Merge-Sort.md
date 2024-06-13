@@ -8,7 +8,7 @@ tags: Algorithm
 <html>
 <style>
     .tag-style {
-        background-color: green;
+        background-color: olivedrab;
         border-radius: 5px;
         padding-left: 4px;
         padding-right: 4px;
