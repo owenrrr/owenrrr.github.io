@@ -20,8 +20,11 @@ tags: Algorithm
     }
 </style>
 <body>
-<div class="tag-style" href="{{ site.baseurl }}/tags/">Algorithm</div>
-<div markdown="block">
+<a href="/tags/">
+    <div class="tag-style">Algorithm</div>
+</a>
+
+<div markdown="block" style="margin-top: 10px">
 
 ```java
 import java.time.Duration;
