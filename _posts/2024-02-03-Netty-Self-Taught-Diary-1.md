@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Netty Self-taught Diary"
+title:  "Netty Self-taught Diary (1)"
 date:   2024-02-03 16:00:55 +0800
 categories: jekyll update
 ---
