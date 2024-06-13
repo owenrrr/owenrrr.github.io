@@ -4,6 +4,12 @@ title: tags
 permalink: /tags/
 ---
 <html>
+    <style>
+        .li-expo-posts {
+            display: inline-block;
+            width: 30%;
+        }
+    </style>
 <body>
     <div class="tags-expo">
         <div class="tags-expo-section">
@@ -11,7 +17,7 @@ permalink: /tags/
             <h2 id="{{ tag[0] | slugify }}">{{ tag[0] }}</h2>
             <ul class="tags-expo-posts">
                 {% for post in tag[1] %}
-                <a href="{{ site.baseurl }}{{ post.url }}" style="display: inline-block; width: 33%;">
+                <a href="{{ site.baseurl }}{{ post.url }}" class="li-expo-posts">
                     <li>
                         {{ post.title }}
                     </li>
