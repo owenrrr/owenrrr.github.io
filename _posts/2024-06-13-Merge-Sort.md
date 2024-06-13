@@ -7,7 +7,7 @@ tags: Algorithm
 ---
 <html>
 <body>
-<div markdown="1">
+<div markdown="block">
 
 ```java
 import java.time.Duration;
