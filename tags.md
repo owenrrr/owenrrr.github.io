@@ -7,7 +7,7 @@ permalink: /tags/
     <style>
         .li-expo-posts {
             display: inline-block;
-            width: 250px;
+            width: 200px;
             text-overflow: ellipsis;
             white-space: nowrap;
             overflow: hidden;
