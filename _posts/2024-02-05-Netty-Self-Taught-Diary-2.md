@@ -3,8 +3,26 @@ layout: post
 title:  "Netty Self-taught Diary (2)"
 date:   2024-02-05 16:53:55 +0800
 categories: jekyll update
+tags: Tech-Share
 ---
-
+<html>
+<style>
+    .tag-style {
+        background-color: olivedrab;
+        border-radius: 5px;
+        padding-left: 4px;
+        padding-right: 4px;
+        display: inline-block;
+        color: white;
+        cursor: pointer;
+    }
+</style>
+<body>
+<a href="/tags/">
+    <div class="tag-style"><i>Tech-Share</i></div>
+</a>
+<div markdown="block" style="margin-top: 10px">
+    
 ### ByteBuffer(Java)/ByteBuf(Netty)
 先來介紹數據類型ByteBuf，這個ByteBuf類是Netty根據Java的ByteBuffer所演化而來的，兩者都是爲了處理數據而產生。因爲在ChannelHandler中所接收到的數據只能保證順序而沒辦法保證接收到的段落。例如Client中按順序發送: "Hello", "World"；但是到了Server端的ChannelHandler可能會被分成"He","lloW","orld"，因此需要設計一種數據類型來處理這類情況。前面所述的情況是因爲傳輸協議本身沒辦法保證，而并非是受到Netty框架所影響。
 
@@ -69,3 +87,7 @@ getBytes(int i, ByteBuf dst, int dstIndex, int len)
 1. [Netty in Action](https://github.com/zuzeep/book/blob/master/Netty%20in%20Action.pdf)
 2. [Java NIO - Buffer Basic Concepts](https://medium.com/@clu1022/java-nio-buffer-c98b52fd93ca)
 3. [Netty 4.x API](https://netty.io/4.1/api/index.html)
+
+</div>
+</body>
+</html>
