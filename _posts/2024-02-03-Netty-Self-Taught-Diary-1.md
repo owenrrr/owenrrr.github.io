@@ -3,7 +3,26 @@ layout: post
 title:  "Netty Self-taught Diary (1)"
 date:   2024-02-03 16:00:55 +0800
 categories: jekyll update
+tags: Tech-Share
 ---
+<html>
+<style>
+    .tag-style {
+        background-color: olivedrab;
+        border-radius: 5px;
+        padding-left: 4px;
+        padding-right: 4px;
+        display: inline-block;
+        color: white;
+        cursor: pointer;
+    }
+</style>
+<body>
+<a href="/tags/">
+    <div class="tag-style"><i>Tech-Share</i></div>
+</a>
+<div markdown="block" style="margin-top: 10px">
+    
 ### Intro
 本來很久之前就想自己寫一個聊天程式自己用，但是一直苦於Netty官網上艱澀的User Guide
 
@@ -132,3 +151,7 @@ public class EchoServer {
 ## 學習資料
 1. [Netty in Action.pdf](https://github.com/zuzeep/book/blob/master/Netty%20in%20Action.pdf)
 2. [Netty Ofiicial](https://netty.io/wiki/user-guide-for-4.x.html)
+
+</div>
+</body>
+</html>
