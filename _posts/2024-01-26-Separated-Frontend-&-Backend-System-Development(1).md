@@ -3,7 +3,7 @@ layout: post
 title:  "Separated Frontend & Backend System Development(1)"
 date:   2024-01-26 09:04:02 +0800
 categories: jekyll update
-tags: Tech%20Share
+tags: Tech-Share
 ---
 <html>
 <style>
@@ -19,7 +19,7 @@ tags: Tech%20Share
 </style>
 <body>
 <a href="/tags/">
-    <div class="tag-style"><i>Tech Share</i></div>
+    <div class="tag-style"><i>Tech-Share</i></div>
 </a>
 <div markdown="block" style="margin-top: 10px">
     
