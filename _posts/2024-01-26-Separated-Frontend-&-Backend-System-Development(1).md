@@ -3,7 +3,26 @@ layout: post
 title:  "Separated Frontend & Backend System Development(1)"
 date:   2024-01-26 09:04:02 +0800
 categories: jekyll update
+tags: Tech%20Share
 ---
+<html>
+<style>
+    .tag-style {
+        background-color: olivedrab;
+        border-radius: 5px;
+        padding-left: 4px;
+        padding-right: 4px;
+        display: inline-block;
+        color: white;
+        cursor: pointer;
+    }
+</style>
+<body>
+<a href="/tags/">
+    <div class="tag-style"><i>Tech Share</i></div>
+</a>
+<div markdown="block" style="margin-top: 10px">
+    
 # 前後端分離系統開發介紹(1)
 
 ## 0. 前言
@@ -384,3 +403,7 @@ save(Link link)
 - `@Transactional`表示將此方法視爲一個事務，當此方法失敗則不會影響到其他的事務，若是此方法中其中一個操作失敗則全部一起失敗並rollback數據(可以定義rollback rules)
 - `@Query`表示詳細的SQL語句，有很多屬性和規則，可在[官方文檔](https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html)查詢
 - `@Param`可以指定在SQL中使用`:name`來代替`?1`
+
+</div>
+</body>
+</html>
