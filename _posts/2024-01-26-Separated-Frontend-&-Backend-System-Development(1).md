@@ -6,21 +6,7 @@ categories: jekyll update
 tags: Tech-Share
 ---
 <html>
-<style>
-    .tag-style {
-        background-color: olivedrab;
-        border-radius: 5px;
-        padding-left: 4px;
-        padding-right: 4px;
-        display: inline-block;
-        color: white;
-        cursor: pointer;
-    }
-</style>
 <body>
-<a href="/tags/">
-    <div class="tag-style"><i>Tech-Share</i></div>
-</a>
 <div markdown="block" style="margin-top: 10px">
     
 # 前後端分離系統開發介紹(1)

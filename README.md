@@ -1,8 +1,4 @@
-### Notice
-
-- After generating new posts for new code, run this command to refresh all html pages in this project
+# Dev 
 ```
-    jekyll serve
+bundle exec jekyll serve --livereload --host 0.0.0.0 --trace
 ```
-
-- The reason to do this is that I only generate the Markdown files in the `_posts` directory. However, Jekyll uses `_site` as final version of generating front-end pages, so make sure to run the command to refresh to current version of all html files.

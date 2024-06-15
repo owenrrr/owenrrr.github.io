@@ -6,21 +6,7 @@ categories: jekyll update
 tags: Algorithm
 ---
 <html>
-<style>
-    .tag-style {
-        background-color: olivedrab;
-        border-radius: 5px;
-        padding-left: 4px;
-        padding-right: 4px;
-        display: inline-block;
-        color: white;
-        cursor: pointer;
-    }
-</style>
 <body>
-<a href="/tags/">
-    <div class="tag-style"><i>Algorithm</i></div>
-</a>
 <div markdown="block" style="margin-top: 10px">
 
 ```java
