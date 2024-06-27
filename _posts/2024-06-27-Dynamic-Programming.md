@@ -8,3 +8,4 @@ tags: Algorithm
 
 # Problems
 - [LeetCode 375. Guess Number Higher or Lower II](https://owenrrr.github.io/jekyll/update/LeetCode-375/)
+- [LeetCode 376. Wiggle Subsequence](https://owenrrr.github.io/jekyll/update/LeetCode-376/)
