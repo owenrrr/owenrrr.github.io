@@ -10,3 +10,4 @@ tags: Algorithm
 - [LeetCode 375. Guess Number Higher or Lower II](https://owenrrr.github.io/jekyll/update/LeetCode-375/)
 - [LeetCode 376. Wiggle Subsequence](https://owenrrr.github.io/jekyll/update/LeetCode-376/)
 - [LeetCode 396. Rotate Function](https://owenrrr.github.io/jekyll/update/LeetCode-396/)
+- [LeetCode 413. Arithmetic Slices](https://owenrrr.github.io/jekyll/update/LeetCode-413/)
