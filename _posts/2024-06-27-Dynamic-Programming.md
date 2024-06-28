@@ -12,3 +12,4 @@ tags: Algorithm
 - [LeetCode 396. Rotate Function](https://owenrrr.github.io/jekyll/update/LeetCode-396/)
 - [LeetCode 413. Arithmetic Slices](https://owenrrr.github.io/jekyll/update/LeetCode-413/)
 - [LeetCode 416. Partition Equal Subset Sum](https://owenrrr.github.io/jekyll/update/LeetCode-416/)
+- [LeetCode 464. Can I win](https://owenrrr.github.io/jekyll/update/LeetCode-464/)
