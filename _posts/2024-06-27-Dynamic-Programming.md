@@ -14,3 +14,4 @@ tags: Algorithm
 - [LeetCode 416. Partition Equal Subset Sum](https://owenrrr.github.io/jekyll/update/LeetCode-416/)
 - [LeetCode 464. Can I win](https://owenrrr.github.io/jekyll/update/LeetCode-464/)
 - [LeetCode 467. Unique Substrings in Wraparound String](https://owenrrr.github.io/jekyll/update/LeetCode-467/)
+- [LeetCode 474. Ones and Zeros](https://owenrrr.github.io/jekyll/update/LeetCode-474/)
