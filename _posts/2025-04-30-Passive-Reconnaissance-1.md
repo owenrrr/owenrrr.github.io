@@ -34,16 +34,17 @@ whois google.com
 
 *The Domain Name System (DNS) is a hierarchical and distributed name service that provides a naming system for computers, services, and other resources on the Internet or other Internet Protocol (IP) networks* 
   
-簡單來說，DNS就是幫你把google.com轉換成ipv4或ipv6的地址。DNS Server就是儲存這個對照關係的數據庫，被每個Registrar保存並用於在有人使用網域名稱是給予對照的地址。值得一提的是，這個數據庫中存著的數據對照關係不單單只是前面提到的網域名稱對映ipv4/ipv6地址，以下是多個 *DNS Record*：
-    - A: 網域名稱->IPv4
-    - AAAA: 網域名稱->IPv6
-    - CNAME: 網域別名->網域名稱
-    - MX: 網域名稱->Mail Server
-    - TXT: 儲存任意資料
-    - SOA: 此域名設置
+簡單來說，DNS就是幫你把google.com轉換成ipv4或ipv6的地址。DNS Server就是儲存這個對照關係的數據庫，被每個Registrar保存並用於在有人使用網域名稱是給予對照的地址。值得一提的是，這個數據庫中存著的數據對照關係不單單只是前面提到的網域名稱對映ipv4/ipv6地址，以下是多個 *DNS Record*：</br>
+    - A: 網域名稱->IPv4</br>
+    - AAAA: 網域名稱->IPv6</br>
+    - CNAME: 網域別名->網域名稱</br>
+    - MX: 網域名稱->Mail Server</br>
+    - TXT: 儲存任意資料</br>
+    - SOA: 此域名設置</br>
 
-- **基本使用**：
-***nslookup OPTIONS DOMAIN_NAME SERVER***
+- **基本使用**：</br>
+***nslookup OPTIONS DOMAIN_NAME SERVER***  
+
 ```
 OPTIONS(要查詢的DNS Record類別)
   -type=A
@@ -59,8 +60,9 @@ nslookup -type=MX google.com
 
 ### dig(Domain Information Groper)
 - **用處**： 與nslookup使用場景基本類似，但提供更多資訊
-- **基本使用**：
-***dig @SERVER DOMAIN_NAME TYPE***
+- **基本使用**：</br>
+***dig @SERVER DOMAIN_NAME TYPE***  
+
 ```
 SERVER(可選，要指定查詢的DNS Server)
   1.1.1.1
