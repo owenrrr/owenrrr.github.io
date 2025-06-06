@@ -6,9 +6,9 @@ feature-img: "assets/img/pexels/travel.jpeg"
 tags: [Page]
 ---
 
-Type on Strap is based on Type Theme, a free and open-source theme for [Jekyll](http://jekyllrb.com/), licensed under the MIT License.
+I have some experience on software development and currently am working on cybersecurity. A huge passion on this field and love to keep working and learning on it.
 
-Head over to the [theme's documentation](https://github.com/sylhare/Type-on-Strap) for much more information about Type on Strap or to install this theme on your own Jekyll site.
-
-This file is an example of a page in Jekyll, that automatically shows up in the header navigation, you can delete or modify this file freely.
+Currently I'm persuing a Master degree on cybersecurity, and desire to dig into it. Also, I'm working on getting security related certifications, and it's welcome to have a discussion with me.
  
+Github: https://github.com/owenrrr
+Gmail: abcd0112014@gmail.com
