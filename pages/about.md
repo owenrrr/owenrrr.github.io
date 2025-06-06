@@ -10,6 +10,6 @@ I have some experience on software development and currently am working on cyber
 
 Currently I'm persuing a Master degree on cybersecurity, and desire to dig into it. Also, I'm working on getting security related certifications, and it's welcome to have a discussion with me.
  
-Github: <a href="https://github.com/owenrrr">
+Github: https://github.com/owenrrr
 
-Gmail: <a hreef="mailto:abcd0112014@gmail.com">
+Gmail: abcd0112014@gmail.com
