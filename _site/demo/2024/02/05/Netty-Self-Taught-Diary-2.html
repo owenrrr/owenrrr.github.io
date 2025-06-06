@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<!--
+    Type on Strap jekyll theme v2.4.12
+    Theme free for personal and commercial use under the MIT license
+    https://github.com/sylhare/Type-on-Strap/blob/master/LICENSE
+-->
+<html lang="en">
+  
+  <head> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=0.5, maximum-scale=5"> <!-- Theme Mode--> <script> const darkBtn = "Dark"; const lightBtn = "Light"; const isAutoTheme = true; const preferredTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; if (isAutoTheme) { document.documentElement.setAttribute('data-theme', sessionStorage.getItem('theme') ?? preferredTheme); } else { document.documentElement.setAttribute('data-theme', "auto"); } </script> <!-- Main JS (navbar.js, katex_init.js and masonry_init.js)--> <script defer src="/assets/js/main.min.js"></script> <!-- CSS --> <link rel="stylesheet" href="/assets/css/main.css"> <!--Favicon--> <link rel="shortcut icon" href="/assets/favicon.ico" type="image/x-icon"> <!-- KaTeX 0.16.11 --> <script defer src="/assets/js/vendor/katex.min.js"></script> <script defer src="/assets/js/vendor/katex.auto-render.min.js" onload="renderMathInElement(document.body);"></script> <!-- Mermaid 11.4.1 --> <script defer src="/assets/js/vendor/mermaid.min.js"></script> <!-- Simple Jekyll Search 1.10.0 --> <script src="/assets/js/vendor/simple-jekyll-search.min.js" type="text/javascript"></script> <!-- Google Analytics / Cookie Consent --> <script> const cookieName = 'cookie-notice-dismissed-http://localhost:4000'; const isCookieConsent = 'false'; const analyticsName = ''; const analyticsNameGA4 = ''; </script> <!-- seo tags --> <meta property="og:image" content="http://localhost:4000/assets/img/header/kali.jpg"> <meta property="og:type" content="website" /> <!-- Begin Jekyll SEO tag v2.8.0 --> <title>Netty Self-taught Diary (2) | Owen’s Blog</title> <meta name="generator" content="Jekyll v4.4.1" /> <meta property="og:title" content="Netty Self-taught Diary (2)" /> <meta property="og:locale" content="en_US" /> <meta name="description" content="ByteBuffer(Java)/ByteBuf(Netty) 先來介紹數據類型ByteBuf，這個ByteBuf類是Netty根據Java的ByteBuffer所演化而來的，兩者都是爲了處理數據而產生。因爲在ChannelHandler中所接收到的數據只能保證順序而沒辦法保證接收到的段落。例如Client中按順序發送: “Hello”, “World”；但是到了Server端的ChannelHandler可能會被分成”He”,”lloW”,”orld”，因此需要設計一種數據類型來處理這類情況。前面所述的情況是因爲傳輸協議本身沒辦法保證，而并非是受到Netty框架所影響。 在介紹這個數據類之前還要先知道在Java NIO中是如何設計的，這樣方便做直觀的比較而且兩者也有相似之處。java.nio.bytebuffer 是 java.nio.buffer 的子類，而ByteBuffer中分爲兩種Buffer: Direct Buffer 和 None-Direct Buffer。就如同名字所述，direct buffer被分配在heap之外，能直接被程序訪問，所以速度較none-direct快；而none-direct buffer被存放在heap中，也就是大部分程序訪問數據的流程，而通常Java會為這個buffer再額外分配一個array用來備份數據，這個array被稱爲 Backing Array。因此，可以在程序中透過 hasArray() 來檢查這個buffer是否擁有backing array，若是有就代表這個buffer屬於none-direct(heap buffer)，反之為direct buffer: Direct Buffer None-Direct buffer 位於heap外，可以直接被stack中的java程序調用 位於heap内 訪問速度快 訪問速度慢 要釋放較麻煩 釋放容易 沒有backing array 有backing array 使用 allowcateDirect() 創建 先 allocate() 創建buffer，然後在手動創建backing array並把它與buffer綁定（調用 wrap()） 讓我們把視角回到Netty的ByteBuf類型，它包含了三種格式，除了前面提到的HeapBuffer和DirectBuffer，Netty還設計了CompositeBuffer，它表示多個ByteBuf的組合類，方便同時處理和傳遞多個ByteBuf；同時若要讀取CompositeByteBuf，可以把它視爲DirectBytebuf，因爲在CompositeByteBuf中并沒有Backing Array。下面就是使用CompositeByteBuf組合兩個ByteBuf和讀取其中數據的範例，非常直觀的描述前面提到的觀念: // 創建CompositeByteBuf CompositeByteBuf messageBuf = Unpooled.compositeBuffer(); ByteBuf buf_1 = ...; // can be backing or direct ByteBuf buf_2 = ...; // can be backing or direct messageBuf.addComponents(buf_1, buf_2); // 讀取CompositeByteBuf后針對array處理即可 int length = compBuf.readableBytes(); byte[] array = new byte[length]; compBuf.getBytes(compBuf.readerIndex(), array); 介紹完不同種類的Buffer后，讓我們把是視角拉回Buffer内部。若是要訪問Buffer的數據，Netty又與原生Java做出區別，這邊爲了簡化流程故而用表格做對比，相信也會更加直觀的看出差異，由於ByteBuffer設計不同，故而使用方法也差距甚大，這邊先不琢磨細節，等到後續使用時再詳細説明： Java NIO Netty ByteBuffer擁有四個基礎屬性: capacity/limit/position/mark。capacity 表示這個buffer定義大小，一但聲明了便不可更改；limit 表示不應該被讀取/寫入資料的位置，例如 [0,limit) 可以被讀取，而 [limit, capacity] 則棄用；position 表示目前讀取/寫入的指針；mark被用來保存當前的position屬性用於後續的重置 擁有兩個主要屬性: writerIndex 和 readerIndex 用於分別表示在讀寫中的指針 由於只有一個position記錄當下位置，因此需要使用flip()/clear()切換讀寫模式，還需要注意limit和position之間的關係，非常複雜 兩個指針分別記錄讀寫模式下的位置，避免許多繁雜的操作以及不必要的問題 How to read/write ByteBuf +-------------------+------------------+------------------+ | discardable bytes | readable bytes | writable bytes | +-------------------+------------------+------------------+ | | | | 0 &lt;= readerIndex &lt;= writerIndex &lt;= capacity 前面提到在ByteBuf中有兩個基礎屬性readerIndex和writerIndex，分別指向當前讀指針和寫指針。先來介紹讀取部分，Netty提供兩種主要讀取的方法: read 和 get；前者當你讀取時指針會跟著變動，後者則不會，這樣做的目的是當你只是用於判斷式且不想讓指針移動時便可以使用get來防止下次讀取時指針跑掉。另外，Netty提供很多類型的read和get方法，下面就以ByteBuf.getByte做介紹： getByte(int i) getBytes(int i, ByteBuf dst) getBytes(int i, ByteBuf dst, int len) getBytes(int i, ByteBuf dst, int dstIndex, int len) 我們假設調用方法的為 ByteBuf target getByte(int i): 最直接將數據從target讀出, readerIndex不變 getBytes(int i, ByteBuf dst): 將數據從target讀出並存入到dst中，target的readerIndex不變但dst的writerIndex會變 getBytes(int i, ByteBuf dst, int len): 將長度為len的數據從target讀出並存入到dst中，target的readerIndex不變但dst的writerIndex會變 getBytes(int i, ByteBuf dst, int dstIndex, int len): 將長度為len的數據從target讀出並從dst的dstIndex位置開始存放，target的readerIndex不變且dst的writerIndex也不變 相反的，若是使用 read 方法，則readerIndex 會改變並影響到下次讀取的位置，這邊便不再贅述，可以參考 Netty 4.x API。同理，寫入部分Netty提供的是 set 和 write 兩種類型，前者寫入時 writerIndex 不變，後者則會隨著寫入長度改變 參考資料 Netty in Action Java NIO - Buffer Basic Concepts Netty 4.x API" /> <meta property="og:description" content="ByteBuffer(Java)/ByteBuf(Netty) 先來介紹數據類型ByteBuf，這個ByteBuf類是Netty根據Java的ByteBuffer所演化而來的，兩者都是爲了處理數據而產生。因爲在ChannelHandler中所接收到的數據只能保證順序而沒辦法保證接收到的段落。例如Client中按順序發送: “Hello”, “World”；但是到了Server端的ChannelHandler可能會被分成”He”,”lloW”,”orld”，因此需要設計一種數據類型來處理這類情況。前面所述的情況是因爲傳輸協議本身沒辦法保證，而并非是受到Netty框架所影響。 在介紹這個數據類之前還要先知道在Java NIO中是如何設計的，這樣方便做直觀的比較而且兩者也有相似之處。java.nio.bytebuffer 是 java.nio.buffer 的子類，而ByteBuffer中分爲兩種Buffer: Direct Buffer 和 None-Direct Buffer。就如同名字所述，direct buffer被分配在heap之外，能直接被程序訪問，所以速度較none-direct快；而none-direct buffer被存放在heap中，也就是大部分程序訪問數據的流程，而通常Java會為這個buffer再額外分配一個array用來備份數據，這個array被稱爲 Backing Array。因此，可以在程序中透過 hasArray() 來檢查這個buffer是否擁有backing array，若是有就代表這個buffer屬於none-direct(heap buffer)，反之為direct buffer: Direct Buffer None-Direct buffer 位於heap外，可以直接被stack中的java程序調用 位於heap内 訪問速度快 訪問速度慢 要釋放較麻煩 釋放容易 沒有backing array 有backing array 使用 allowcateDirect() 創建 先 allocate() 創建buffer，然後在手動創建backing array並把它與buffer綁定（調用 wrap()） 讓我們把視角回到Netty的ByteBuf類型，它包含了三種格式，除了前面提到的HeapBuffer和DirectBuffer，Netty還設計了CompositeBuffer，它表示多個ByteBuf的組合類，方便同時處理和傳遞多個ByteBuf；同時若要讀取CompositeByteBuf，可以把它視爲DirectBytebuf，因爲在CompositeByteBuf中并沒有Backing Array。下面就是使用CompositeByteBuf組合兩個ByteBuf和讀取其中數據的範例，非常直觀的描述前面提到的觀念: // 創建CompositeByteBuf CompositeByteBuf messageBuf = Unpooled.compositeBuffer(); ByteBuf buf_1 = ...; // can be backing or direct ByteBuf buf_2 = ...; // can be backing or direct messageBuf.addComponents(buf_1, buf_2); // 讀取CompositeByteBuf后針對array處理即可 int length = compBuf.readableBytes(); byte[] array = new byte[length]; compBuf.getBytes(compBuf.readerIndex(), array); 介紹完不同種類的Buffer后，讓我們把是視角拉回Buffer内部。若是要訪問Buffer的數據，Netty又與原生Java做出區別，這邊爲了簡化流程故而用表格做對比，相信也會更加直觀的看出差異，由於ByteBuffer設計不同，故而使用方法也差距甚大，這邊先不琢磨細節，等到後續使用時再詳細説明： Java NIO Netty ByteBuffer擁有四個基礎屬性: capacity/limit/position/mark。capacity 表示這個buffer定義大小，一但聲明了便不可更改；limit 表示不應該被讀取/寫入資料的位置，例如 [0,limit) 可以被讀取，而 [limit, capacity] 則棄用；position 表示目前讀取/寫入的指針；mark被用來保存當前的position屬性用於後續的重置 擁有兩個主要屬性: writerIndex 和 readerIndex 用於分別表示在讀寫中的指針 由於只有一個position記錄當下位置，因此需要使用flip()/clear()切換讀寫模式，還需要注意limit和position之間的關係，非常複雜 兩個指針分別記錄讀寫模式下的位置，避免許多繁雜的操作以及不必要的問題 How to read/write ByteBuf +-------------------+------------------+------------------+ | discardable bytes | readable bytes | writable bytes | +-------------------+------------------+------------------+ | | | | 0 &lt;= readerIndex &lt;= writerIndex &lt;= capacity 前面提到在ByteBuf中有兩個基礎屬性readerIndex和writerIndex，分別指向當前讀指針和寫指針。先來介紹讀取部分，Netty提供兩種主要讀取的方法: read 和 get；前者當你讀取時指針會跟著變動，後者則不會，這樣做的目的是當你只是用於判斷式且不想讓指針移動時便可以使用get來防止下次讀取時指針跑掉。另外，Netty提供很多類型的read和get方法，下面就以ByteBuf.getByte做介紹： getByte(int i) getBytes(int i, ByteBuf dst) getBytes(int i, ByteBuf dst, int len) getBytes(int i, ByteBuf dst, int dstIndex, int len) 我們假設調用方法的為 ByteBuf target getByte(int i): 最直接將數據從target讀出, readerIndex不變 getBytes(int i, ByteBuf dst): 將數據從target讀出並存入到dst中，target的readerIndex不變但dst的writerIndex會變 getBytes(int i, ByteBuf dst, int len): 將長度為len的數據從target讀出並存入到dst中，target的readerIndex不變但dst的writerIndex會變 getBytes(int i, ByteBuf dst, int dstIndex, int len): 將長度為len的數據從target讀出並從dst的dstIndex位置開始存放，target的readerIndex不變且dst的writerIndex也不變 相反的，若是使用 read 方法，則readerIndex 會改變並影響到下次讀取的位置，這邊便不再贅述，可以參考 Netty 4.x API。同理，寫入部分Netty提供的是 set 和 write 兩種類型，前者寫入時 writerIndex 不變，後者則會隨著寫入長度改變 參考資料 Netty in Action Java NIO - Buffer Basic Concepts Netty 4.x API" /> <link rel="canonical" href="http://localhost:4000/demo/2024/02/05/Netty-Self-Taught-Diary-2.html" /> <meta property="og:url" content="http://localhost:4000/demo/2024/02/05/Netty-Self-Taught-Diary-2.html" /> <meta property="og:site_name" content="Owen’s Blog" /> <meta property="og:type" content="article" /> <meta property="article:published_time" content="2024-02-05T16:53:55+08:00" /> <meta name="twitter:card" content="summary" /> <meta property="twitter:title" content="Netty Self-taught Diary (2)" /> <script type="application/ld+json"> {"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-02-05T16:53:55+08:00","datePublished":"2024-02-05T16:53:55+08:00","description":"ByteBuffer(Java)/ByteBuf(Netty) 先來介紹數據類型ByteBuf，這個ByteBuf類是Netty根據Java的ByteBuffer所演化而來的，兩者都是爲了處理數據而產生。因爲在ChannelHandler中所接收到的數據只能保證順序而沒辦法保證接收到的段落。例如Client中按順序發送: “Hello”, “World”；但是到了Server端的ChannelHandler可能會被分成”He”,”lloW”,”orld”，因此需要設計一種數據類型來處理這類情況。前面所述的情況是因爲傳輸協議本身沒辦法保證，而并非是受到Netty框架所影響。 在介紹這個數據類之前還要先知道在Java NIO中是如何設計的，這樣方便做直觀的比較而且兩者也有相似之處。java.nio.bytebuffer 是 java.nio.buffer 的子類，而ByteBuffer中分爲兩種Buffer: Direct Buffer 和 None-Direct Buffer。就如同名字所述，direct buffer被分配在heap之外，能直接被程序訪問，所以速度較none-direct快；而none-direct buffer被存放在heap中，也就是大部分程序訪問數據的流程，而通常Java會為這個buffer再額外分配一個array用來備份數據，這個array被稱爲 Backing Array。因此，可以在程序中透過 hasArray() 來檢查這個buffer是否擁有backing array，若是有就代表這個buffer屬於none-direct(heap buffer)，反之為direct buffer: Direct Buffer None-Direct buffer 位於heap外，可以直接被stack中的java程序調用 位於heap内 訪問速度快 訪問速度慢 要釋放較麻煩 釋放容易 沒有backing array 有backing array 使用 allowcateDirect() 創建 先 allocate() 創建buffer，然後在手動創建backing array並把它與buffer綁定（調用 wrap()） 讓我們把視角回到Netty的ByteBuf類型，它包含了三種格式，除了前面提到的HeapBuffer和DirectBuffer，Netty還設計了CompositeBuffer，它表示多個ByteBuf的組合類，方便同時處理和傳遞多個ByteBuf；同時若要讀取CompositeByteBuf，可以把它視爲DirectBytebuf，因爲在CompositeByteBuf中并沒有Backing Array。下面就是使用CompositeByteBuf組合兩個ByteBuf和讀取其中數據的範例，非常直觀的描述前面提到的觀念: // 創建CompositeByteBuf CompositeByteBuf messageBuf = Unpooled.compositeBuffer(); ByteBuf buf_1 = ...; // can be backing or direct ByteBuf buf_2 = ...; // can be backing or direct messageBuf.addComponents(buf_1, buf_2); // 讀取CompositeByteBuf后針對array處理即可 int length = compBuf.readableBytes(); byte[] array = new byte[length]; compBuf.getBytes(compBuf.readerIndex(), array); 介紹完不同種類的Buffer后，讓我們把是視角拉回Buffer内部。若是要訪問Buffer的數據，Netty又與原生Java做出區別，這邊爲了簡化流程故而用表格做對比，相信也會更加直觀的看出差異，由於ByteBuffer設計不同，故而使用方法也差距甚大，這邊先不琢磨細節，等到後續使用時再詳細説明： Java NIO Netty ByteBuffer擁有四個基礎屬性: capacity/limit/position/mark。capacity 表示這個buffer定義大小，一但聲明了便不可更改；limit 表示不應該被讀取/寫入資料的位置，例如 [0,limit) 可以被讀取，而 [limit, capacity] 則棄用；position 表示目前讀取/寫入的指針；mark被用來保存當前的position屬性用於後續的重置 擁有兩個主要屬性: writerIndex 和 readerIndex 用於分別表示在讀寫中的指針 由於只有一個position記錄當下位置，因此需要使用flip()/clear()切換讀寫模式，還需要注意limit和position之間的關係，非常複雜 兩個指針分別記錄讀寫模式下的位置，避免許多繁雜的操作以及不必要的問題 How to read/write ByteBuf +-------------------+------------------+------------------+ | discardable bytes | readable bytes | writable bytes | +-------------------+------------------+------------------+ | | | | 0 &lt;= readerIndex &lt;= writerIndex &lt;= capacity 前面提到在ByteBuf中有兩個基礎屬性readerIndex和writerIndex，分別指向當前讀指針和寫指針。先來介紹讀取部分，Netty提供兩種主要讀取的方法: read 和 get；前者當你讀取時指針會跟著變動，後者則不會，這樣做的目的是當你只是用於判斷式且不想讓指針移動時便可以使用get來防止下次讀取時指針跑掉。另外，Netty提供很多類型的read和get方法，下面就以ByteBuf.getByte做介紹： getByte(int i) getBytes(int i, ByteBuf dst) getBytes(int i, ByteBuf dst, int len) getBytes(int i, ByteBuf dst, int dstIndex, int len) 我們假設調用方法的為 ByteBuf target getByte(int i): 最直接將數據從target讀出, readerIndex不變 getBytes(int i, ByteBuf dst): 將數據從target讀出並存入到dst中，target的readerIndex不變但dst的writerIndex會變 getBytes(int i, ByteBuf dst, int len): 將長度為len的數據從target讀出並存入到dst中，target的readerIndex不變但dst的writerIndex會變 getBytes(int i, ByteBuf dst, int dstIndex, int len): 將長度為len的數據從target讀出並從dst的dstIndex位置開始存放，target的readerIndex不變且dst的writerIndex也不變 相反的，若是使用 read 方法，則readerIndex 會改變並影響到下次讀取的位置，這邊便不再贅述，可以參考 Netty 4.x API。同理，寫入部分Netty提供的是 set 和 write 兩種類型，前者寫入時 writerIndex 不變，後者則會隨著寫入長度改變 參考資料 Netty in Action Java NIO - Buffer Basic Concepts Netty 4.x API","headline":"Netty Self-taught Diary (2)","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/demo/2024/02/05/Netty-Self-Taught-Diary-2.html"},"url":"http://localhost:4000/demo/2024/02/05/Netty-Self-Taught-Diary-2.html"}</script> <!-- End Jekyll SEO tag --> <!-- RSS --> <link rel="alternate" type="application/atom+xml" title="Owen's Blog" href="http://localhost:4000/feed.xml"/> <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Owen&apos;s Blog" /> <!-- Twitter Cards --> <meta name="twitter:title" content="Netty Self-taught Diary (2)"> <meta name="twitter:description" content=" ByteBuffer(Java)/ByteBuf(Netty) 先來介紹數據類型ByteBuf，這個ByteBuf類是Netty根據Java的ByteBuffer所演化而來的，兩者都是爲了處理數據而產生。因爲在ChannelHandler中所接收到的數據只能保證順序而沒辦法保證接收到的段落。..."> <meta name="twitter:card" content="summary"> <meta name="twitter:image" content="http://localhost:4000/assets/img/header/kali.jpg"> <meta name="twitter:image:alt" content="Netty Self-taught Diary (2)"> </head>
+  <body>
+    
+    <header class="site-header"> <!-- Logo and title --> <div class="branding"> <a href="/"> <img alt="logo img" class="avatar" src="/assets/img/triangle.png" loading="lazy"/> </a> <a class="site-title" aria-label="Owen's Blog" href="/"> Owen's Blog </a> </div> <!-- Toggle menu --> <nav class="clear"> <a aria-label="pull" id="pull" class="toggle" href="#"> <i class="fas fa-bars fa-lg"></i> </a> <!-- Menu --> <ul class="hide"> <li class="separator"> | </li> <li> <a class="clear" aria-label="About" title="About" href="/about/"> <span class="navbar-label ">About</span> </a> </li> <li class="separator"> | </li> <li> <a class="clear" aria-label="Portfolio" title="Portfolio" href="/portfolio/"> <span class="navbar-label ">Portfolio</span> </a> </li> <li class="separator"> | </li> <li> <a class="clear" aria-label="Search" title="Search" href="/search/"> <i class="navbar-icon fas fa-search" aria-hidden="true"></i> <span class="navbar-label navbar-label-with-icon">Search</span> </a> </li> <li class="separator"> | </li> <li> <a class="clear" aria-label="Tags" title="Tags" href="/tags/"> <i class="navbar-icon fas fa-tags" aria-hidden="true"></i> <span class="navbar-label navbar-label-with-icon">Tags</span> </a> </li> <li class="separator"> | </li> <li><a id="theme-toggle" title="Netty Self-taught Diary (2) " aria-label="Netty Self-taught Diary (2)" onclick="themeToggle()"></a></li> </ul> </nav> </header>
+    <div class="content">
+      <article >
+    <header id="main" style="">
+        <div class="title-padder">
+            
+                <h1 id="Netty+Self-taught+Diary+%282%29" class="title">Netty Self-taught Diary (2)</h1>
+                
+
+
+<div class="post-info">
+  <div class="post-meta">
+    
+    
+    <p class="meta">February 05, 2024</p>
+  </div>
+  
+</div>
+
+            
+        </div>
+    </header>
+
+    <section class="post-content">
+    
+            <html>
+<body>
+<div style="margin-top: 10px">
+
+      <h3 id="bytebufferjavabytebufnetty">ByteBuffer(Java)/ByteBuf(Netty)</h3>
+      <p>先來介紹數據類型ByteBuf，這個ByteBuf類是Netty根據Java的ByteBuffer所演化而來的，兩者都是爲了處理數據而產生。因爲在ChannelHandler中所接收到的數據只能保證順序而沒辦法保證接收到的段落。例如Client中按順序發送: “Hello”, “World”；但是到了Server端的ChannelHandler可能會被分成”He”,”lloW”,”orld”，因此需要設計一種數據類型來處理這類情況。前面所述的情況是因爲傳輸協議本身沒辦法保證，而并非是受到Netty框架所影響。</p>
+
+      <p>在介紹這個數據類之前還要先知道在Java NIO中是如何設計的，這樣方便做直觀的比較而且兩者也有相似之處。<code class="language-plaintext highlighter-rouge">java.nio.bytebuffer</code> 是 <code class="language-plaintext highlighter-rouge">java.nio.buffer</code> 的子類，而ByteBuffer中分爲兩種Buffer: <code class="language-plaintext highlighter-rouge">Direct Buffer</code> 和 <code class="language-plaintext highlighter-rouge">None-Direct Buffer</code>。就如同名字所述，direct buffer被分配在heap之外，能直接被程序訪問，所以速度較none-direct快；而none-direct buffer被存放在heap中，也就是大部分程序訪問數據的流程，而通常Java會為這個buffer再額外分配一個array用來備份數據，這個array被稱爲 <code class="language-plaintext highlighter-rouge">Backing Array</code>。因此，可以在程序中透過 <code class="language-plaintext highlighter-rouge">hasArray()</code> 來檢查這個buffer是否擁有backing array，若是有就代表這個buffer屬於none-direct(heap buffer)，反之為direct buffer:</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align: left">Direct Buffer</th>
+            <th style="text-align: left">None-Direct buffer</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="text-align: left">位於heap外，可以直接被stack中的java程序調用</td>
+            <td style="text-align: left">位於heap内</td>
+          </tr>
+          <tr>
+            <td style="text-align: left">訪問速度快</td>
+            <td style="text-align: left">訪問速度慢</td>
+          </tr>
+          <tr>
+            <td style="text-align: left">要釋放較麻煩</td>
+            <td style="text-align: left">釋放容易</td>
+          </tr>
+          <tr>
+            <td style="text-align: left">沒有backing array</td>
+            <td style="text-align: left">有backing array</td>
+          </tr>
+          <tr>
+            <td style="text-align: left">使用 <code class="language-plaintext highlighter-rouge">allowcateDirect()</code> 創建</td>
+            <td style="text-align: left">先 <code class="language-plaintext highlighter-rouge">allocate()</code> 創建buffer，然後在手動創建backing array並把它與buffer綁定（調用 <code class="language-plaintext highlighter-rouge">wrap()</code>）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>讓我們把視角回到Netty的ByteBuf類型，它包含了三種格式，除了前面提到的HeapBuffer和DirectBuffer，Netty還設計了CompositeBuffer，它表示多個ByteBuf的組合類，方便同時處理和傳遞多個ByteBuf；同時若要讀取CompositeByteBuf，可以把它視爲DirectBytebuf，因爲在CompositeByteBuf中并沒有Backing Array。下面就是使用CompositeByteBuf組合兩個ByteBuf和讀取其中數據的範例，非常直觀的描述前面提到的觀念:</p>
+
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 創建CompositeByteBuf
+CompositeByteBuf messageBuf = Unpooled.compositeBuffer();
+ByteBuf buf_1 = ...; // can be backing or direct
+ByteBuf buf_2 = ...; // can be backing or direct
+messageBuf.addComponents(buf_1, buf_2);
+
+// 讀取CompositeByteBuf后針對array處理即可
+int length = compBuf.readableBytes();
+byte[] array = new byte[length];
+compBuf.getBytes(compBuf.readerIndex(), array);
+</code></pre></div>      </div>
+
+      <p>介紹完不同種類的Buffer后，讓我們把是視角拉回Buffer内部。若是要訪問Buffer的數據，Netty又與原生Java做出區別，這邊爲了簡化流程故而用表格做對比，相信也會更加直觀的看出差異，由於ByteBuffer設計不同，故而使用方法也差距甚大，這邊先不琢磨細節，等到後續使用時再詳細説明：</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align: left">Java NIO</th>
+            <th style="text-align: left">Netty</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="text-align: left">ByteBuffer擁有四個基礎屬性: <code class="language-plaintext highlighter-rouge">capacity/limit/position/mark</code>。<code class="language-plaintext highlighter-rouge">capacity</code> 表示這個buffer定義大小，一但聲明了便不可更改；<code class="language-plaintext highlighter-rouge">limit</code> 表示不應該被讀取/寫入資料的位置，例如 [0,limit) 可以被讀取，而 [limit, capacity] 則棄用；<code class="language-plaintext highlighter-rouge">position</code> 表示目前讀取/寫入的指針；<code class="language-plaintext highlighter-rouge">mark</code>被用來保存當前的<code class="language-plaintext highlighter-rouge">position</code>屬性用於後續的重置</td>
+            <td style="text-align: left">擁有兩個主要屬性: <code class="language-plaintext highlighter-rouge">writerIndex</code> 和 <code class="language-plaintext highlighter-rouge">readerIndex</code> 用於分別表示在讀寫中的指針</td>
+          </tr>
+          <tr>
+            <td style="text-align: left">由於只有一個<code class="language-plaintext highlighter-rouge">position</code>記錄當下位置，因此需要使用<code class="language-plaintext highlighter-rouge">flip()/clear()</code>切換讀寫模式，還需要注意<code class="language-plaintext highlighter-rouge">limit</code>和<code class="language-plaintext highlighter-rouge">position</code>之間的關係，非常複雜</td>
+            <td style="text-align: left">兩個指針分別記錄讀寫模式下的位置，避免許多繁雜的操作以及不必要的問題</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="how-to-readwrite-bytebuf">How to read/write ByteBuf</h3>
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+-------------------+------------------+------------------+
+| discardable bytes |  readable bytes  |  writable bytes  |
++-------------------+------------------+------------------+
+|                   |                  |                  |
+0    &lt;=      readerIndex   &lt;=   writerIndex    &lt;=    capacity
+</code></pre></div>      </div>
+
+      <p>前面提到在ByteBuf中有兩個基礎屬性<code class="language-plaintext highlighter-rouge">readerIndex</code>和<code class="language-plaintext highlighter-rouge">writerIndex</code>，分別指向當前讀指針和寫指針。先來介紹讀取部分，Netty提供兩種主要讀取的方法: <code class="language-plaintext highlighter-rouge">read</code> 和 <code class="language-plaintext highlighter-rouge">get</code>；前者當你讀取時指針會跟著變動，後者則不會，這樣做的目的是當你只是用於判斷式且不想讓指針移動時便可以使用<code class="language-plaintext highlighter-rouge">get</code>來防止下次讀取時指針跑掉。另外，Netty提供很多類型的read和get方法，下面就以<code class="language-plaintext highlighter-rouge">ByteBuf.getByte</code>做介紹：</p>
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>getByte(int i)
+getBytes(int i, ByteBuf dst)
+getBytes(int i, ByteBuf dst, int len)
+getBytes(int i, ByteBuf dst, int dstIndex, int len)
+</code></pre></div>      </div>
+
+      <ul>
+        <li>我們假設調用方法的為 <strong>ByteBuf target</strong></li>
+        <li><code class="language-plaintext highlighter-rouge">getByte(int i)</code>: 最直接將數據從target讀出, readerIndex不變</li>
+        <li><code class="language-plaintext highlighter-rouge">getBytes(int i, ByteBuf dst)</code>: 將數據從target讀出並存入到dst中，target的readerIndex不變但dst的writerIndex會變</li>
+        <li><code class="language-plaintext highlighter-rouge">getBytes(int i, ByteBuf dst, int len)</code>: 將長度為len的數據從target讀出並存入到dst中，target的readerIndex不變但dst的writerIndex會變</li>
+        <li><code class="language-plaintext highlighter-rouge">getBytes(int i, ByteBuf dst, int dstIndex, int len)</code>: 將長度為len的數據從target讀出並從dst的dstIndex位置開始存放，target的readerIndex不變且dst的writerIndex也不變</li>
+      </ul>
+
+      <p>相反的，若是使用 <code class="language-plaintext highlighter-rouge">read</code> 方法，則<code class="language-plaintext highlighter-rouge">readerIndex</code> 會改變並影響到下次讀取的位置，這邊便不再贅述，可以參考 <a href="https://netty.io/4.1/api/index.html">Netty 4.x API</a>。同理，寫入部分Netty提供的是 <code class="language-plaintext highlighter-rouge">set</code> 和 <code class="language-plaintext highlighter-rouge">write</code> 兩種類型，前者寫入時 <code class="language-plaintext highlighter-rouge">writerIndex</code> 不變，後者則會隨著寫入長度改變</p>
+
+      <h2 id="section">參考資料</h2>
+      <ol>
+        <li><a href="https://github.com/zuzeep/book/blob/master/Netty%20in%20Action.pdf">Netty in Action</a></li>
+        <li><a href="https://medium.com/@clu1022/java-nio-buffer-c98b52fd93ca">Java NIO - Buffer Basic Concepts</a></li>
+        <li><a href="https://netty.io/4.1/api/index.html">Netty 4.x API</a></li>
+      </ol>
+
+    </div>
+</body>
+</html>
+
+    
+    </section>
+
+    <!-- Social media shares -->
+    
+
+<div class="share-buttons">
+    <ul class="share-buttons">
+        <li class="meta">Share</li>
+        
+        <li>
+            <a href="https://www.facebook.com/sharer/sharer.php?u=http://localhost:4000/demo/2024/02/05/Netty-Self-Taught-Diary-2.html" target="_blank"
+               title=" Facebook">
+                <i class="fab fa-facebook-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on Facebook</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://twitter.com/intent/tweet?text=Netty+Self-taught+Diary+%282%29%20http%3A%2F%2Flocalhost%3A4000%2Fdemo%2F2024%2F02%2F05%2FNetty-Self-Taught-Diary-2.html"
+               target="_blank" title="">
+                <i class="fab fa-twitter-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Tweet</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://www.tumblr.com/share?v=3&u=http://localhost:4000/demo/2024/02/05/Netty-Self-Taught-Diary-2.html&quote=Netty+Self-taught+Diary+%282%29%20%7C%20Owen%27s+Blog&s="
+               target="_blank" title=" Tumblr">
+                <i class="fab fa-tumblr-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on Tumblr</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://pinterest.com/pin/create/button/?url=http://localhost:4000/demo/2024/02/05/Netty-Self-Taught-Diary-2.html&media=$description=%0A%0A%0A%0A++++++ByteBuffer%28Java%29%2FByteBuf%28Netty%29%0A++++++%E5%85%88%E4%BE%86%E4%BB%8B%E7%B4%B9%E6%95%B8%E6%93%9A%E9%A1%9E%E5%9E%8BByteBuf%EF%BC%8C%E9%80%99%E5%80%8BByteBuf%E9%A1%9E%E6%98%AFNetty%E6%A0%B9%E6%93%9AJava%E7%9A%84ByteBuffer%E6%89%80%E6%BC%94%E5%8C%96%E8%80%8C%E4%BE%86%E7%9A%84%EF%BC%8C%E5%85%A9%E8%80%85%E9%83%BD%E6%98%AF%E7%88%B2%E4%BA%86%E8%99%95%E7%90%86%E6%95%B8%E6%93%9A%E8%80%8C%E7%94%A2%E7%94%9F%E3%80%82%E5%9B%A0%E7%88%B2%E5%9C%A8ChannelHandler%E4%B8%AD%E6%89%80%E6%8E%A5%E6%94%B6%E5%88%B0%E7%9A%84%E6%95%B8%E6%93%9A%E5%8F%AA%E8%83%BD%E4%BF%9D%E8%AD%89%E9%A0%86%E5%BA%8F%E8%80%8C%E6%B2%92%E8%BE%A6%E6%B3%95%E4%BF%9D%E8%AD%89%E6%8E%A5%E6%94%B6%E5%88%B0%E7%9A%84%E6%AE%B5%E8%90%BD%E3%80%82%E4%BE%8B%E5%A6%82Client%E4%B8%AD%E6%8C%89%E9%A0%86%E5%BA%8F%E7%99%BC%E9%80%81%3A+%E2%80%9CHello%E2%80%9D%2C+%E2%80%9CWorld%E2%80%9D%EF%BC%9B%E4%BD%86%E6%98%AF%E5%88%B0%E4%BA%86Server%E7%AB%AF%E7%9A%84ChannelHandler%E5%8F%AF%E8%83%BD%E6%9C%83%E8%A2%AB%E5%88%86%E6%88%90%E2%80%9DHe%E2%80%9D%2C%E2%80%9DlloW%E2%80%9D%2C%E2%80%9Dorld%E2%80%9D%EF%BC%8C%E5%9B%A0%E6%AD%A4%E9%9C%80%E8%A6%81%E8%A8%AD%E8%A8%88%E4%B8%80%E7%A8%AE%E6%95%B8%E6%93%9A%E9%A1%9E%E5%9E%8B%E4%BE%86%E8%99%95%E7%90%86%E9%80%99%E9%A1%9E%E6%83%85%E6%B3%81%E3%80%82%E5%89%8D%E9%9D%A2%E6%89%80%E8%BF%B0%E7%9A%84%E6%83%85%E6%B3%81%E6%98%AF%E5%9B%A0%E7%88%B2%E5%82%B3%E8%BC%B8%E5%8D%94%E8%AD%B0%E6%9C%AC%E8%BA%AB%E6%B2%92%E8%BE%A6%E6%B3%95%E4%BF%9D%E8%AD%89%EF%BC%8C%E8%80%8C%E5%B9%B6%E9%9D%9E%E6%98%AF%E5%8F%97%E5%88%B0Netty%E6%A1%86%E6%9E%B6%E6%89%80%E5%BD%B1%E9%9F%BF%E3%80%82%0A%0A++++++%E5%9C%A8%E4%BB%8B%E7%B4%B9%E9%80%99%E5%80%8B%E6%95%B8%E6%93%9A%E9%A1%9E%E4%B9%8B%E5%89%8D%E9%82%84%E8%A6%81%E5%85%88%E7%9F%A5%E9%81%93%E5%9C%A8Java+NIO%E4%B8%AD%E6%98%AF%E5%A6%82%E4%BD%95%E8%A8%AD%E8%A8%88%E7%9A%84%EF%BC%8C%E9%80%99%E6%A8%A3%E6%96%B9%E4%BE%BF%E5%81%9A%E7%9B%B4%E8%A7%80%E7%9A%84%E6%AF%94%E8%BC%83%E8%80%8C%E4%B8%94%E5%85%A9%E8%80%85%E4%B9%9F%E6%9C%89%E7%9B%B8%E4%BC%BC%E4%B9%8B%E8%99%95%E3%80%82java.nio.bytebuffer+%E6%98%AF+java.nio.buffer+%E7%9A%84%E5%AD%90%E9%A1%9E%EF%BC%8C%E8%80%8CByteBuffer%E4%B8%AD%E5%88%86%E7%88%B2%E5%85%A9%E7%A8%AEBuffer%3A+Direct+Buffer+%E5%92%8C+None-Direct+Buffer%E3%80%82%E5%B0%B1%E5%A6%82%E5%90%8C%E5%90%8D%E5%AD%97%E6%89%80%E8%BF%B0%EF%BC%8Cdirect+buffer%E8%A2%AB%E5%88%86%E9%85%8D%E5%9C%A8heap%E4%B9%8B%E5%A4%96%EF%BC%8C%E8%83%BD%E7%9B%B4%E6%8E%A5%E8%A2%AB%E7%A8%8B%E5%BA%8F%E8%A8%AA%E5%95%8F%EF%BC%8C%E6%89%80%E4%BB%A5%E9%80%9F%E5%BA%A6%E8%BC%83none-direct%E5%BF%AB%EF%BC%9B%E8%80%8Cnone-direct+buffer%E8%A2%AB%E5%AD%98%E6%94%BE%E5%9C%A8heap%E4%B8%AD%EF%BC%8C%E4%B9%9F%E5%B0%B1%E6%98%AF%E5%A4%A7%E9%83%A8%E5%88%86%E7%A8%8B%E5%BA%8F%E8%A8%AA%E5%95%8F%E6%95%B8%E6%93%9A%E7%9A%84%E6%B5%81%E7%A8%8B%EF%BC%8C%E8%80%8C%E9%80%9A%E5%B8%B8Java%E6%9C%83%E7%82%BA%E9%80%99%E5%80%8Bbuffer%E5%86%8D%E9%A1%8D%E5%A4%96%E5%88%86%E9%85%8D%E4%B8%80%E5%80%8Barray%E7%94%A8%E4%BE%86%E5%82%99%E4%BB%BD%E6%95%B8%E6%93%9A%EF%BC%8C%E9%80%99%E5%80%8Barray%E8%A2%AB%E7%A8%B1%E7%88%B2+Backing+Array%E3%80%82%E5%9B%A0%E6%AD%A4%EF%BC%8C%E5%8F%AF%E4%BB%A5%E5%9C%A8%E7%A8%8B%E5%BA%8F%E4%B8%AD%E9%80%8F%E9%81%8E+hasArray%28%29+%E4%BE%86%E6%AA%A2%E6%9F%A5%E9%80%99%E5%80%8Bbuffer%E6%98%AF%E5%90%A6%E6%93%81%E6%9C%89backing+array%EF%BC%8C%E8%8B%A5%E6%98%AF%E6%9C%89%E5%B0%B1%E4%BB%A3%E8%A1%A8%E9%80%99%E5%80%8Bbuffer%E5%B1%AC%E6%96%BCnone-direct%28heap+buffer%29%EF%BC%8C%E5%8F%8D%E4%B9%8B%E7%82%BAdirect+buffer%3A%0A%0A++++++%0A++++++++%0A++++++++++%0A++++++++++++Direct+Buffer%0A++++++++++++None-Direct+buffer%0A++++++++++%0A++++++++%0A++++++++%0A++++++++++%0A++++++++++++%E4%BD%8D%E6%96%BCheap%E5%A4%96%EF%BC%8C%E5%8F%AF%E4%BB%A5%E7%9B%B4%E6%8E%A5%E8%A2%ABstack%E4%B8%AD%E7%9A%84java%E7%A8%8B%E5%BA%8F%E8%AA%BF%E7%94%A8%0A++++++++++++%E4%BD%8D%E6%96%BCheap%E5%86%85%0A++++++++++%0A++++++++++%0A++++++++++++%E8%A8%AA%E5%95%8F%E9%80%9F%E5%BA%A6%E5%BF%AB%0A++++++++++++%E8%A8%AA%E5%95%8F%E9%80%9F%E5%BA%A6%E6%85%A2%0A++++++++++%0A++++++++++%0A++++++++++++%E8%A6%81%E9%87%8B%E6%94%BE%E8%BC%83%E9%BA%BB%E7%85%A9%0A++++++++++++%E9%87%8B%E6%94%BE%E5%AE%B9%E6%98%93%0A++++++++++%0A++++++++++%0A++++++++++++%E6%B2%92%E6%9C%89backing+array%0A++++++++++++%E6%9C%89backing+array%0A++++++++++%0A++++++++++%0A++++++++++++%E4%BD%BF%E7%94%A8+allowcateDirect%28%29+%E5%89%B5%E5%BB%BA%0A++++++++++++%E5%85%88+allocate%28%29+%E5%89%B5%E5%BB%BAbuffer%EF%BC%8C%E7%84%B6%E5%BE%8C%E5%9C%A8%E6%89%8B%E5%8B%95%E5%89%B5%E5%BB%BAbacking+array%E4%B8%A6%E6%8A%8A%E5%AE%83%E8%88%87buffer%E7%B6%81%E5%AE%9A%EF%BC%88%E8%AA%BF%E7%94%A8+wrap%28%29%EF%BC%89%0A++++++++++%0A++++++++%0A++++++%0A%0A++++++%E8%AE%93%E6%88%91%E5%80%91%E6%8A%8A%E8%A6%96%E8%A7%92%E5%9B%9E%E5%88%B0Netty%E7%9A%84ByteBuf%E9%A1%9E%E5%9E%8B%EF%BC%8C%E5%AE%83%E5%8C%85%E5%90%AB%E4%BA%86%E4%B8%89%E7%A8%AE%E6%A0%BC%E5%BC%8F%EF%BC%8C%E9%99%A4%E4%BA%86%E5%89%8D%E9%9D%A2%E6%8F%90%E5%88%B0%E7%9A%84HeapBuffer%E5%92%8CDirectBuffer%EF%BC%8CNetty%E9%82%84%E8%A8%AD%E8%A8%88%E4%BA%86CompositeBuffer%EF%BC%8C%E5%AE%83%E8%A1%A8%E7%A4%BA%E5%A4%9A%E5%80%8BByteBuf%E7%9A%84%E7%B5%84%E5%90%88%E9%A1%9E%EF%BC%8C%E6%96%B9%E4%BE%BF%E5%90%8C%E6%99%82%E8%99%95%E7%90%86%E5%92%8C%E5%82%B3%E9%81%9E%E5%A4%9A%E5%80%8BByteBuf%EF%BC%9B%E5%90%8C%E6%99%82%E8%8B%A5%E8%A6%81%E8%AE%80%E5%8F%96CompositeByteBuf%EF%BC%8C%E5%8F%AF%E4%BB%A5%E6%8A%8A%E5%AE%83%E8%A6%96%E7%88%B2DirectBytebuf%EF%BC%8C%E5%9B%A0%E7%88%B2%E5%9C%A8CompositeByteBuf%E4%B8%AD%E5%B9%B6%E6%B2%92%E6%9C%89Backing+Array%E3%80%82%E4%B8%8B%E9%9D%A2%E5%B0%B1%E6%98%AF%E4%BD%BF%E7%94%A8CompositeByteBuf%E7%B5%84%E5%90%88%E5%85%A9%E5%80%8BByteBuf%E5%92%8C%E8%AE%80%E5%8F%96%E5%85%B6%E4%B8%AD%E6%95%B8%E6%93%9A%E7%9A%84%E7%AF%84%E4%BE%8B%EF%BC%8C%E9%9D%9E%E5%B8%B8%E7%9B%B4%E8%A7%80%E7%9A%84%E6%8F%8F%E8%BF%B0%E5%89%8D%E9%9D%A2%E6%8F%90%E5%88%B0%E7%9A%84%E8%A7%80%E5%BF%B5%3A%0A%0A++++++%2F%2F+%E5%89%B5%E5%BB%BACompositeByteBuf%0ACompositeByteBuf+messageBuf+%3D+Unpooled.compositeBuffer%28%29%3B%0AByteBuf+buf_1+%3D+...%3B+%2F%2F+can+be+backing+or+direct%0AByteBuf+buf_2+%3D+...%3B+%2F%2F+can+be+backing+or+direct%0AmessageBuf.addComponents%28buf_1%2C+buf_2%29%3B%0A%0A%2F%2F+%E8%AE%80%E5%8F%96CompositeByteBuf%E5%90%8E%E9%87%9D%E5%B0%8Darray%E8%99%95%E7%90%86%E5%8D%B3%E5%8F%AF%0Aint+length+%3D+compBuf.readableBytes%28%29%3B%0Abyte%5B%5D+array+%3D+new+byte%5Blength%5D%3B%0AcompBuf.getBytes%28compBuf.readerIndex%28%29%2C+array%29%3B%0A++++++%0A%0A++++++%E4%BB%8B%E7%B4%B9%E5%AE%8C%E4%B8%8D%E5%90%8C%E7%A8%AE%E9%A1%9E%E7%9A%84Buffer%E5%90%8E%EF%BC%8C%E8%AE%93%E6%88%91%E5%80%91%E6%8A%8A%E6%98%AF%E8%A6%96%E8%A7%92%E6%8B%89%E5%9B%9EBuffer%E5%86%85%E9%83%A8%E3%80%82%E8%8B%A5%E6%98%AF%E8%A6%81%E8%A8%AA%E5%95%8FBuffer%E7%9A%84%E6%95%B8%E6%93%9A%EF%BC%8CNetty%E5%8F%88%E8%88%87%E5%8E%9F%E7%94%9FJava%E5%81%9A%E5%87%BA%E5%8D%80%E5%88%A5%EF%BC%8C%E9%80%99%E9%82%8A%E7%88%B2%E4%BA%86%E7%B0%A1%E5%8C%96%E6%B5%81%E7%A8%8B%E6%95%85%E8%80%8C%E7%94%A8%E8%A1%A8%E6%A0%BC%E5%81%9A%E5%B0%8D%E6%AF%94%EF%BC%8C%E7%9B%B8%E4%BF%A1%E4%B9%9F%E6%9C%83%E6%9B%B4%E5%8A%A0%E7%9B%B4%E8%A7%80%E7%9A%84%E7%9C%8B%E5%87%BA%E5%B7%AE%E7%95%B0%EF%BC%8C%E7%94%B1%E6%96%BCByteBuffer%E8%A8%AD%E8%A8%88%E4%B8%8D%E5%90%8C%EF%BC%8C%E6%95%85%E8%80%8C%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95%E4%B9%9F%E5%B7%AE%E8%B7%9D%E7%94%9A%E5%A4%A7%EF%BC%8C%E9%80%99%E9%82%8A%E5%85%88%E4%B8%8D%E7%90%A2%E7%A3%A8%E7%B4%B0%E7%AF%80%EF%BC%8C%E7%AD%89%E5%88%B0%E5%BE%8C%E7%BA%8C%E4%BD%BF%E7%94%A8%E6%99%82%E5%86%8D%E8%A9%B3%E7%B4%B0%E8%AA%AC%E6%98%8E%EF%BC%9A%0A%0A++++++%0A++++++++%0A++++++++++%0A++++++++++++Java+NIO%0A++++++++++++Netty%0A++++++++++%0A++++++++%0A++++++++%0A++++++++++%0A++++++++++++ByteBuffer%E6%93%81%E6%9C%89%E5%9B%9B%E5%80%8B%E5%9F%BA%E7%A4%8E%E5%B1%AC%E6%80%A7%3A+capacity%2Flimit%2Fposition%2Fmark%E3%80%82capacity+%E8%A1%A8%E7%A4%BA%E9%80%99%E5%80%8Bbuffer%E5%AE%9A%E7%BE%A9%E5%A4%A7%E5%B0%8F%EF%BC%8C%E4%B8%80%E4%BD%86%E8%81%B2%E6%98%8E%E4%BA%86%E4%BE%BF%E4%B8%8D%E5%8F%AF%E6%9B%B4%E6%94%B9%EF%BC%9Blimit+%E8%A1%A8%E7%A4%BA%E4%B8%8D%E6%87%89%E8%A9%B2%E8%A2%AB%E8%AE%80%E5%8F%96%2F%E5%AF%AB%E5%85%A5%E8%B3%87%E6%96%99%E7%9A%84%E4%BD%8D%E7%BD%AE%EF%BC%8C%E4%BE%8B%E5%A6%82+%5B0%2Climit%29+%E5%8F%AF%E4%BB%A5%E8%A2%AB%E8%AE%80%E5%8F%96%EF%BC%8C%E8%80%8C+%5Blimit%2C+capacity%5D+%E5%89%87%E6%A3%84%E7%94%A8%EF%BC%9Bposition+%E8%A1%A8%E7%A4%BA%E7%9B%AE%E5%89%8D%E8%AE%80%E5%8F%96%2F%E5%AF%AB%E5%85%A5%E7%9A%84%E6%8C%87%E9%87%9D%EF%BC%9Bmark%E8%A2%AB%E7%94%A8%E4%BE%86%E4%BF%9D%E5%AD%98%E7%95%B6%E5%89%8D%E7%9A%84position%E5%B1%AC%E6%80%A7%E7%94%A8%E6%96%BC%E5%BE%8C%E7%BA%8C%E7%9A%84%E9%87%8D%E7%BD%AE%0A++++++++++++%E6%93%81%E6%9C%89%E5%85%A9%E5%80%8B%E4%B8%BB%E8%A6%81%E5%B1%AC%E6%80%A7%3A+writerIndex+%E5%92%8C+readerIndex+%E7%94%A8%E6%96%BC%E5%88%86%E5%88%A5%E8%A1%A8%E7%A4%BA%E5%9C%A8%E8%AE%80%E5%AF%AB%E4%B8%AD%E7%9A%84%E6%8C%87%E9%87%9D%0A++++++++++%0A++++++++++%0A++++++++++++%E7%94%B1%E6%96%BC%E5%8F%AA%E6%9C%89%E4%B8%80%E5%80%8Bposition%E8%A8%98%E9%8C%84%E7%95%B6%E4%B8%8B%E4%BD%8D%E7%BD%AE%EF%BC%8C%E5%9B%A0%E6%AD%A4%E9%9C%80%E8%A6%81%E4%BD%BF%E7%94%A8flip%28%29%2Fclear%28%29%E5%88%87%E6%8F%9B%E8%AE%80%E5%AF%AB%E6%A8%A1%E5%BC%8F%EF%BC%8C%E9%82%84%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8Flimit%E5%92%8Cposition%E4%B9%8B%E9%96%93%E7%9A%84%E9%97%9C%E4%BF%82%EF%BC%8C%E9%9D%9E%E5%B8%B8%E8%A4%87%E9%9B%9C%0A++++++++++++%E5%85%A9%E5%80%8B%E6%8C%87%E9%87%9D%E5%88%86%E5%88%A5%E8%A8%98%E9%8C%84%E8%AE%80%E5%AF%AB%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%9A%84%E4%BD%8D%E7%BD%AE%EF%BC%8C%E9%81%BF%E5%85%8D%E8%A8%B1%E5%A4%9A%E7%B9%81%E9%9B%9C%E7%9A%84%E6%93%8D%E4%BD%9C%E4%BB%A5%E5%8F%8A%E4%B8%8D%E5%BF%85%E8%A6%81%E7%9A%84%E5%95%8F%E9%A1%8C%0A++++++++++%0A++++++++%0A++++++%0A%0A++++++How+to+read%2Fwrite+ByteBuf%0A++++++%2B-------------------%2B------------------%2B------------------%2B%0A%7C+discardable+bytes+%7C++readable+bytes++%7C++writable+bytes++%7C%0A%2B-------------------%2B------------------%2B------------------%2B%0A%7C+++++++++++++++++++%7C++++++++++++++++++%7C++++++++++++++++++%7C%0A0++++%26lt%3B%3D++++++readerIndex+++%26lt%3B%3D+++writerIndex++++%26lt%3B%3D++++capacity%0A++++++%0A%0A++++++%E5%89%8D%E9%9D%A2%E6%8F%90%E5%88%B0%E5%9C%A8ByteBuf%E4%B8%AD%E6%9C%89%E5%85%A9%E5%80%8B%E5%9F%BA%E7%A4%8E%E5%B1%AC%E6%80%A7readerIndex%E5%92%8CwriterIndex%EF%BC%8C%E5%88%86%E5%88%A5%E6%8C%87%E5%90%91%E7%95%B6%E5%89%8D%E8%AE%80%E6%8C%87%E9%87%9D%E5%92%8C%E5%AF%AB%E6%8C%87%E9%87%9D%E3%80%82%E5%85%88%E4%BE%86%E4%BB%8B%E7%B4%B9%E8%AE%80%E5%8F%96%E9%83%A8%E5%88%86%EF%BC%8CNetty%E6%8F%90%E4%BE%9B%E5%85%A9%E7%A8%AE%E4%B8%BB%E8%A6%81%E8%AE%80%E5%8F%96%E7%9A%84%E6%96%B9%E6%B3%95%3A+read+%E5%92%8C+get%EF%BC%9B%E5%89%8D%E8%80%85%E7%95%B6%E4%BD%A0%E8%AE%80%E5%8F%96%E6%99%82%E6%8C%87%E9%87%9D%E6%9C%83%E8%B7%9F%E8%91%97%E8%AE%8A%E5%8B%95%EF%BC%8C%E5%BE%8C%E8%80%85%E5%89%87%E4%B8%8D%E6%9C%83%EF%BC%8C%E9%80%99%E6%A8%A3%E5%81%9A%E7%9A%84%E7%9B%AE%E7%9A%84%E6%98%AF%E7%95%B6%E4%BD%A0%E5%8F%AA%E6%98%AF%E7%94%A8%E6%96%BC%E5%88%A4%E6%96%B7%E5%BC%8F%E4%B8%94%E4%B8%8D%E6%83%B3%E8%AE%93%E6%8C%87%E9%87%9D%E7%A7%BB%E5%8B%95%E6%99%82%E4%BE%BF%E5%8F%AF%E4%BB%A5%E4%BD%BF%E7%94%A8get%E4%BE%86%E9%98%B2%E6%AD%A2%E4%B8%8B%E6%AC%A1%E8%AE%80%E5%8F%96%E6%99%82%E6%8C%87%E9%87%9D%E8%B7%91%E6%8E%89%E3%80%82%E5%8F%A6%E5%A4%96%EF%BC%8CNetty%E6%8F%90%E4%BE%9B%E5%BE%88%E5%A4%9A%E9%A1%9E%E5%9E%8B%E7%9A%84read%E5%92%8Cget%E6%96%B9%E6%B3%95%EF%BC%8C%E4%B8%8B%E9%9D%A2%E5%B0%B1%E4%BB%A5ByteBuf.getByte%E5%81%9A%E4%BB%8B%E7%B4%B9%EF%BC%9A%0A++++++getByte%28int+i%29%0AgetBytes%28int+i%2C+ByteBuf+dst%29%0AgetBytes%28int+i%2C+ByteBuf+dst%2C+int+len%29%0AgetBytes%28int+i%2C+ByteBuf+dst%2C+int+dstIndex%2C+int+len%29%0A++++++%0A%0A++++++%0A++++++++%E6%88%91%E5%80%91%E5%81%87%E8%A8%AD%E8%AA%BF%E7%94%A8%E6%96%B9%E6%B3%95%E7%9A%84%E7%82%BA+ByteBuf+target%0A++++++++getByte%28int+i%29%3A+%E6%9C%80%E7%9B%B4%E6%8E%A5%E5%B0%87%E6%95%B8%E6%93%9A%E5%BE%9Etarget%E8%AE%80%E5%87%BA%2C+readerIndex%E4%B8%8D%E8%AE%8A%0A++++++++getBytes%28int+i%2C+ByteBuf+dst%29%3A+%E5%B0%87%E6%95%B8%E6%93%9A%E5%BE%9Etarget%E8%AE%80%E5%87%BA%E4%B8%A6%E5%AD%98%E5%85%A5%E5%88%B0dst%E4%B8%AD%EF%BC%8Ctarget%E7%9A%84readerIndex%E4%B8%8D%E8%AE%8A%E4%BD%86dst%E7%9A%84writerIndex%E6%9C%83%E8%AE%8A%0A++++++++getBytes%28int+i%2C+ByteBuf+dst%2C+int+len%29%3A+%E5%B0%87%E9%95%B7%E5%BA%A6%E7%82%BAlen%E7%9A%84%E6%95%B8%E6%93%9A%E5%BE%9Etarget%E8%AE%80%E5%87%BA%E4%B8%A6%E5%AD%98%E5%85%A5%E5%88%B0dst%E4%B8%AD%EF%BC%8Ctarget%E7%9A%84readerIndex%E4%B8%8D%E8%AE%8A%E4%BD%86dst%E7%9A%84writerIndex%E6%9C%83%E8%AE%8A%0A++++++++getBytes%28int+i%2C+ByteBuf+dst%2C+int+dstIndex%2C+int+len%29%3A+%E5%B0%87%E9%95%B7%E5%BA%A6%E7%82%BAlen%E7%9A%84%E6%95%B8%E6%93%9A%E5%BE%9Etarget%E8%AE%80%E5%87%BA%E4%B8%A6%E5%BE%9Edst%E7%9A%84dstIndex%E4%BD%8D%E7%BD%AE%E9%96%8B%E5%A7%8B%E5%AD%98%E6%94%BE%EF%BC%8Ctarget%E7%9A%84readerIndex%E4%B8%8D%E8%AE%8A%E4%B8%94dst%E7%9A%84writerIndex%E4%B9%9F%E4%B8%8D%E8%AE%8A%0A++++++%0A%0A++++++%E7%9B%B8%E5%8F%8D%E7%9A%84%EF%BC%8C%E8%8B%A5%E6%98%AF%E4%BD%BF%E7%94%A8+read+%E6%96%B9%E6%B3%95%EF%BC%8C%E5%89%87readerIndex+%E6%9C%83%E6%94%B9%E8%AE%8A%E4%B8%A6%E5%BD%B1%E9%9F%BF%E5%88%B0%E4%B8%8B%E6%AC%A1%E8%AE%80%E5%8F%96%E7%9A%84%E4%BD%8D%E7%BD%AE%EF%BC%8C%E9%80%99%E9%82%8A%E4%BE%BF%E4%B8%8D%E5%86%8D%E8%B4%85%E8%BF%B0%EF%BC%8C%E5%8F%AF%E4%BB%A5%E5%8F%83%E8%80%83+Netty+4.x+API%E3%80%82%E5%90%8C%E7%90%86%EF%BC%8C%E5%AF%AB%E5%85%A5%E9%83%A8%E5%88%86Netty%E6%8F%90%E4%BE%9B%E7%9A%84%E6%98%AF+set+%E5%92%8C+write+%E5%85%A9%E7%A8%AE%E9%A1%9E%E5%9E%8B%EF%BC%8C%E5%89%8D%E8%80%85%E5%AF%AB%E5%85%A5%E6%99%82+writerIndex+%E4%B8%8D%E8%AE%8A%EF%BC%8C%E5%BE%8C%E8%80%85%E5%89%87%E6%9C%83%E9%9A%A8%E8%91%97%E5%AF%AB%E5%85%A5%E9%95%B7%E5%BA%A6%E6%94%B9%E8%AE%8A%0A%0A++++++%E5%8F%83%E8%80%83%E8%B3%87%E6%96%99%0A++++++%0A++++++++Netty+in+Action%0A++++++++Java+NIO+-+Buffer+Basic+Concepts%0A++++++++Netty+4.x+API%0A++++++%0A%0A++++%0A%0A%0A"
+               target="_blank" title="">
+                <i class="fab fa-pinterest-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Pin it</span>
+            </a>
+        </li>
+          
+        <li>
+            <a href="https://www.reddit.com/submit?url=http://localhost:4000/demo/2024/02/05/Netty-Self-Taught-Diary-2.html&title=Netty+Self-taught+Diary+%282%29%20%7C%20Owen%27s+Blog"
+               target="_blank" title=" Reddit">
+                <i class="fab fa-reddit-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on Reddit</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://www.linkedin.com/shareArticle?mini=true&url=http://localhost:4000/demo/2024/02/05/Netty-Self-Taught-Diary-2.html&title=Netty+Self-taught+Diary+%282%29%20%7C%20Owen%27s+Blog&summary=&source=http://localhost:4000/demo/2024/02/05/Netty-Self-Taught-Diary-2.html"
+               target="_blank" title=" LinkedIn">
+                <i class="fab fa-linkedin fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on LinkedIn</span>
+            </a>
+        </li>
+          
+        <li>
+            <a href="mailto:?subject=Netty Self-taught Diary (2)%20%7C%20Owen's Blog&body=http://localhost:4000/demo/2024/02/05/Netty-Self-Taught-Diary-2.html"
+               target="_blank" title="">
+                <i class="fas fa-envelope-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Email</span></a>
+        </li>
+        
+    </ul>
+</div>
+
+
+
+
+    <!-- Tag list -->
+    
+    
+
+
+  <div class="tag-list">
+    <ul>
+      
+        <li class="meta">Tag</li>
+      
+
+      
+        <li><a class="button" href="/tags#Tech-Share">
+          <p><i class="fas fa-tag fa-fw fa-sm"></i> Tech-Share</p>
+        </a></li>
+      
+    </ul>
+  </div>
+
+
+
+</article>
+
+
+
+
+<!-- To change color of links in the page --> <style> header#main { background-size: cover; background-repeat: no-repeat; background-position: center; } </style> <!-- Post navigation --> <div id="post-nav"> <div id="previous-post"> <a alt="LeetCode 75." href="/demo/2024/06/12/LeetCode-75.html"> <p>Previous post</p> LeetCode 75. </a> </div> <div id="next-post"> <a alt="Netty Self-taught Diary (1)" href="/demo/2024/02/03/Netty-Self-Taught-Diary-1.html"> <p>Next post</p> Netty Self-taught Diary (1) </a> </div> </div> <!-- Giscus --> <!--Utterances--> <!-- Cusdis --> <!-- Disqus -->
+
+
+    </div>
+    
+    <footer class="site-footer"> <p class="text"> Powered by <a href='https://jekyllrb.com/'>Jekyll</a> with <a href='https://github.com/sylhare/Type-on-Strap'>Type on Strap</a></p> <div class="footer-icons"> <ul> <!-- Social icons from Font Awesome, if enabled --> <li> <a feed.xml href="/feed.xml" title="Follow RSS feed" target="_blank"> <span class="fa-stack fa-lg"> <i class="fas fa-circle fa-stack-2x"></i> <i class="fas fa-rss fa-stack-1x fa-inverse"></i> </span> </a> </li> <li> <a href="https://github.com/sylhare" title="Follow on Github" target="_blank" rel="noopener"> <span class="fa-stack fa-lg"> <i class="fas fa-circle fa-stack-2x"></i> <i class="fab fa-github fa-stack-1x fa-inverse"></i> </span> </a> </li> </ul> </div> <script type="module"> mermaid.initialize({ startOnLoad: false, theme: "default" }); mermaid.run({ nodes: [...document.querySelectorAll('.language-mermaid'), ...document.querySelectorAll('.mermaid')] }); </script> </footer>
+  </body>
+</html>

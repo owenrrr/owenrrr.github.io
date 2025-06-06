@@ -1,0 +1,681 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-06-06T11:50:15+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Owen’s Blog</title><subtitle>A website to share technical articles and learning walkthroughs</subtitle><entry><title type="html">Nmap介紹 (1)</title><link href="http://localhost:4000/demo/2025/05/03/Nmap-1.html" rel="alternate" type="text/html" title="Nmap介紹 (1)" /><published>2025-05-03T00:00:00+08:00</published><updated>2025-05-03T00:00:00+08:00</updated><id>http://localhost:4000/demo/2025/05/03/Nmap-1</id><content type="html" xml:base="http://localhost:4000/demo/2025/05/03/Nmap-1.html"><![CDATA[<html>
+<body>
+<div style="margin-top: 10px">
+
+      <h3 id="intro">Intro</h3>
+      <p>本篇介紹Nmap這個強大的滲透測試工具，常見的功能有：</p>
+      <ul>
+        <li>Live Host Discovery(在線主機搜索)</li>
+        <li>Port Scan (端口搜索)</li>
+        <li>Firewall Detection (測試目標主機防火牆設置)
+在使用Nmap時，通常是先利用在線主機搜索，得出所有在線主機；然後再利用端口搜索去進一步搜尋開放的端口及端口上運行的服務。通過這樣的實現才不會在離線主機上進行不必要的端口搜索浪費時間。另外關於測試目標主機防火牆設置是通過幾種巧妙的方式來檢測目標主機是否有防火牆設置，這後面會提到，算是Nmap工具功能的延伸。</li>
+      </ul>
+
+      <h3 id="host-discovery-using-arp">Host Discovery using ARP</h3>
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nmap -PR -sn TARGET
+</code></pre></div>      </div>
+      <ul>
+        <li>-sn 的意思是不要做端口掃描，因為目前只想要做在線主機搜索</li>
+        <li>-PR 是告訴nmap使用ARP scan。同時請注意使用 -PR 需要有root權限(原因是ARP屬於Data Link Layer，需要自己構造raw packet。而這一步因為系統安全考慮需要有root權限)</li>
+        <li>另外這種在線主機查詢的方法只適用於在同一個Subnet中才有效果(原因也很簡單，因為ARP packet只會在同一個Subnet中廣播，沒辦法透過Router傳遞到其他的Subnet，所以這種策略只適用於目標主機段與你處於同一個Subnet)</li>
+        <li>但如果你指定了 -sn 的情況下與目標主機段處於不同個 Subnet 的話，nmap 會自動將查詢策略轉為使用混合策略：
+          <ul>
+            <li>ICMP echo requests,</li>
+            <li>TCP ACK to port 80,</li>
+            <li>TCP SYN to port 443,</li>
+            <li>ICMP timestamp request.</li>
+          </ul>
+        </li>
+        <li>例子：
+          <blockquote>
+            <p>sudo nmap -PR -sn 10.10.210.1/24</p>
+          </blockquote>
+        </li>
+      </ul>
+
+      <h3 id="host-discovery-using-icmp">Host Discovery using ICMP</h3>
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nmap -PE -sn TARGET
+nmap -PP -sn TARGET
+nmap -PM -sn TARGET
+</code></pre></div>      </div>
+      <ul>
+        <li>這三種利用ICMP的檢測方式皆不需要root權限，因為ICMP不需要動到raw packet(ICMP基於IP層)</li>
+        <li>這三種策略都可以支持自己與目標主機段處於不同 Subnet，因為ICMP協議是基於IP協議之上(將整個IP packet包裝為payload)，所以可以將這些ICMP packet傳送到不同 Subnet 來查詢</li>
+        <li>-PE 是告訴nmap使用 ICMP Echo Request</li>
+        <li>-PP 是告訴nmap使用 ICMP Timestamp Request</li>
+        <li>-PM 是告訴nmap使用 ICMP Address Mask Request</li>
+        <li>例子：
+          <blockquote>
+            <p>sudo nmap -PE -sn 10.10.210.1/24<br />
+sudo nmap -PP -sn 10.10.210.1/24<br />
+sudo nmap -PM -sn 10.10.210.1/24</p>
+          </blockquote>
+        </li>
+      </ul>
+
+      <h3 id="host-discovery-using-tcp">Host Discovery using TCP</h3>
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nmap -PS -sn TARGET
+nmap -PA -sn TARGET
+nmap -PU -sn TARGET
+</code></pre></div>      </div>
+      <ul>
+        <li>這三種利用TCP/UDP的檢測方式皆不需要root權限，因為它們也不需要動到raw packet(TCP/UDP基於IP層)</li>
+        <li>這三種策略都可以支持自己與目標主機段處於不同 Subnet，因為TCP/UDP協議是基於IP協議之上(將整個IP packet包裝為payload)，所以可以將這些TCP/UDP packet傳送到不同 Subnet 來查詢</li>
+        <li>-PS 是告訴nmap傳送 TCP SYN，等待 TCP SYN-ACK，並傳回 TCP ACK</li>
+        <li>-PA 是告訴nmap傳送 TCP ACK，並等待 TCP RST (因為target主機會覺得很奇怪，明明都沒有建立tcp連接就收到ACK，所以直接傳回一個RST來回絕這個ACK)</li>
+        <li>-PU 是告訴nmap傳送 UDP packet</li>
+        <li>關於 -PU 我們必須要知道，由於UDP是無狀態的協議(代表說即使目標主機接收到我們傳送的UDP packet，也不會有回覆)，因此我們判斷的條件要與TCP/ICMP反著來。也就是說，TCP/ICMP大多是由接收到回覆包來判斷目標主機是否在線；而UDP則是藉由接收到回覆包來知道目標主機離線。因此在 -PU 這種策略下，若是接收到回覆的話有兩種可能：
+          <ul>
+            <li>ICMP(3,3) Port Unreachable: 代表目標主機可能在線，只不過端口關閉</li>
+            <li>ICMP(3,1) Host Unreachable: 代表目標主機離線</li>
+            <li>最後，如果在timeout過後沒有收到回覆，就代表說目標主機有可能在線</li>
+          </ul>
+        </li>
+        <li>例子：
+          <blockquote>
+            <p>sudo nmap -PS -sn 10.10.210.1/24<br />
+sudo nmap -PA -sn 10.10.210.1/24<br />
+sudo nmap -PU -sn 10.10.210.1/24</p>
+          </blockquote>
+        </li>
+      </ul>
+
+      <h2 id="section">學習資料</h2>
+      <ol>
+        <li>TryHackMe CompTIA Pentest+ / Information Gathering and Vulnerability Scanning / 
+Nmap Live Host Discovery</li>
+        <li><a href="https://nmap.org/book/host-discovery.html">Nmap Host Discovery</a></li>
+      </ol>
+
+    </div>
+</body>
+</html>]]></content><author><name></name></author><category term="Demo" /><category term="Cybersecurity" /><summary type="html"><![CDATA[Intro 本篇介紹Nmap這個強大的滲透測試工具，常見的功能有： Live Host Discovery(在線主機搜索) Port Scan (端口搜索) Firewall Detection (測試目標主機防火牆設置) 在使用Nmap時，通常是先利用在線主機搜索，得出所有在線主機；然後再利用端口搜索去進一步搜尋開放的端口及端口上運行的服務。通過這樣的實現才不會在離線主機上進行不必要的端口搜索浪費時間。另外關於測試目標主機防火牆設置是通過幾種巧妙的方式來檢測目標主機是否有防火牆設置，這後面會提到，算是Nmap工具功能的延伸。 Host Discovery using ARP nmap -PR -sn TARGET -sn 的意思是不要做端口掃描，因為目前只想要做在線主機搜索 -PR 是告訴nmap使用ARP scan。同時請注意使用 -PR 需要有root權限(原因是ARP屬於Data Link Layer，需要自己構造raw packet。而這一步因為系統安全考慮需要有root權限) 另外這種在線主機查詢的方法只適用於在同一個Subnet中才有效果(原因也很簡單，因為ARP packet只會在同一個Subnet中廣播，沒辦法透過Router傳遞到其他的Subnet，所以這種策略只適用於目標主機段與你處於同一個Subnet) 但如果你指定了 -sn 的情況下與目標主機段處於不同個 Subnet 的話，nmap 會自動將查詢策略轉為使用混合策略： ICMP echo requests, TCP ACK to port 80, TCP SYN to port 443, ICMP timestamp request. 例子： sudo nmap -PR -sn 10.10.210.1/24]]></summary></entry><entry><title type="html">Passive Reconnaissance (1)</title><link href="http://localhost:4000/demo/2025/04/30/Passive-Reconnaissance-1.html" rel="alternate" type="text/html" title="Passive Reconnaissance (1)" /><published>2025-04-30T21:00:55+08:00</published><updated>2025-04-30T21:00:55+08:00</updated><id>http://localhost:4000/demo/2025/04/30/Passive-Reconnaissance-1</id><content type="html" xml:base="http://localhost:4000/demo/2025/04/30/Passive-Reconnaissance-1.html"><![CDATA[<html>
+<body>
+<div style="margin-top: 10px">
+
+      <h3 id="intro">Intro</h3>
+      <p>本篇來介紹幾個常用的Passive Reconnaissance工具來供大家參考，並提供相關的背景知識和基本使用方法，其中包含：</p>
+      <ul>
+        <li>whois</li>
+        <li>nslookup</li>
+        <li>dig</li>
+        <li>DNSDumpster</li>
+        <li>Shodan<br />
+而介紹工具前必須先瞭解此工具的用處、背景再來才是工具的基本用法，這樣才能理解透徹並善加使用</li>
+      </ul>
+
+      <h3 id="whois">whois</h3>
+      <ul>
+        <li><strong>用處</strong>： 查看此domain註冊時提供的信息，注意，由於安全意識抬頭且此工具被大家熟知，故而可以在此紀錄上做手腳，因此用此工具獲得的資訊必須妥善使用</li>
+        <li><strong>背景知識</strong>： 每一位開發者/公司在向Registrar註冊網域名稱時都會提供相應資訊，如公司註冊人、電話、郵箱等。Registrar再向Whois Server提供資料已作後續查詢或其他用途。而我們使用的whois工具中查詢的便是多個Whois server組成的集合</li>
+        <li><strong>基本使用</strong>：
+          <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>whois google.com
+</code></pre></div>          </div>
+        </li>
+      </ul>
+
+      <h3 id="nslookup">nslookup</h3>
+      <ul>
+        <li><strong>用處</strong>： 它可以幫助你確認一個網域名稱對應的 IP 地址、DNS 記錄的內容、以及測試 DNS 是否正確運作</li>
+        <li><strong>背景知識</strong>： 首先要先瞭解DNS是什麼?</li>
+      </ul>
+
+      <p><em>The Domain Name System (DNS) is a hierarchical and distributed name service that provides a naming system for computers, services, and other resources on the Internet or other Internet Protocol (IP) networks</em></p>
+
+      <p>簡單來說，DNS就是幫你把google.com轉換成ipv4或ipv6的地址。DNS Server就是儲存這個對照關係的數據庫，被每個Registrar保存並用於在有人使用網域名稱是給予對照的地址。值得一提的是，這個數據庫中存著的數據對照關係不單單只是前面提到的網域名稱對映ipv4/ipv6地址，以下是多個 <em>DNS Record</em>：<br />
+    - A: 網域名稱-&gt;IPv4<br />
+    - AAAA: 網域名稱-&gt;IPv6<br />
+    - CNAME: 網域別名-&gt;網域名稱<br />
+    - MX: 網域名稱-&gt;Mail Server<br />
+    - TXT: 儲存任意資料<br />
+    - SOA: 此域名設置</p>
+
+      <ul>
+        <li><strong>基本使用</strong>：<br />
+<strong><em>nslookup OPTIONS DOMAIN_NAME SERVER</em></strong></li>
+      </ul>
+
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>OPTIONS(要查詢的DNS Record類別)
+  -type=A
+DOMAIN_NAME(要查詢的域名)
+  google.com
+SERVER(可選，要指定查詢的DNS Server)
+  1.1.1.1
+
+nslookup -type=A google.com 1.1.1.1
+nslookup -type=MX google.com
+</code></pre></div>      </div>
+
+      <h3 id="digdomain-information-groper">dig(Domain Information Groper)</h3>
+      <ul>
+        <li><strong>用處</strong>： 與nslookup使用場景基本類似，但提供更多資訊</li>
+        <li><strong>基本使用</strong>：<br />
+<strong><em>dig @SERVER DOMAIN_NAME TYPE</em></strong></li>
+      </ul>
+
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SERVER(可選，要指定查詢的DNS Server)
+  1.1.1.1
+DOMAIN_NAME(要查詢的域名)
+  google.com
+TYPE(要查詢的DNS Record類別)
+  TXT
+
+dig google.com TXT
+dig @1.1.1.1 google.com MX
+</code></pre></div>      </div>
+
+      <h3 id="dnsdumpster">DNSDumpster</h3>
+      <ul>
+        <li><strong>用處</strong>： 是一個網站工具，可以通過瀏覽器使用非常方便。他與 <code class="language-plaintext highlighter-rouge">nslookup</code> 和 <code class="language-plaintext highlighter-rouge">dig</code> 工具不同的地方是， <code class="language-plaintext highlighter-rouge">DNSDumpster</code> 可以查詢到子域名，例如你查詢 <code class="language-plaintext highlighter-rouge">google.com</code> 可以搜尋到 <code class="language-plaintext highlighter-rouge">admin.google.com</code> 等等子域名，對於要搜集有關網域資料的人來說非常有用</li>
+        <li><strong>基本使用</strong>：
+直接打開瀏覽器搜尋 <a href="https://dnsdumpster.com/">DNSDumpster</a> 或直接點擊連結即可。搜尋容易功能強大，就是免費版對結果數量有限制，沒辦法查找到最完全的資訊(但也非常夠用)</li>
+      </ul>
+
+      <h3 id="shodan">Shodan</h3>
+      <ul>
+        <li><strong>用處</strong>： 是一個更加強大且全面的網站工具，它注重的是所有與網路連接的設備檢測（包含IoT等），故而非常強大。也可用在DNS搜索、OS/Server版本型號檢測等。<code class="language-plaintext highlighter-rouge">Shodan</code> 比較像是查看統計數據的工具，以及該連接設備的詳細資料，而並非只著重在DNS Query</li>
+        <li><strong>基本使用</strong>：
+直接打開瀏覽器搜尋 <a href="https://www.shodan.io/">Shodan</a> 或直接點擊連結即可。可以搜尋域名 <code class="language-plaintext highlighter-rouge">google.com</code>、OS版本 <code class="language-plaintext highlighter-rouge">Ubuntu</code>、Server版本 <code class="language-plaintext highlighter-rouge">Apache/2.4.18</code>等等，功能非常全面</li>
+      </ul>
+
+      <h2 id="section">學習資料</h2>
+      <ol>
+        <li>TryHackMe CompTIA Pentest+ / Information Gathering and Vulnerability Scanning
+Passive Reconnaissance</li>
+        <li><a href="https://dnsdumpster.com/">DNSDumpster</a></li>
+        <li><a href="https://www.shodan.io/">Shodan</a></li>
+      </ol>
+
+    </div>
+</body>
+</html>]]></content><author><name></name></author><category term="Demo" /><category term="Cybersecurity" /><summary type="html"><![CDATA[Intro 本篇來介紹幾個常用的Passive Reconnaissance工具來供大家參考，並提供相關的背景知識和基本使用方法，其中包含： whois nslookup dig DNSDumpster Shodan 而介紹工具前必須先瞭解此工具的用處、背景再來才是工具的基本用法，這樣才能理解透徹並善加使用]]></summary></entry><entry><title type="html">LeetCode 4.</title><link href="http://localhost:4000/demo/2024/06/28/LeetCode-4.html" rel="alternate" type="text/html" title="LeetCode 4." /><published>2024-06-28T15:56:00+08:00</published><updated>2024-06-28T15:56:00+08:00</updated><id>http://localhost:4000/demo/2024/06/28/LeetCode-4</id><content type="html" xml:base="http://localhost:4000/demo/2024/06/28/LeetCode-4.html"><![CDATA[<h1 id="question">Question</h1>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.
+
+The overall run time complexity should be O(log (m+n)).
+</code></pre></div></div>
+
+<h1 id="example">Example</h1>
+<ul>
+  <li><strong>Example 1:</strong>
+    <blockquote>
+      <p>Input: nums1 = [1,3], nums2 = [2]</p>
+
+      <p>Output: 2.0</p>
+    </blockquote>
+  </li>
+  <li><strong>Example 2:</strong>
+    <blockquote>
+      <p>Input: [1,2], nums2 = [3,4]</p>
+
+      <p>Output: 2.5</p>
+    </blockquote>
+  </li>
+</ul>
+
+<h1 id="complexity">Complexity</h1>
+<ul>
+  <li>
+    <p>Time complexity: <strong><em>O(log(m+n))</em></strong></p>
+  </li>
+  <li>
+    <p>Space complexity: <strong><em>O(1)</em></strong></p>
+  </li>
+</ul>
+
+<h1 id="code">Code</h1>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Solution</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">double</span> <span class="nf">findMedianSortedArrays</span><span class="o">(</span><span class="kt">int</span><span class="o">[]</span> <span class="n">nums1</span><span class="o">,</span> <span class="kt">int</span><span class="o">[]</span> <span class="n">nums2</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">left</span> <span class="o">=</span> <span class="mi">0</span><span class="o">,</span> <span class="n">right</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="kt">double</span> <span class="n">result</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">((</span><span class="n">nums1</span><span class="o">.</span><span class="na">length</span> <span class="o">+</span> <span class="n">nums2</span><span class="o">.</span><span class="na">length</span><span class="o">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kt">int</span> <span class="n">mid2</span> <span class="o">=</span> <span class="o">(</span><span class="n">nums1</span><span class="o">.</span><span class="na">length</span><span class="o">+</span><span class="n">nums2</span><span class="o">.</span><span class="na">length</span><span class="o">)/</span><span class="mi">2</span><span class="o">;</span>
+            <span class="kt">int</span> <span class="n">mid1</span> <span class="o">=</span> <span class="n">mid2</span> <span class="o">-</span> <span class="mi">1</span><span class="o">;</span>
+            <span class="kt">boolean</span> <span class="n">isMid1</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span> <span class="n">isMid2</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+            <span class="k">while</span> <span class="o">(</span><span class="n">left</span> <span class="o">&lt;</span> <span class="n">nums1</span><span class="o">.</span><span class="na">length</span> <span class="o">&amp;&amp;</span> <span class="n">right</span> <span class="o">&lt;</span> <span class="n">nums2</span><span class="o">.</span><span class="na">length</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span> <span class="o">==</span> <span class="n">mid1</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">result</span> <span class="o">+=</span> <span class="n">nums1</span><span class="o">[</span><span class="n">left</span><span class="o">]</span> <span class="o">&lt;=</span> <span class="n">nums2</span><span class="o">[</span><span class="n">right</span><span class="o">]</span> <span class="o">?</span> <span class="n">nums1</span><span class="o">[</span><span class="n">left</span><span class="o">]</span> <span class="o">:</span> <span class="n">nums2</span><span class="o">[</span><span class="n">right</span><span class="o">];</span>
+                    <span class="n">isMid1</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+                <span class="o">}</span><span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span> <span class="o">==</span> <span class="n">mid2</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">result</span> <span class="o">+=</span> <span class="n">nums1</span><span class="o">[</span><span class="n">left</span><span class="o">]</span> <span class="o">&lt;=</span> <span class="n">nums2</span><span class="o">[</span><span class="n">right</span><span class="o">]</span> <span class="o">?</span> <span class="n">nums1</span><span class="o">[</span><span class="n">left</span><span class="o">]</span> <span class="o">:</span> <span class="n">nums2</span><span class="o">[</span><span class="n">right</span><span class="o">];</span>
+                    <span class="n">isMid2</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+                    <span class="k">break</span><span class="o">;</span>
+                <span class="o">}</span>
+
+                <span class="k">if</span> <span class="o">(</span><span class="n">nums1</span><span class="o">[</span><span class="n">left</span><span class="o">]</span> <span class="o">&lt;=</span> <span class="n">nums2</span><span class="o">[</span><span class="n">right</span><span class="o">])</span> <span class="o">{</span>
+                    <span class="n">left</span><span class="o">++;</span>
+                <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+                    <span class="n">right</span><span class="o">++;</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+
+            <span class="k">if</span> <span class="o">(!</span><span class="n">isMid1</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">isMid2</span><span class="o">)</span> <span class="o">{</span>
+                <span class="kt">int</span> <span class="n">pos1</span> <span class="o">=</span> <span class="n">left</span> <span class="o">==</span> <span class="n">nums1</span><span class="o">.</span><span class="na">length</span> <span class="o">?</span> <span class="n">mid1</span> <span class="o">-</span> <span class="n">left</span> <span class="o">:</span> <span class="n">mid1</span> <span class="o">-</span> <span class="n">right</span><span class="o">;</span>
+                <span class="kt">int</span> <span class="n">pos2</span> <span class="o">=</span> <span class="n">pos1</span> <span class="o">+</span> <span class="mi">1</span><span class="o">;</span>
+                <span class="n">result</span> <span class="o">+=</span> <span class="n">left</span> <span class="o">==</span> <span class="n">nums1</span><span class="o">.</span><span class="na">length</span> <span class="o">?</span> <span class="n">nums2</span><span class="o">[</span><span class="n">pos1</span><span class="o">]</span> <span class="o">:</span> <span class="n">nums1</span><span class="o">[</span><span class="n">pos1</span><span class="o">];</span>
+                <span class="n">result</span> <span class="o">+=</span> <span class="n">left</span> <span class="o">==</span> <span class="n">nums1</span><span class="o">.</span><span class="na">length</span> <span class="o">?</span> <span class="n">nums2</span><span class="o">[</span><span class="n">pos2</span><span class="o">]</span> <span class="o">:</span> <span class="n">nums1</span><span class="o">[</span><span class="n">pos2</span><span class="o">];</span>
+            <span class="o">}</span><span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">isMid1</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">isMid2</span><span class="o">)</span> <span class="o">{</span>
+                <span class="kt">int</span> <span class="n">pos2</span> <span class="o">=</span> <span class="n">left</span> <span class="o">==</span> <span class="n">nums1</span><span class="o">.</span><span class="na">length</span> <span class="o">?</span> <span class="n">mid2</span> <span class="o">-</span> <span class="n">left</span> <span class="o">:</span> <span class="n">mid2</span> <span class="o">-</span> <span class="n">right</span><span class="o">;</span>
+                <span class="n">result</span> <span class="o">+=</span> <span class="n">left</span> <span class="o">==</span> <span class="n">nums1</span><span class="o">.</span><span class="na">length</span> <span class="o">?</span> <span class="n">nums2</span><span class="o">[</span><span class="n">pos2</span><span class="o">]</span> <span class="o">:</span> <span class="n">nums1</span><span class="o">[</span><span class="n">pos2</span><span class="o">];</span>
+            <span class="o">}</span>
+            <span class="k">return</span> <span class="n">result</span> <span class="o">/=</span> <span class="mi">2</span><span class="o">;</span>
+        <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+            <span class="kt">int</span> <span class="n">mid</span> <span class="o">=</span> <span class="o">(</span><span class="n">nums1</span><span class="o">.</span><span class="na">length</span> <span class="o">+</span> <span class="n">nums2</span><span class="o">.</span><span class="na">length</span><span class="o">)</span> <span class="o">/</span> <span class="mi">2</span><span class="o">;</span>
+            <span class="k">while</span> <span class="o">(</span><span class="n">left</span> <span class="o">&lt;</span> <span class="n">nums1</span><span class="o">.</span><span class="na">length</span> <span class="o">&amp;&amp;</span> <span class="n">right</span> <span class="o">&lt;</span> <span class="n">nums2</span><span class="o">.</span><span class="na">length</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span> <span class="o">==</span> <span class="n">mid</span><span class="o">)</span> <span class="k">return</span> <span class="n">nums1</span><span class="o">[</span><span class="n">left</span><span class="o">]</span> <span class="o">&lt;=</span> <span class="n">nums2</span><span class="o">[</span><span class="n">right</span><span class="o">]</span> <span class="o">?</span> <span class="n">nums1</span><span class="o">[</span><span class="n">left</span><span class="o">]</span> <span class="o">:</span> <span class="n">nums2</span><span class="o">[</span><span class="n">right</span><span class="o">];</span>
+
+                <span class="k">if</span> <span class="o">(</span><span class="n">nums1</span><span class="o">[</span><span class="n">left</span><span class="o">]</span> <span class="o">&lt;=</span> <span class="n">nums2</span><span class="o">[</span><span class="n">right</span><span class="o">])</span> <span class="o">{</span>
+                    <span class="n">left</span><span class="o">++;</span>
+                <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+                    <span class="n">right</span><span class="o">++;</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+            <span class="kt">int</span> <span class="n">pos</span> <span class="o">=</span> <span class="n">left</span> <span class="o">==</span> <span class="n">nums1</span><span class="o">.</span><span class="na">length</span> <span class="o">?</span> <span class="n">mid</span> <span class="o">-</span> <span class="n">left</span> <span class="o">:</span> <span class="n">mid</span> <span class="o">-</span> <span class="n">right</span><span class="o">;</span>
+            <span class="k">return</span> <span class="n">left</span> <span class="o">==</span> <span class="n">nums1</span><span class="o">.</span><span class="na">length</span> <span class="o">?</span> <span class="n">nums2</span><span class="o">[</span><span class="n">pos</span><span class="o">]:</span> <span class="n">nums1</span><span class="o">[</span><span class="n">pos</span><span class="o">];</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Check out the description of this problem at <a href="https://leetcode.com/problems/median-of-two-sorted-arrays/description/">LC 4</a>.</p>]]></content><author><name></name></author><category term="Demo" /><category term="LeetCode" /><summary type="html"><![CDATA[Question ``` Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.]]></summary></entry><entry><title type="html">LeetCode 474.</title><link href="http://localhost:4000/demo/2024/06/28/LeetCode-474.html" rel="alternate" type="text/html" title="LeetCode 474." /><published>2024-06-28T15:23:00+08:00</published><updated>2024-06-28T15:23:00+08:00</updated><id>http://localhost:4000/demo/2024/06/28/LeetCode-474</id><content type="html" xml:base="http://localhost:4000/demo/2024/06/28/LeetCode-474.html"><![CDATA[<h1 id="question">Question</h1>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>You are given an array of binary strings strs and two integers m and n.
+
+Return the size of the largest subset of strs such that there are at most m 0's and n 1's in the subset.
+
+A set x is a subset of a set y if all elements of x are also elements of y.
+</code></pre></div></div>
+
+<h1 id="example">Example</h1>
+<ul>
+  <li><strong>Example 1:</strong>
+    <blockquote>
+      <p>Input: strs = [“10”,”0001”,”111001”,”1”,”0”], m = 5, n = 3</p>
+
+      <p>Output: 4</p>
+
+      <p>Explanation: The largest subset with at most 5 0’s and 3 1’s is {“10”, “0001”, “1”, “0”}, so the answer is 4.
+Other valid but smaller subsets include {“0001”, “1”} and {“10”, “1”, “0”}.
+{“111001”} is an invalid subset because it contains 4 1’s, greater than the maximum of 3.</p>
+    </blockquote>
+  </li>
+  <li><strong>Example 2:</strong>
+    <blockquote>
+      <p>Input: strs = [“10”,”0”,”1”], m = 1, n = 1</p>
+
+      <p>Output: 2</p>
+
+      <p>Explanation: The largest subset is {“0”, “1”}, so the answer is 2.</p>
+    </blockquote>
+  </li>
+</ul>
+
+<h1 id="complexity">Complexity</h1>
+<ul>
+  <li>
+    <p>Time complexity: <strong><em>O(mnlen(strs))</em></strong></p>
+  </li>
+  <li>
+    <p>Space complexity: <strong><em>O(mnlen(strs))</em></strong></p>
+  </li>
+</ul>
+
+<h1 id="code">Code</h1>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Solution</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">findMaxForm</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">strs</span><span class="o">,</span> <span class="kt">int</span> <span class="n">m</span><span class="o">,</span> <span class="kt">int</span> <span class="n">n</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span><span class="o">[][][]</span> <span class="n">dp</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[</span><span class="n">strs</span><span class="o">.</span><span class="na">length</span> <span class="o">+</span> <span class="mi">1</span><span class="o">][</span><span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="o">][</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="o">];</span>
+        <span class="kt">int</span> <span class="n">oneCount</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">zeroCount</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">strs</span><span class="o">.</span><span class="na">length</span> <span class="o">+</span> <span class="mi">1</span><span class="o">;</span> <span class="o">++</span><span class="n">i</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">String</span> <span class="n">str</span> <span class="o">=</span> <span class="n">strs</span><span class="o">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="o">];</span>
+            <span class="kt">int</span><span class="o">[]</span> <span class="n">count</span> <span class="o">=</span> <span class="n">count</span><span class="o">(</span><span class="n">str</span><span class="o">);</span>
+            <span class="n">zeroCount</span> <span class="o">+=</span> <span class="n">count</span><span class="o">[</span><span class="mi">0</span><span class="o">];</span>
+            <span class="n">oneCount</span> <span class="o">+=</span> <span class="n">count</span><span class="o">[</span><span class="mi">1</span><span class="o">];</span>
+            <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="o">;</span> <span class="o">++</span><span class="n">j</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="o">;</span> <span class="o">++</span><span class="n">k</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="k">if</span> <span class="o">(</span><span class="n">j</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="n">dp</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">j</span><span class="o">][</span><span class="n">k</span><span class="o">]</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+                    <span class="o">}</span>
+                    <span class="k">else</span> <span class="nf">if</span> <span class="o">(</span><span class="n">zeroCount</span> <span class="o">&lt;=</span> <span class="n">j</span> <span class="o">&amp;&amp;</span> <span class="n">oneCount</span> <span class="o">&lt;=</span> <span class="n">k</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="n">dp</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">j</span><span class="o">][</span><span class="n">k</span><span class="o">]</span> <span class="o">=</span> <span class="n">i</span><span class="o">;</span>
+                    <span class="o">}</span>
+                    <span class="k">else</span> <span class="nf">if</span> <span class="o">(</span><span class="n">j</span> <span class="o">&gt;=</span> <span class="n">count</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">&amp;&amp;</span> <span class="n">k</span> <span class="o">&gt;=</span> <span class="n">count</span><span class="o">[</span><span class="mi">1</span><span class="o">]){</span>
+                        <span class="n">dp</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">j</span><span class="o">][</span><span class="n">k</span><span class="o">]</span> <span class="o">=</span> 
+                            <span class="nc">Math</span><span class="o">.</span><span class="na">max</span><span class="o">(</span><span class="n">dp</span><span class="o">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="o">][</span><span class="n">j</span><span class="o">][</span><span class="n">k</span><span class="o">],</span> <span class="n">dp</span><span class="o">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="o">][</span><span class="n">j</span> <span class="o">-</span> <span class="n">count</span><span class="o">[</span><span class="mi">0</span><span class="o">]][</span><span class="n">k</span> <span class="o">-</span> <span class="n">count</span><span class="o">[</span><span class="mi">1</span><span class="o">]]</span> <span class="o">+</span> <span class="mi">1</span><span class="o">);</span>
+                    <span class="o">}</span>
+                    <span class="k">else</span> <span class="o">{</span>
+                        <span class="n">dp</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">j</span><span class="o">][</span><span class="n">k</span><span class="o">]</span> <span class="o">=</span> <span class="n">dp</span><span class="o">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="o">][</span><span class="n">j</span><span class="o">][</span><span class="n">k</span><span class="o">];</span>
+                    <span class="o">}</span>
+                <span class="o">}</span> 
+            <span class="o">}</span>   
+        <span class="o">}</span>
+        
+        <span class="k">return</span> <span class="n">dp</span><span class="o">[</span><span class="n">strs</span><span class="o">.</span><span class="na">length</span><span class="o">][</span><span class="n">m</span><span class="o">][</span><span class="n">n</span><span class="o">];</span>
+    <span class="o">}</span>
+    
+    <span class="kd">public</span> <span class="kt">int</span><span class="o">[]</span> <span class="nf">count</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span><span class="o">[]</span> <span class="n">res</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[</span><span class="mi">2</span><span class="o">];</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">char</span> <span class="n">c</span> <span class="o">:</span> <span class="n">str</span><span class="o">.</span><span class="na">toCharArray</span><span class="o">())</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">c</span> <span class="o">==</span> <span class="sc">'0'</span><span class="o">)</span> <span class="n">res</span><span class="o">[</span><span class="mi">0</span><span class="o">]++;</span>
+            <span class="k">else</span> <span class="n">res</span><span class="o">[</span><span class="mi">1</span><span class="o">]++;</span>
+        <span class="o">}</span>
+        
+        <span class="k">return</span> <span class="n">res</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Check out the description of this problem at <a href="https://leetcode.com/problems/ones-and-zeroes/description/">LC 474</a>.</p>]]></content><author><name></name></author><category term="Demo" /><category term="LeetCode" /><summary type="html"><![CDATA[Question ``` You are given an array of binary strings strs and two integers m and n.]]></summary></entry><entry><title type="html">LeetCode 467.</title><link href="http://localhost:4000/demo/2024/06/28/LeetCode-467.html" rel="alternate" type="text/html" title="LeetCode 467." /><published>2024-06-28T11:44:00+08:00</published><updated>2024-06-28T11:44:00+08:00</updated><id>http://localhost:4000/demo/2024/06/28/LeetCode-467</id><content type="html" xml:base="http://localhost:4000/demo/2024/06/28/LeetCode-467.html"><![CDATA[<h1 id="question">Question</h1>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>We define the string base to be the infinite wraparound string of "abcdefghijklmnopqrstuvwxyz", so base will look like this:
+
+"...zabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcd....".
+Given a string s, return the number of unique non-empty substrings of s are present in base.
+</code></pre></div></div>
+
+<h1 id="complexity">Complexity</h1>
+<ul>
+  <li>
+    <p>Time complexity: <strong><em>O(n^2)</em></strong></p>
+  </li>
+  <li>
+    <p>Space complexity: <strong><em>O(n^2)</em></strong></p>
+  </li>
+</ul>
+
+<h1 id="code-1tle">Code 1(TLE)</h1>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Solution</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">findSubstringInWraproundString</span><span class="o">(</span><span class="nc">String</span> <span class="n">s</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="na">length</span><span class="o">();</span>
+        <span class="kt">boolean</span><span class="o">[][]</span> <span class="n">isqualified</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">boolean</span><span class="o">[</span><span class="n">n</span><span class="o">][</span><span class="n">n</span><span class="o">];</span>
+        <span class="nc">Set</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">uni</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashSet</span><span class="o">&lt;&gt;();</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="n">isqualified</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+            <span class="k">if</span> <span class="o">(!</span><span class="n">uni</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="nc">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">s</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span><span class="o">))))</span> <span class="o">{</span>
+                <span class="n">uni</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="nc">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">s</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span><span class="o">)));</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">len</span><span class="o">=</span><span class="mi">2</span><span class="o">;</span> <span class="n">len</span><span class="o">&lt;=</span><span class="n">n</span><span class="o">;</span> <span class="n">len</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;=</span><span class="n">n</span><span class="o">-</span><span class="n">len</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                <span class="nc">String</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="n">i</span><span class="o">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">len</span><span class="o">);</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">isqualified</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">i</span><span class="o">+</span><span class="n">len</span><span class="o">-</span><span class="mi">2</span><span class="o">]</span> <span class="o">&amp;&amp;</span> 
+                    <span class="n">isconsecutive</span><span class="o">(</span><span class="n">s</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">len</span> <span class="o">-</span> <span class="mi">2</span><span class="o">),</span> <span class="n">s</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">len</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)))</span> <span class="o">{</span>
+                    <span class="n">isqualified</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">i</span><span class="o">+</span><span class="n">len</span><span class="o">-</span><span class="mi">1</span><span class="o">]</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+                    <span class="n">uni</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">temp</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+
+        <span class="k">return</span> <span class="n">uni</span><span class="o">.</span><span class="na">size</span><span class="o">();</span>
+
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isconsecutive</span><span class="o">(</span><span class="kt">char</span> <span class="n">former</span><span class="o">,</span> <span class="kt">char</span> <span class="n">later</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">later</span> <span class="o">==</span> <span class="sc">'a'</span> <span class="o">&amp;&amp;</span> <span class="n">former</span> <span class="o">==</span> <span class="sc">'z'</span><span class="o">)</span> <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+        <span class="k">else</span> <span class="k">return</span> <span class="n">later</span> <span class="o">-</span> <span class="n">former</span> <span class="o">==</span> <span class="mi">1</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h1 id="complexity-1">Complexity</h1>
+<ul>
+  <li>
+    <p>Time complexity: <strong><em>O(n)</em></strong></p>
+  </li>
+  <li>
+    <p>Space complexity: <strong><em>O(n)</em></strong></p>
+  </li>
+</ul>
+
+<h1 id="code-2">Code 2</h1>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Solution</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">findSubstringInWraproundString</span><span class="o">(</span><span class="nc">String</span> <span class="n">s</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">dp</span><span class="o">[]</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[</span><span class="n">s</span><span class="o">.</span><span class="na">length</span><span class="o">()];</span>
+        <span class="n">dp</span><span class="o">[</span><span class="n">s</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">-</span> <span class="mi">1</span><span class="o">]</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">maxArray</span><span class="o">[]</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[</span><span class="mi">26</span><span class="o">];</span>
+        <span class="n">maxArray</span><span class="o">[</span><span class="n">s</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">s</span><span class="o">.</span><span class="na">length</span><span class="o">()-</span><span class="mi">1</span><span class="o">)</span> <span class="o">-</span> <span class="sc">'a'</span><span class="o">]</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+        <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">;</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">;</span> <span class="n">i</span><span class="o">--){</span>
+            <span class="k">if</span><span class="o">(</span><span class="n">s</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">==</span> <span class="n">s</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">||</span> <span class="n">s</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">==</span> <span class="sc">'z'</span> 
+                <span class="o">&amp;&amp;</span> <span class="n">s</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">)</span> <span class="o">==</span> <span class="sc">'a'</span><span class="o">){</span>
+                <span class="n">dp</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">dp</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">];</span>
+            <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+                <span class="n">dp</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+            <span class="o">}</span>
+            <span class="kt">int</span> <span class="n">key</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">-</span> <span class="sc">'a'</span><span class="o">;</span>
+            <span class="n">maxArray</span><span class="o">[</span><span class="n">key</span><span class="o">]</span> <span class="o">=</span> <span class="nc">Math</span><span class="o">.</span><span class="na">max</span><span class="o">(</span><span class="n">maxArray</span><span class="o">[</span><span class="n">key</span><span class="o">],</span><span class="n">dp</span><span class="o">[</span><span class="n">i</span><span class="o">]);</span>
+        <span class="o">}</span>
+        <span class="kt">int</span> <span class="n">res</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span><span class="n">i</span><span class="o">&lt;</span><span class="mi">26</span><span class="o">;</span><span class="n">i</span><span class="o">++){</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">res</span> <span class="o">+</span> <span class="n">maxArray</span><span class="o">[</span><span class="n">i</span><span class="o">];</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">res</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Check out the description of this problem at <a href="https://leetcode.com/problems/unique-substrings-in-wraparound-string/description/">LC 467</a>.</p>]]></content><author><name></name></author><category term="Demo" /><category term="LeetCode" /><summary type="html"><![CDATA[Question ``` We define the string base to be the infinite wraparound string of “abcdefghijklmnopqrstuvwxyz”, so base will look like this:]]></summary></entry><entry><title type="html">LeetCode 464.</title><link href="http://localhost:4000/demo/2024/06/28/LeetCode-464.html" rel="alternate" type="text/html" title="LeetCode 464." /><published>2024-06-28T10:44:00+08:00</published><updated>2024-06-28T10:44:00+08:00</updated><id>http://localhost:4000/demo/2024/06/28/LeetCode-464</id><content type="html" xml:base="http://localhost:4000/demo/2024/06/28/LeetCode-464.html"><![CDATA[<h1 id="complexity">Complexity</h1>
+<ul>
+  <li>
+    <p>Time complexity: <strong><em>O(2^n)</em></strong></p>
+  </li>
+  <li>
+    <p>Space complexity: <strong><em>O(2^n)</em></strong></p>
+  </li>
+</ul>
+
+<h1 id="code">Code</h1>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Solution</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">canIWin</span><span class="o">(</span><span class="kt">int</span> <span class="n">maxChoosableInteger</span><span class="o">,</span> <span class="kt">int</span> <span class="n">desiredTotal</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// First of all, we check if it's even possible for our players to reach the disiredTotal</span>
+        <span class="kt">int</span> <span class="n">totalPossibleSum</span> <span class="o">=</span> <span class="n">maxChoosableInteger</span> <span class="o">*</span> <span class="o">(</span><span class="n">maxChoosableInteger</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="o">/</span> <span class="mi">2</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">totalPossibleSum</span> <span class="o">&lt;</span> <span class="n">desiredTotal</span><span class="o">)</span> <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+
+        <span class="c1">// Declare a map for memoization, where the key is the bitmask of our current state (0 - number is available for use, 1 - number was taken)</span>
+        <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">,</span> <span class="nc">Boolean</span><span class="o">&gt;</span> <span class="n">memo</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;&gt;();</span>
+        <span class="k">return</span> <span class="nf">dp</span><span class="o">(</span><span class="n">desiredTotal</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">maxChoosableInteger</span><span class="o">,</span> <span class="n">memo</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kt">boolean</span> <span class="nf">dp</span><span class="o">(</span><span class="kt">int</span> <span class="n">goal</span><span class="o">,</span> <span class="kt">int</span> <span class="n">state</span><span class="o">,</span> <span class="kt">int</span> <span class="n">maxChoosable</span><span class="o">,</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">,</span> <span class="nc">Boolean</span><span class="o">&gt;</span> <span class="n">memo</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// If we have already calculated a result for this state, then return it</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">memo</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="n">state</span><span class="o">))</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">memo</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">state</span><span class="o">);</span>
+        <span class="o">}</span>
+        
+        <span class="c1">// Declare the result variable</span>
+        <span class="kt">boolean</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+        
+        <span class="c1">// Iterate over all possible integers from 1 to maxChoosable</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">maxChoosable</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            
+            <span class="c1">// Then we have to check our state (bitmask) to see if our current integer (i) was used or not</span>
+            <span class="kt">boolean</span> <span class="n">isAvailable</span> <span class="o">=</span> <span class="o">(</span><span class="n">state</span> <span class="o">&gt;&gt;</span> <span class="n">i</span><span class="o">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="o">;</span>
+            
+            <span class="c1">// If it was used, then we keep looking for an unused integer            </span>
+            <span class="k">if</span> <span class="o">(!</span><span class="n">isAvailable</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">continue</span><span class="o">;</span>
+            <span class="o">}</span>
+            
+            <span class="c1">// We check our win conditions. If we reach the goal, our result is true, and we can jump to our last lines.</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">goal</span> <span class="o">-</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+                <span class="k">break</span><span class="o">;</span>
+            <span class="o">}</span>
+
+            <span class="c1">// We need to create a new state (bitmask) to mark our current integer as used</span>
+            <span class="kt">int</span> <span class="n">currMask</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">i</span><span class="o">;</span>
+            <span class="kt">int</span> <span class="n">newState</span> <span class="o">=</span> <span class="n">state</span> <span class="o">|</span> <span class="n">currMask</span><span class="o">;</span>
+
+            <span class="c1">// And we pass the turn to our rival</span>
+            <span class="kt">boolean</span> <span class="n">rivalResult</span> <span class="o">=</span> <span class="n">dp</span><span class="o">(</span><span class="n">goal</span> <span class="o">-</span> <span class="n">i</span><span class="o">,</span> <span class="n">newState</span><span class="o">,</span> <span class="n">maxChoosable</span><span class="o">,</span> <span class="n">memo</span><span class="o">);</span>
+            
+            <span class="c1">// In case our rival doesn't win, it means that it's possible for us to beat the rival</span>
+            <span class="k">if</span> <span class="o">(!</span><span class="n">rivalResult</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+                <span class="k">break</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+
+        <span class="c1">// We save our result for the current state and return it</span>
+        <span class="n">memo</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">state</span><span class="o">,</span> <span class="n">result</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Check out the description of this problem at <a href="https://leetcode.com/problems/can-i-win/description/">LC 464</a>.</p>]]></content><author><name></name></author><category term="Demo" /><category term="LeetCode" /><summary type="html"><![CDATA[Complexity Time complexity: O(2^n)]]></summary></entry><entry><title type="html">LeetCode 2285.</title><link href="http://localhost:4000/demo/2024/06/28/LeetCode-2285.html" rel="alternate" type="text/html" title="LeetCode 2285." /><published>2024-06-28T08:44:00+08:00</published><updated>2024-06-28T08:44:00+08:00</updated><id>http://localhost:4000/demo/2024/06/28/LeetCode-2285</id><content type="html" xml:base="http://localhost:4000/demo/2024/06/28/LeetCode-2285.html"><![CDATA[<h1 id="complexity">Complexity</h1>
+<ul>
+  <li>
+    <p>Time complexity: <strong><em>O(len(roads))</em></strong></p>
+  </li>
+  <li>
+    <p>Space complexity: <strong><em>O(n)</em></strong></p>
+  </li>
+</ul>
+
+<h1 id="code">Code</h1>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Solution</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">long</span> <span class="nf">maximumImportance</span><span class="o">(</span><span class="kt">int</span> <span class="n">n</span><span class="o">,</span> <span class="kt">int</span><span class="o">[][]</span> <span class="n">roads</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span><span class="o">[]</span> <span class="n">times</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[</span><span class="n">n</span><span class="o">];</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span><span class="o">[]</span> <span class="nl">r:</span> <span class="n">roads</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">times</span><span class="o">[</span><span class="n">r</span><span class="o">[</span><span class="mi">0</span><span class="o">]]++;</span>
+            <span class="n">times</span><span class="o">[</span><span class="n">r</span><span class="o">[</span><span class="mi">1</span><span class="o">]]++;</span>
+        <span class="o">}</span>
+
+        <span class="kt">int</span><span class="o">[]</span> <span class="n">time</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[</span><span class="n">roads</span><span class="o">.</span><span class="na">length</span> <span class="o">+</span> <span class="mi">1</span><span class="o">];</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="nl">t:</span> <span class="n">times</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">time</span><span class="o">[</span><span class="n">t</span><span class="o">]++;</span>
+        <span class="o">}</span>
+
+        <span class="kt">int</span> <span class="n">pointer</span> <span class="o">=</span> <span class="n">n</span><span class="o">;</span>
+        <span class="kt">long</span> <span class="n">result</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="kt">boolean</span> <span class="n">flag</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="n">roads</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> <span class="n">i</span><span class="o">&gt;=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">--)</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">time</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">result</span> <span class="o">+=</span> <span class="o">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pointer</span> <span class="o">-</span> <span class="n">time</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="o">*</span> <span class="o">(</span><span class="kt">long</span><span class="o">)</span> <span class="n">time</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">*</span> <span class="o">(</span><span class="kt">long</span><span class="o">)</span> <span class="n">i</span> <span class="o">/</span> <span class="mi">2</span><span class="o">;</span>
+                <span class="n">pointer</span> <span class="o">-=</span> <span class="n">time</span><span class="o">[</span><span class="n">i</span><span class="o">];</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+
+        <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Check out the description of this problem at <a href="https://leetcode.com/problems/maximum-total-importance-of-roads/description">LC 2285</a>.</p>]]></content><author><name></name></author><category term="Demo" /><category term="LeetCode" /><summary type="html"><![CDATA[Complexity Time complexity: O(len(roads))]]></summary></entry><entry><title type="html">LeetCode 416.</title><link href="http://localhost:4000/demo/2024/06/27/LeetCode-416.html" rel="alternate" type="text/html" title="LeetCode 416." /><published>2024-06-27T16:44:00+08:00</published><updated>2024-06-27T16:44:00+08:00</updated><id>http://localhost:4000/demo/2024/06/27/LeetCode-416</id><content type="html" xml:base="http://localhost:4000/demo/2024/06/27/LeetCode-416.html"><![CDATA[<h1 id="complexity">Complexity</h1>
+<ul>
+  <li>
+    <p>Time complexity: <strong><em>O(n^2)</em></strong></p>
+  </li>
+  <li>
+    <p>Space complexity: <strong><em>O(n)</em></strong></p>
+  </li>
+</ul>
+
+<h1 id="code">Code</h1>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Solution</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">canPartition</span><span class="o">(</span><span class="kt">int</span><span class="o">[]</span> <span class="n">nums</span><span class="o">)</span> <span class="o">{</span>
+        
+        <span class="kt">int</span> <span class="n">half</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="nl">n:</span> <span class="n">nums</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">half</span> <span class="o">+=</span> <span class="n">n</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">half</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+
+        <span class="n">half</span> <span class="o">=</span> <span class="n">half</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="o">;</span>
+
+        <span class="kt">boolean</span><span class="o">[]</span> <span class="n">reach</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">boolean</span><span class="o">[</span><span class="n">half</span> <span class="o">+</span> <span class="mi">1</span><span class="o">];</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">tmp</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="nl">num:</span> <span class="n">nums</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;=</span><span class="n">half</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">reach</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">&amp;&amp;</span> <span class="n">i</span> <span class="o">+</span> <span class="n">num</span> <span class="o">&lt;=</span> <span class="n">half</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="k">if</span> <span class="o">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">num</span> <span class="o">==</span> <span class="n">half</span><span class="o">)</span> <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+                    <span class="n">tmp</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">i</span><span class="o">+</span><span class="n">num</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">num</span> <span class="o">&lt;</span> <span class="n">half</span><span class="o">)</span> <span class="n">reach</span><span class="o">[</span><span class="n">num</span><span class="o">]</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+            <span class="k">else</span> <span class="nf">if</span> <span class="o">(</span><span class="n">num</span> <span class="o">==</span> <span class="n">half</span><span class="o">)</span> <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+            <span class="k">else</span> <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+
+            <span class="k">for</span> <span class="o">(</span><span class="nc">Integer</span> <span class="nl">in:</span> <span class="n">tmp</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">reach</span><span class="o">[</span><span class="n">in</span><span class="o">]</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+            <span class="o">}</span>
+            <span class="n">tmp</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+        <span class="o">}</span>
+
+        <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Check out the description of this problem at <a href="https://leetcode.com/problems/partition-equal-subset-sum/description/">LC 416</a>.</p>]]></content><author><name></name></author><category term="Demo" /><category term="LeetCode" /><summary type="html"><![CDATA[Complexity Time complexity: O(n^2)]]></summary></entry><entry><title type="html">LeetCode 413.</title><link href="http://localhost:4000/demo/2024/06/27/LeetCode-413.html" rel="alternate" type="text/html" title="LeetCode 413." /><published>2024-06-27T15:58:00+08:00</published><updated>2024-06-27T15:58:00+08:00</updated><id>http://localhost:4000/demo/2024/06/27/LeetCode-413</id><content type="html" xml:base="http://localhost:4000/demo/2024/06/27/LeetCode-413.html"><![CDATA[<h1 id="complexity">Complexity</h1>
+<ul>
+  <li>
+    <p>Time complexity: <strong><em>O(n^2)</em></strong></p>
+  </li>
+  <li>
+    <p>Space complexity: <strong><em>O(n^2)</em></strong></p>
+  </li>
+</ul>
+
+<h1 id="code">Code</h1>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Solution</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">numberOfArithmeticSlices</span><span class="o">(</span><span class="kt">int</span><span class="o">[]</span> <span class="n">nums</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">nums</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
+        <span class="kt">boolean</span><span class="o">[][]</span> <span class="n">isAri</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">boolean</span><span class="o">[</span><span class="n">n</span><span class="o">][</span><span class="n">n</span><span class="o">];</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">boolean</span><span class="o">[]</span> <span class="nl">r:</span> <span class="n">isAri</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">Arrays</span><span class="o">.</span><span class="na">fill</span><span class="o">(</span><span class="n">r</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="kt">int</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;=</span><span class="n">n</span><span class="o">-</span><span class="mi">3</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">nums</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">]-</span><span class="n">nums</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">==</span> <span class="n">nums</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="o">]-</span><span class="n">nums</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">])</span> <span class="o">{</span>
+                <span class="n">isAri</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="o">]</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+                <span class="n">count</span><span class="o">++;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">len</span><span class="o">=</span><span class="mi">3</span><span class="o">;</span> <span class="n">len</span><span class="o">&lt;=</span><span class="n">n</span><span class="o">;</span> <span class="n">len</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;=</span><span class="n">n</span><span class="o">-</span><span class="n">len</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">isAri</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">][</span><span class="n">i</span><span class="o">+</span><span class="n">len</span><span class="o">-</span><span class="mi">1</span><span class="o">]</span> <span class="o">&amp;&amp;</span> 
+                    <span class="n">nums</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">]-</span><span class="n">nums</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">==</span> <span class="n">nums</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="o">]-</span><span class="n">nums</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">])</span> <span class="o">{</span>
+                    <span class="n">isAri</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">i</span><span class="o">+</span><span class="n">len</span><span class="o">-</span><span class="mi">1</span><span class="o">]</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+                    <span class="n">count</span><span class="o">++;</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+
+        <span class="k">return</span> <span class="n">count</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Check out the description of this problem at <a href="https://leetcode.com/problems/arithmetic-slices/description/">LC 413</a>.</p>]]></content><author><name></name></author><category term="Demo" /><category term="LeetCode" /><summary type="html"><![CDATA[Complexity Time complexity: O(n^2)]]></summary></entry><entry><title type="html">LeetCode 396.</title><link href="http://localhost:4000/demo/2024/06/27/LeetCode-396.html" rel="alternate" type="text/html" title="LeetCode 396." /><published>2024-06-27T11:58:00+08:00</published><updated>2024-06-27T11:58:00+08:00</updated><id>http://localhost:4000/demo/2024/06/27/LeetCode-396</id><content type="html" xml:base="http://localhost:4000/demo/2024/06/27/LeetCode-396.html"><![CDATA[<h1 id="complexity">Complexity</h1>
+<ul>
+  <li>
+    <p>Time complexity: <strong><em>O(n)</em></strong></p>
+  </li>
+  <li>
+    <p>Space complexity: <strong><em>O(1)</em></strong></p>
+  </li>
+</ul>
+
+<h1 id="code">Code</h1>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Solution</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">maxRotateFunction</span><span class="o">(</span><span class="kt">int</span><span class="o">[]</span> <span class="n">nums</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">prev</span> <span class="o">=</span> <span class="mi">0</span><span class="o">,</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">nums</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="n">prev</span> <span class="o">+=</span> <span class="n">nums</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">*</span> <span class="n">i</span><span class="o">;</span>
+            <span class="n">sum</span> <span class="o">+=</span> <span class="n">nums</span><span class="o">[</span><span class="n">i</span><span class="o">];</span>
+        <span class="o">}</span>
+
+        <span class="kt">int</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">MIN_VALUE</span><span class="o">;</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;=</span><span class="n">nums</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="n">prev</span> <span class="o">+=</span> <span class="o">(</span><span class="n">sum</span> <span class="o">-</span> <span class="n">nums</span><span class="o">[</span><span class="n">nums</span><span class="o">.</span><span class="na">length</span> <span class="o">-</span> <span class="n">i</span><span class="o">]</span> <span class="o">*</span> <span class="n">nums</span><span class="o">.</span><span class="na">length</span><span class="o">);</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="nc">Math</span><span class="o">.</span><span class="na">max</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">prev</span><span class="o">);</span>
+        <span class="o">}</span>
+
+        <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Check out the description of this problem at <a href="https://leetcode.com/problems/rotate-function/description/">LC 396</a>.</p>]]></content><author><name></name></author><category term="Demo" /><category term="LeetCode" /><summary type="html"><![CDATA[Complexity Time complexity: O(n)]]></summary></entry></feed>

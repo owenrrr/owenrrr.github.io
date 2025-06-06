@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<!--
+    Type on Strap jekyll theme v2.4.12
+    Theme free for personal and commercial use under the MIT license
+    https://github.com/sylhare/Type-on-Strap/blob/master/LICENSE
+-->
+<html lang="en">
+  
+  <head> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=0.5, maximum-scale=5"> <!-- Theme Mode--> <script> const darkBtn = "Dark"; const lightBtn = "Light"; const isAutoTheme = true; const preferredTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; if (isAutoTheme) { document.documentElement.setAttribute('data-theme', sessionStorage.getItem('theme') ?? preferredTheme); } else { document.documentElement.setAttribute('data-theme', "auto"); } </script> <!-- Main JS (navbar.js, katex_init.js and masonry_init.js)--> <script defer src="/assets/js/main.min.js"></script> <!-- CSS --> <link rel="stylesheet" href="/assets/css/main.css"> <!--Favicon--> <link rel="shortcut icon" href="/assets/favicon.ico" type="image/x-icon"> <!-- KaTeX 0.16.11 --> <script defer src="/assets/js/vendor/katex.min.js"></script> <script defer src="/assets/js/vendor/katex.auto-render.min.js" onload="renderMathInElement(document.body);"></script> <!-- Mermaid 11.4.1 --> <script defer src="/assets/js/vendor/mermaid.min.js"></script> <!-- Simple Jekyll Search 1.10.0 --> <script src="/assets/js/vendor/simple-jekyll-search.min.js" type="text/javascript"></script> <!-- Google Analytics / Cookie Consent --> <script> const cookieName = 'cookie-notice-dismissed-http://localhost:4000'; const isCookieConsent = 'false'; const analyticsName = ''; const analyticsNameGA4 = ''; </script> <!-- seo tags --> <meta property="og:image" content="http://localhost:4000/assets/img/header/kali.jpg"> <meta property="og:type" content="website" /> <!-- Begin Jekyll SEO tag v2.8.0 --> <title>LeetCode 1482. | Owen’s Blog</title> <meta name="generator" content="Jekyll v4.4.1" /> <meta property="og:title" content="LeetCode 1482." /> <meta property="og:locale" content="en_US" /> <meta name="description" content="Intuition I use dynamic programming on my first thought. It works but turns out to be TLE." /> <meta property="og:description" content="Intuition I use dynamic programming on my first thought. It works but turns out to be TLE." /> <link rel="canonical" href="http://localhost:4000/demo/2024/06/19/LeetCode-1482.html" /> <meta property="og:url" content="http://localhost:4000/demo/2024/06/19/LeetCode-1482.html" /> <meta property="og:site_name" content="Owen’s Blog" /> <meta property="og:type" content="article" /> <meta property="article:published_time" content="2024-06-19T10:32:59+08:00" /> <meta name="twitter:card" content="summary" /> <meta property="twitter:title" content="LeetCode 1482." /> <script type="application/ld+json"> {"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-06-19T10:32:59+08:00","datePublished":"2024-06-19T10:32:59+08:00","description":"Intuition I use dynamic programming on my first thought. It works but turns out to be TLE.","headline":"LeetCode 1482.","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/demo/2024/06/19/LeetCode-1482.html"},"url":"http://localhost:4000/demo/2024/06/19/LeetCode-1482.html"}</script> <!-- End Jekyll SEO tag --> <!-- RSS --> <link rel="alternate" type="application/atom+xml" title="Owen's Blog" href="http://localhost:4000/feed.xml"/> <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Owen&apos;s Blog" /> <!-- Twitter Cards --> <meta name="twitter:title" content="LeetCode 1482."> <meta name="twitter:description" content="IntuitionI use dynamic programming on my first thought. It works but turns out to be TLE.Then I saw the range of input parameters that each bloomDay[i] shoul..."> <meta name="twitter:card" content="summary"> <meta name="twitter:image" content="http://localhost:4000/assets/img/header/kali.jpg"> <meta name="twitter:image:alt" content="LeetCode 1482."> </head>
+  <body>
+    
+    <header class="site-header"> <!-- Logo and title --> <div class="branding"> <a href="/"> <img alt="logo img" class="avatar" src="/assets/img/triangle.png" loading="lazy"/> </a> <a class="site-title" aria-label="Owen's Blog" href="/"> Owen's Blog </a> </div> <!-- Toggle menu --> <nav class="clear"> <a aria-label="pull" id="pull" class="toggle" href="#"> <i class="fas fa-bars fa-lg"></i> </a> <!-- Menu --> <ul class="hide"> <li class="separator"> | </li> <li> <a class="clear" aria-label="About" title="About" href="/about/"> <span class="navbar-label ">About</span> </a> </li> <li class="separator"> | </li> <li> <a class="clear" aria-label="Portfolio" title="Portfolio" href="/portfolio/"> <span class="navbar-label ">Portfolio</span> </a> </li> <li class="separator"> | </li> <li> <a class="clear" aria-label="Search" title="Search" href="/search/"> <i class="navbar-icon fas fa-search" aria-hidden="true"></i> <span class="navbar-label navbar-label-with-icon">Search</span> </a> </li> <li class="separator"> | </li> <li> <a class="clear" aria-label="Tags" title="Tags" href="/tags/"> <i class="navbar-icon fas fa-tags" aria-hidden="true"></i> <span class="navbar-label navbar-label-with-icon">Tags</span> </a> </li> <li class="separator"> | </li> <li><a id="theme-toggle" title="LeetCode 1482. " aria-label="LeetCode 1482." onclick="themeToggle()"></a></li> </ul> </nav> </header>
+    <div class="content">
+      <article >
+    <header id="main" style="">
+        <div class="title-padder">
+            
+                <h1 id="LeetCode+1482." class="title">LeetCode 1482.</h1>
+                
+
+
+<div class="post-info">
+  <div class="post-meta">
+    
+    
+    <p class="meta">June 19, 2024</p>
+  </div>
+  
+</div>
+
+            
+        </div>
+    </header>
+
+    <section class="post-content">
+    
+            <h1 id="intuition">Intuition</h1>
+<p>I use dynamic programming on my first thought. It works but turns out to be <em>TLE</em>.</p>
+
+<p>Then I saw the range of input parameters that each bloomDay[i] should be smaller than <em>10^9</em>.</p>
+
+<p>The implementation should be simplified to a searching problem so I try Binary Search on my second thought.</p>
+<h1 id="approach">Approach</h1>
+
+<p>Assume the answer is <code class="language-plaintext highlighter-rouge">ans</code>, <code class="language-plaintext highlighter-rouge">1 &lt;= ans &lt;= 10^9</code>. Use <strong>BS</strong> to find the answer.</p>
+
+<p>Initialize the parameters we’ll use:</p>
+<ul>
+  <li><strong><em>left = 1</em></strong></li>
+  <li><strong><em>right = 10^9</em></strong></li>
+  <li><strong><em>mid = 1 + (10^9-1)/2</em></strong></li>
+  <li><strong><em>answer=mid</em></strong></li>
+</ul>
+
+<p><strong>If bloomDay is qualified to current mid, then the answer must be located in the range of left and mid (left &lt;= ans &lt;= mid). Otherwise, it must be located between mid+1 and right (mid+1 &lt;= ans &lt;= right)</strong></p>
+
+<p>When bloomDay is qualified, <strong><em>left &lt;= answer &lt;= mid</em></strong></p>
+
+<p>Otherwise, <strong><em>mid + 1&lt;=answer&lt;=right</em></strong></p>
+
+<h1 id="complexity">Complexity</h1>
+<ul>
+  <li>
+    <p>Time complexity: <strong><em>O(nlogn)</em></strong></p>
+  </li>
+  <li>
+    <p>Space complexity: <strong><em>O(logn)</em></strong></p>
+  </li>
+</ul>
+
+<h1 id="code">Code</h1>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Solution</span> <span class="o">{</span>
+    
+    <span class="c1">// First Attempt</span>
+    <span class="cm">/*
+    public static int minDays(int[] bloomDay, int m, int k) {
+        if (m * k &gt; bloomDay.length) return -1;
+        // Try Dynamic Programming
+        // arr[n - k + 1], 表示從index處開始取k個的值
+        int[] minCost = new int[bloomDay.length - k + 1];
+        for (int i=0; i&lt;bloomDay.length - k + 1; i++) {
+            minCost[i] = bloomDay[i];
+            for (int j=1; j&lt;k; j++) {
+                minCost[i] = Math.max(minCost[i], bloomDay[i + j]);
+            }
+        }
+        // GOAL: 取m個值總和最小; CONSTRAINT: 兩者相隔必須k
+        return dp(minCost, k, 0, m, 0);
+    }
+
+    public static int dp(int[] minCost, int k, int start, int left, int cost) {
+        if (cost &lt; 0) return -1;
+        if (left == 0) return cost;
+        if (start &gt;= minCost.length) return -1;
+        int n = minCost.length + k - 1;
+        if ((n - start - 1) / k + 1 &lt; left) return -1;
+
+        int get = dp(minCost, k, start + k, left-1, Math.max(cost, minCost[start]));
+        int pass = dp(minCost, k, start + 1, left, cost);
+        if (get &lt; 0 &amp;&amp; pass &lt; 0) return -1;
+        else if (get &lt; 0) return pass;
+        else if (pass &lt; 0) return get;
+        return Math.min(get, pass);
+    }
+    */</span>
+
+    <span class="c1">// Second Attempt: BS</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">minDays</span><span class="o">(</span><span class="kt">int</span><span class="o">[]</span> <span class="n">bloomDay</span><span class="o">,</span> <span class="kt">int</span> <span class="n">m</span><span class="o">,</span> <span class="kt">int</span> <span class="n">k</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">m</span> <span class="o">*</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="n">bloomDay</span><span class="o">.</span><span class="na">length</span><span class="o">)</span> <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+        
+        <span class="c1">//由於結果只會在1和10^9之間產生則使用BS</span>
+        <span class="kt">int</span> <span class="n">l</span> <span class="o">=</span> <span class="mi">1</span><span class="o">,</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">1000000000</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">min</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+        <span class="k">while</span> <span class="o">(</span><span class="n">l</span> <span class="o">&lt;=</span> <span class="n">r</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kt">int</span> <span class="n">mid</span> <span class="o">=</span> <span class="n">l</span> <span class="o">+</span> <span class="o">(</span><span class="n">r</span> <span class="o">-</span> <span class="n">l</span><span class="o">)</span> <span class="o">/</span> <span class="mi">2</span><span class="o">;</span>
+            <span class="kt">int</span> <span class="n">consecutive</span> <span class="o">=</span> <span class="mi">0</span><span class="o">,</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+            <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">bloomDay</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">bloomDay</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">&lt;=</span> <span class="n">mid</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="k">if</span> <span class="o">(++</span><span class="n">consecutive</span> <span class="o">==</span> <span class="n">k</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="n">consecutive</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+                        <span class="n">count</span><span class="o">++;</span>
+                    <span class="o">}</span>
+                <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+                    <span class="n">consecutive</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">count</span> <span class="o">&gt;=</span> <span class="n">m</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">min</span> <span class="o">=</span> <span class="n">mid</span><span class="o">;</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">mid</span> <span class="o">-</span> <span class="mi">1</span><span class="o">;</span>
+            <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+                <span class="n">l</span> <span class="o">=</span> <span class="n">mid</span> <span class="o">+</span> <span class="mi">1</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">min</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Check out the description of this problem at <a href="https://leetcode.com/problems/minimum-number-of-days-to-make-m-bouquets/description">LC 1482</a>.</p>
+
+
+    
+    </section>
+
+    <!-- Social media shares -->
+    
+
+<div class="share-buttons">
+    <ul class="share-buttons">
+        <li class="meta">Share</li>
+        
+        <li>
+            <a href="https://www.facebook.com/sharer/sharer.php?u=http://localhost:4000/demo/2024/06/19/LeetCode-1482.html" target="_blank"
+               title=" Facebook">
+                <i class="fab fa-facebook-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on Facebook</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://twitter.com/intent/tweet?text=LeetCode+1482.%20http%3A%2F%2Flocalhost%3A4000%2Fdemo%2F2024%2F06%2F19%2FLeetCode-1482.html"
+               target="_blank" title="">
+                <i class="fab fa-twitter-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Tweet</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://www.tumblr.com/share?v=3&u=http://localhost:4000/demo/2024/06/19/LeetCode-1482.html&quote=LeetCode+1482.%20%7C%20Owen%27s+Blog&s="
+               target="_blank" title=" Tumblr">
+                <i class="fab fa-tumblr-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on Tumblr</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://pinterest.com/pin/create/button/?url=http://localhost:4000/demo/2024/06/19/LeetCode-1482.html&media=$description=Intuition%0AI+use+dynamic+programming+on+my+first+thought.+It+works+but+turns+out+to+be+TLE.%0A"
+               target="_blank" title="">
+                <i class="fab fa-pinterest-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Pin it</span>
+            </a>
+        </li>
+          
+        <li>
+            <a href="https://www.reddit.com/submit?url=http://localhost:4000/demo/2024/06/19/LeetCode-1482.html&title=LeetCode+1482.%20%7C%20Owen%27s+Blog"
+               target="_blank" title=" Reddit">
+                <i class="fab fa-reddit-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on Reddit</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://www.linkedin.com/shareArticle?mini=true&url=http://localhost:4000/demo/2024/06/19/LeetCode-1482.html&title=LeetCode+1482.%20%7C%20Owen%27s+Blog&summary=&source=http://localhost:4000/demo/2024/06/19/LeetCode-1482.html"
+               target="_blank" title=" LinkedIn">
+                <i class="fab fa-linkedin fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on LinkedIn</span>
+            </a>
+        </li>
+          
+        <li>
+            <a href="mailto:?subject=LeetCode 1482.%20%7C%20Owen's Blog&body=http://localhost:4000/demo/2024/06/19/LeetCode-1482.html"
+               target="_blank" title="">
+                <i class="fas fa-envelope-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Email</span></a>
+        </li>
+        
+    </ul>
+</div>
+
+
+
+
+    <!-- Tag list -->
+    
+    
+
+
+  <div class="tag-list">
+    <ul>
+      
+        <li class="meta">Tag</li>
+      
+
+      
+        <li><a class="button" href="/tags#LeetCode">
+          <p><i class="fas fa-tag fa-fw fa-sm"></i> LeetCode</p>
+        </a></li>
+      
+    </ul>
+  </div>
+
+
+
+</article>
+
+
+
+
+<!-- To change color of links in the page --> <style> header#main { background-size: cover; background-repeat: no-repeat; background-position: center; } </style> <!-- Post navigation --> <div id="post-nav"> <div id="previous-post"> <a alt="LeetCode 278." href="/demo/2024/06/19/LeetCode-278.html"> <p>Previous post</p> LeetCode 278. </a> </div> <div id="next-post"> <a alt="LeetCode 633." href="/demo/2024/06/17/LeetCode-633.html"> <p>Next post</p> LeetCode 633. </a> </div> </div> <!-- Giscus --> <!--Utterances--> <!-- Cusdis --> <!-- Disqus -->
+
+
+    </div>
+    
+    <footer class="site-footer"> <p class="text"> Powered by <a href='https://jekyllrb.com/'>Jekyll</a> with <a href='https://github.com/sylhare/Type-on-Strap'>Type on Strap</a></p> <div class="footer-icons"> <ul> <!-- Social icons from Font Awesome, if enabled --> <li> <a feed.xml href="/feed.xml" title="Follow RSS feed" target="_blank"> <span class="fa-stack fa-lg"> <i class="fas fa-circle fa-stack-2x"></i> <i class="fas fa-rss fa-stack-1x fa-inverse"></i> </span> </a> </li> <li> <a href="https://github.com/sylhare" title="Follow on Github" target="_blank" rel="noopener"> <span class="fa-stack fa-lg"> <i class="fas fa-circle fa-stack-2x"></i> <i class="fab fa-github fa-stack-1x fa-inverse"></i> </span> </a> </li> </ul> </div> <script type="module"> mermaid.initialize({ startOnLoad: false, theme: "default" }); mermaid.run({ nodes: [...document.querySelectorAll('.language-mermaid'), ...document.querySelectorAll('.mermaid')] }); </script> </footer>
+  </body>
+</html>

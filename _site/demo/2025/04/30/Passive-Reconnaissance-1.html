@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<!--
+    Type on Strap jekyll theme v2.4.12
+    Theme free for personal and commercial use under the MIT license
+    https://github.com/sylhare/Type-on-Strap/blob/master/LICENSE
+-->
+<html lang="en">
+  
+  <head> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=0.5, maximum-scale=5"> <!-- Theme Mode--> <script> const darkBtn = "Dark"; const lightBtn = "Light"; const isAutoTheme = true; const preferredTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; if (isAutoTheme) { document.documentElement.setAttribute('data-theme', sessionStorage.getItem('theme') ?? preferredTheme); } else { document.documentElement.setAttribute('data-theme', "auto"); } </script> <!-- Main JS (navbar.js, katex_init.js and masonry_init.js)--> <script defer src="/assets/js/main.min.js"></script> <!-- CSS --> <link rel="stylesheet" href="/assets/css/main.css"> <!--Favicon--> <link rel="shortcut icon" href="/assets/favicon.ico" type="image/x-icon"> <!-- KaTeX 0.16.11 --> <script defer src="/assets/js/vendor/katex.min.js"></script> <script defer src="/assets/js/vendor/katex.auto-render.min.js" onload="renderMathInElement(document.body);"></script> <!-- Mermaid 11.4.1 --> <script defer src="/assets/js/vendor/mermaid.min.js"></script> <!-- Simple Jekyll Search 1.10.0 --> <script src="/assets/js/vendor/simple-jekyll-search.min.js" type="text/javascript"></script> <!-- Google Analytics / Cookie Consent --> <script> const cookieName = 'cookie-notice-dismissed-http://localhost:4000'; const isCookieConsent = 'false'; const analyticsName = ''; const analyticsNameGA4 = ''; </script> <!-- seo tags --> <meta property="og:image" content="http://localhost:4000/assets/img/header/kali.jpg"> <meta property="og:type" content="website" /> <!-- Begin Jekyll SEO tag v2.8.0 --> <title>Passive Reconnaissance (1) | Owen’s Blog</title> <meta name="generator" content="Jekyll v4.4.1" /> <meta property="og:title" content="Passive Reconnaissance (1)" /> <meta property="og:locale" content="en_US" /> <meta name="description" content="Intro 本篇來介紹幾個常用的Passive Reconnaissance工具來供大家參考，並提供相關的背景知識和基本使用方法，其中包含： whois nslookup dig DNSDumpster Shodan 而介紹工具前必須先瞭解此工具的用處、背景再來才是工具的基本用法，這樣才能理解透徹並善加使用" /> <meta property="og:description" content="Intro 本篇來介紹幾個常用的Passive Reconnaissance工具來供大家參考，並提供相關的背景知識和基本使用方法，其中包含： whois nslookup dig DNSDumpster Shodan 而介紹工具前必須先瞭解此工具的用處、背景再來才是工具的基本用法，這樣才能理解透徹並善加使用" /> <link rel="canonical" href="http://localhost:4000/demo/2025/04/30/Passive-Reconnaissance-1.html" /> <meta property="og:url" content="http://localhost:4000/demo/2025/04/30/Passive-Reconnaissance-1.html" /> <meta property="og:site_name" content="Owen’s Blog" /> <meta property="og:type" content="article" /> <meta property="article:published_time" content="2025-04-30T21:00:55+08:00" /> <meta name="twitter:card" content="summary" /> <meta property="twitter:title" content="Passive Reconnaissance (1)" /> <script type="application/ld+json"> {"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2025-04-30T21:00:55+08:00","datePublished":"2025-04-30T21:00:55+08:00","description":"Intro 本篇來介紹幾個常用的Passive Reconnaissance工具來供大家參考，並提供相關的背景知識和基本使用方法，其中包含： whois nslookup dig DNSDumpster Shodan 而介紹工具前必須先瞭解此工具的用處、背景再來才是工具的基本用法，這樣才能理解透徹並善加使用","headline":"Passive Reconnaissance (1)","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/demo/2025/04/30/Passive-Reconnaissance-1.html"},"url":"http://localhost:4000/demo/2025/04/30/Passive-Reconnaissance-1.html"}</script> <!-- End Jekyll SEO tag --> <!-- RSS --> <link rel="alternate" type="application/atom+xml" title="Owen's Blog" href="http://localhost:4000/feed.xml"/> <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Owen&apos;s Blog" /> <!-- Twitter Cards --> <meta name="twitter:title" content="Passive Reconnaissance (1)"> <meta name="twitter:description" content=" Intro 本篇來介紹幾個常用的Passive Reconnaissance工具來供大家參考，並提供相關的背景知識和基本使用方法，其中包含： whois nslookup dig DNSDumpster Sho..."> <meta name="twitter:card" content="summary"> <meta name="twitter:image" content="http://localhost:4000/assets/img/header/kali.jpg"> <meta name="twitter:image:alt" content="Passive Reconnaissance (1)"> </head>
+  <body>
+    
+    <header class="site-header"> <!-- Logo and title --> <div class="branding"> <a href="/"> <img alt="logo img" class="avatar" src="/assets/img/triangle.png" loading="lazy"/> </a> <a class="site-title" aria-label="Owen's Blog" href="/"> Owen's Blog </a> </div> <!-- Toggle menu --> <nav class="clear"> <a aria-label="pull" id="pull" class="toggle" href="#"> <i class="fas fa-bars fa-lg"></i> </a> <!-- Menu --> <ul class="hide"> <li class="separator"> | </li> <li> <a class="clear" aria-label="About" title="About" href="/about/"> <span class="navbar-label ">About</span> </a> </li> <li class="separator"> | </li> <li> <a class="clear" aria-label="Portfolio" title="Portfolio" href="/portfolio/"> <span class="navbar-label ">Portfolio</span> </a> </li> <li class="separator"> | </li> <li> <a class="clear" aria-label="Search" title="Search" href="/search/"> <i class="navbar-icon fas fa-search" aria-hidden="true"></i> <span class="navbar-label navbar-label-with-icon">Search</span> </a> </li> <li class="separator"> | </li> <li> <a class="clear" aria-label="Tags" title="Tags" href="/tags/"> <i class="navbar-icon fas fa-tags" aria-hidden="true"></i> <span class="navbar-label navbar-label-with-icon">Tags</span> </a> </li> <li class="separator"> | </li> <li><a id="theme-toggle" title="Passive Reconnaissance (1) " aria-label="Passive Reconnaissance (1)" onclick="themeToggle()"></a></li> </ul> </nav> </header>
+    <div class="content">
+      <article >
+    <header id="main" style="">
+        <div class="title-padder">
+            
+                <h1 id="Passive+Reconnaissance+%281%29" class="title">Passive Reconnaissance (1)</h1>
+                
+
+
+<div class="post-info">
+  <div class="post-meta">
+    
+    
+    <p class="meta">April 30, 2025</p>
+  </div>
+  
+</div>
+
+            
+        </div>
+    </header>
+
+    <section class="post-content">
+    
+            <html>
+<body>
+<div style="margin-top: 10px">
+
+      <h3 id="intro">Intro</h3>
+      <p>本篇來介紹幾個常用的Passive Reconnaissance工具來供大家參考，並提供相關的背景知識和基本使用方法，其中包含：</p>
+      <ul>
+        <li>whois</li>
+        <li>nslookup</li>
+        <li>dig</li>
+        <li>DNSDumpster</li>
+        <li>Shodan<br />
+而介紹工具前必須先瞭解此工具的用處、背景再來才是工具的基本用法，這樣才能理解透徹並善加使用</li>
+      </ul>
+
+      <h3 id="whois">whois</h3>
+      <ul>
+        <li><strong>用處</strong>： 查看此domain註冊時提供的信息，注意，由於安全意識抬頭且此工具被大家熟知，故而可以在此紀錄上做手腳，因此用此工具獲得的資訊必須妥善使用</li>
+        <li><strong>背景知識</strong>： 每一位開發者/公司在向Registrar註冊網域名稱時都會提供相應資訊，如公司註冊人、電話、郵箱等。Registrar再向Whois Server提供資料已作後續查詢或其他用途。而我們使用的whois工具中查詢的便是多個Whois server組成的集合</li>
+        <li><strong>基本使用</strong>：
+          <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>whois google.com
+</code></pre></div>          </div>
+        </li>
+      </ul>
+
+      <h3 id="nslookup">nslookup</h3>
+      <ul>
+        <li><strong>用處</strong>： 它可以幫助你確認一個網域名稱對應的 IP 地址、DNS 記錄的內容、以及測試 DNS 是否正確運作</li>
+        <li><strong>背景知識</strong>： 首先要先瞭解DNS是什麼?</li>
+      </ul>
+
+      <p><em>The Domain Name System (DNS) is a hierarchical and distributed name service that provides a naming system for computers, services, and other resources on the Internet or other Internet Protocol (IP) networks</em></p>
+
+      <p>簡單來說，DNS就是幫你把google.com轉換成ipv4或ipv6的地址。DNS Server就是儲存這個對照關係的數據庫，被每個Registrar保存並用於在有人使用網域名稱是給予對照的地址。值得一提的是，這個數據庫中存著的數據對照關係不單單只是前面提到的網域名稱對映ipv4/ipv6地址，以下是多個 <em>DNS Record</em>：<br />
+    - A: 網域名稱-&gt;IPv4<br />
+    - AAAA: 網域名稱-&gt;IPv6<br />
+    - CNAME: 網域別名-&gt;網域名稱<br />
+    - MX: 網域名稱-&gt;Mail Server<br />
+    - TXT: 儲存任意資料<br />
+    - SOA: 此域名設置</p>
+
+      <ul>
+        <li><strong>基本使用</strong>：<br />
+<strong><em>nslookup OPTIONS DOMAIN_NAME SERVER</em></strong></li>
+      </ul>
+
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>OPTIONS(要查詢的DNS Record類別)
+  -type=A
+DOMAIN_NAME(要查詢的域名)
+  google.com
+SERVER(可選，要指定查詢的DNS Server)
+  1.1.1.1
+
+nslookup -type=A google.com 1.1.1.1
+nslookup -type=MX google.com
+</code></pre></div>      </div>
+
+      <h3 id="digdomain-information-groper">dig(Domain Information Groper)</h3>
+      <ul>
+        <li><strong>用處</strong>： 與nslookup使用場景基本類似，但提供更多資訊</li>
+        <li><strong>基本使用</strong>：<br />
+<strong><em>dig @SERVER DOMAIN_NAME TYPE</em></strong></li>
+      </ul>
+
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SERVER(可選，要指定查詢的DNS Server)
+  1.1.1.1
+DOMAIN_NAME(要查詢的域名)
+  google.com
+TYPE(要查詢的DNS Record類別)
+  TXT
+
+dig google.com TXT
+dig @1.1.1.1 google.com MX
+</code></pre></div>      </div>
+
+      <h3 id="dnsdumpster">DNSDumpster</h3>
+      <ul>
+        <li><strong>用處</strong>： 是一個網站工具，可以通過瀏覽器使用非常方便。他與 <code class="language-plaintext highlighter-rouge">nslookup</code> 和 <code class="language-plaintext highlighter-rouge">dig</code> 工具不同的地方是， <code class="language-plaintext highlighter-rouge">DNSDumpster</code> 可以查詢到子域名，例如你查詢 <code class="language-plaintext highlighter-rouge">google.com</code> 可以搜尋到 <code class="language-plaintext highlighter-rouge">admin.google.com</code> 等等子域名，對於要搜集有關網域資料的人來說非常有用</li>
+        <li><strong>基本使用</strong>：
+直接打開瀏覽器搜尋 <a href="https://dnsdumpster.com/">DNSDumpster</a> 或直接點擊連結即可。搜尋容易功能強大，就是免費版對結果數量有限制，沒辦法查找到最完全的資訊(但也非常夠用)</li>
+      </ul>
+
+      <h3 id="shodan">Shodan</h3>
+      <ul>
+        <li><strong>用處</strong>： 是一個更加強大且全面的網站工具，它注重的是所有與網路連接的設備檢測（包含IoT等），故而非常強大。也可用在DNS搜索、OS/Server版本型號檢測等。<code class="language-plaintext highlighter-rouge">Shodan</code> 比較像是查看統計數據的工具，以及該連接設備的詳細資料，而並非只著重在DNS Query</li>
+        <li><strong>基本使用</strong>：
+直接打開瀏覽器搜尋 <a href="https://www.shodan.io/">Shodan</a> 或直接點擊連結即可。可以搜尋域名 <code class="language-plaintext highlighter-rouge">google.com</code>、OS版本 <code class="language-plaintext highlighter-rouge">Ubuntu</code>、Server版本 <code class="language-plaintext highlighter-rouge">Apache/2.4.18</code>等等，功能非常全面</li>
+      </ul>
+
+      <h2 id="section">學習資料</h2>
+      <ol>
+        <li>TryHackMe CompTIA Pentest+ / Information Gathering and Vulnerability Scanning
+Passive Reconnaissance</li>
+        <li><a href="https://dnsdumpster.com/">DNSDumpster</a></li>
+        <li><a href="https://www.shodan.io/">Shodan</a></li>
+      </ol>
+
+    </div>
+</body>
+</html>
+
+    
+    </section>
+
+    <!-- Social media shares -->
+    
+
+<div class="share-buttons">
+    <ul class="share-buttons">
+        <li class="meta">Share</li>
+        
+        <li>
+            <a href="https://www.facebook.com/sharer/sharer.php?u=http://localhost:4000/demo/2025/04/30/Passive-Reconnaissance-1.html" target="_blank"
+               title=" Facebook">
+                <i class="fab fa-facebook-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on Facebook</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://twitter.com/intent/tweet?text=Passive+Reconnaissance+%281%29%20http%3A%2F%2Flocalhost%3A4000%2Fdemo%2F2025%2F04%2F30%2FPassive-Reconnaissance-1.html"
+               target="_blank" title="">
+                <i class="fab fa-twitter-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Tweet</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://www.tumblr.com/share?v=3&u=http://localhost:4000/demo/2025/04/30/Passive-Reconnaissance-1.html&quote=Passive+Reconnaissance+%281%29%20%7C%20Owen%27s+Blog&s="
+               target="_blank" title=" Tumblr">
+                <i class="fab fa-tumblr-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on Tumblr</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://pinterest.com/pin/create/button/?url=http://localhost:4000/demo/2025/04/30/Passive-Reconnaissance-1.html&media=$description=%0A%0A%0A%0A++++++Intro%0A++++++%E6%9C%AC%E7%AF%87%E4%BE%86%E4%BB%8B%E7%B4%B9%E5%B9%BE%E5%80%8B%E5%B8%B8%E7%94%A8%E7%9A%84Passive+Reconnaissance%E5%B7%A5%E5%85%B7%E4%BE%86%E4%BE%9B%E5%A4%A7%E5%AE%B6%E5%8F%83%E8%80%83%EF%BC%8C%E4%B8%A6%E6%8F%90%E4%BE%9B%E7%9B%B8%E9%97%9C%E7%9A%84%E8%83%8C%E6%99%AF%E7%9F%A5%E8%AD%98%E5%92%8C%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95%EF%BC%8C%E5%85%B6%E4%B8%AD%E5%8C%85%E5%90%AB%EF%BC%9A%0A++++++%0A++++++++whois%0A++++++++nslookup%0A++++++++dig%0A++++++++DNSDumpster%0A++++++++Shodan%0A%E8%80%8C%E4%BB%8B%E7%B4%B9%E5%B7%A5%E5%85%B7%E5%89%8D%E5%BF%85%E9%A0%88%E5%85%88%E7%9E%AD%E8%A7%A3%E6%AD%A4%E5%B7%A5%E5%85%B7%E7%9A%84%E7%94%A8%E8%99%95%E3%80%81%E8%83%8C%E6%99%AF%E5%86%8D%E4%BE%86%E6%89%8D%E6%98%AF%E5%B7%A5%E5%85%B7%E7%9A%84%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95%EF%BC%8C%E9%80%99%E6%A8%A3%E6%89%8D%E8%83%BD%E7%90%86%E8%A7%A3%E9%80%8F%E5%BE%B9%E4%B8%A6%E5%96%84%E5%8A%A0%E4%BD%BF%E7%94%A8%0A++++++%0A++++%0A"
+               target="_blank" title="">
+                <i class="fab fa-pinterest-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Pin it</span>
+            </a>
+        </li>
+          
+        <li>
+            <a href="https://www.reddit.com/submit?url=http://localhost:4000/demo/2025/04/30/Passive-Reconnaissance-1.html&title=Passive+Reconnaissance+%281%29%20%7C%20Owen%27s+Blog"
+               target="_blank" title=" Reddit">
+                <i class="fab fa-reddit-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on Reddit</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://www.linkedin.com/shareArticle?mini=true&url=http://localhost:4000/demo/2025/04/30/Passive-Reconnaissance-1.html&title=Passive+Reconnaissance+%281%29%20%7C%20Owen%27s+Blog&summary=&source=http://localhost:4000/demo/2025/04/30/Passive-Reconnaissance-1.html"
+               target="_blank" title=" LinkedIn">
+                <i class="fab fa-linkedin fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on LinkedIn</span>
+            </a>
+        </li>
+          
+        <li>
+            <a href="mailto:?subject=Passive Reconnaissance (1)%20%7C%20Owen's Blog&body=http://localhost:4000/demo/2025/04/30/Passive-Reconnaissance-1.html"
+               target="_blank" title="">
+                <i class="fas fa-envelope-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Email</span></a>
+        </li>
+        
+    </ul>
+</div>
+
+
+
+
+    <!-- Tag list -->
+    
+    
+
+
+  <div class="tag-list">
+    <ul>
+      
+        <li class="meta">Tag</li>
+      
+
+      
+        <li><a class="button" href="/tags#Cybersecurity">
+          <p><i class="fas fa-tag fa-fw fa-sm"></i> Cybersecurity</p>
+        </a></li>
+      
+    </ul>
+  </div>
+
+
+
+</article>
+
+
+
+
+<!-- To change color of links in the page --> <style> header#main { background-size: cover; background-repeat: no-repeat; background-position: center; } </style> <!-- Post navigation --> <div id="post-nav"> <div id="previous-post"> <a alt="Nmap介紹 (1)" href="/demo/2025/05/03/Nmap-1.html"> <p>Previous post</p> Nmap介紹 (1) </a> </div> <div id="next-post"> <a alt="LeetCode 4." href="/demo/2024/06/28/LeetCode-4.html"> <p>Next post</p> LeetCode 4. </a> </div> </div> <!-- Giscus --> <!--Utterances--> <!-- Cusdis --> <!-- Disqus -->
+
+
+    </div>
+    
+    <footer class="site-footer"> <p class="text"> Powered by <a href='https://jekyllrb.com/'>Jekyll</a> with <a href='https://github.com/sylhare/Type-on-Strap'>Type on Strap</a></p> <div class="footer-icons"> <ul> <!-- Social icons from Font Awesome, if enabled --> <li> <a feed.xml href="/feed.xml" title="Follow RSS feed" target="_blank"> <span class="fa-stack fa-lg"> <i class="fas fa-circle fa-stack-2x"></i> <i class="fas fa-rss fa-stack-1x fa-inverse"></i> </span> </a> </li> <li> <a href="https://github.com/sylhare" title="Follow on Github" target="_blank" rel="noopener"> <span class="fa-stack fa-lg"> <i class="fas fa-circle fa-stack-2x"></i> <i class="fab fa-github fa-stack-1x fa-inverse"></i> </span> </a> </li> </ul> </div> <script type="module"> mermaid.initialize({ startOnLoad: false, theme: "default" }); mermaid.run({ nodes: [...document.querySelectorAll('.language-mermaid'), ...document.querySelectorAll('.mermaid')] }); </script> </footer>
+  </body>
+</html>

@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<!--
+    Type on Strap jekyll theme v2.4.12
+    Theme free for personal and commercial use under the MIT license
+    https://github.com/sylhare/Type-on-Strap/blob/master/LICENSE
+-->
+<html lang="en">
+  
+  <head> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=0.5, maximum-scale=5"> <!-- Theme Mode--> <script> const darkBtn = "Dark"; const lightBtn = "Light"; const isAutoTheme = true; const preferredTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; if (isAutoTheme) { document.documentElement.setAttribute('data-theme', sessionStorage.getItem('theme') ?? preferredTheme); } else { document.documentElement.setAttribute('data-theme', "auto"); } </script> <!-- Main JS (navbar.js, katex_init.js and masonry_init.js)--> <script defer src="/assets/js/main.min.js"></script> <!-- CSS --> <link rel="stylesheet" href="/assets/css/main.css"> <!--Favicon--> <link rel="shortcut icon" href="/assets/favicon.ico" type="image/x-icon"> <!-- KaTeX 0.16.11 --> <script defer src="/assets/js/vendor/katex.min.js"></script> <script defer src="/assets/js/vendor/katex.auto-render.min.js" onload="renderMathInElement(document.body);"></script> <!-- Mermaid 11.4.1 --> <script defer src="/assets/js/vendor/mermaid.min.js"></script> <!-- Simple Jekyll Search 1.10.0 --> <script src="/assets/js/vendor/simple-jekyll-search.min.js" type="text/javascript"></script> <!-- Google Analytics / Cookie Consent --> <script> const cookieName = 'cookie-notice-dismissed-http://localhost:4000'; const isCookieConsent = 'false'; const analyticsName = ''; const analyticsNameGA4 = ''; </script> <!-- seo tags --> <meta property="og:image" content="http://localhost:4000/assets/img/header/kali.jpg"> <meta property="og:type" content="website" /> <!-- Begin Jekyll SEO tag v2.8.0 --> <title>Separated Frontend &amp; Backend System Development(1) | Owen’s Blog</title> <meta name="generator" content="Jekyll v4.4.1" /> <meta property="og:title" content="Separated Frontend &amp; Backend System Development(1)" /> <meta property="og:locale" content="en_US" /> <meta name="description" content="前後端分離系統開發介紹(1) 0. 前言 前端為一個項目，後端為一個項目，分別部署后前端調用後端提供的API，總體來説可以看作兩個獨立的項目。通過這樣可以使得雙方專注與自己的部分，并且修改其中一端并不會影響到另一端的運行情況 本次介紹案例都在本地執行，前端使用 Vue+Nginx；後端使用 Springboot+Tomcat springboot: 3.2.2 vue: 2.6.14 vuex: 3.6.2 nginx: 1.25.1 tomcat: 10.1.18 Springboot是SpringMVC的便捷版，可讓開發人員專注在開發細節上而非繁雜的配置； 另外Springboot嵌入在Tomcat、Jetty、Undertow上所以不需要額外部署它 體量比較: SpringMVC &lt; Spring &lt; Springboot Spring使用很多特殊的注解(annotation)作爲輔助，需要查閲官方文檔學習 Vue本次使用 Vue v2 + Vuex v3; Vuex是Vue的狀態管理模式庫，通俗來説就是管理流通在Vue中的各種數據。另外Vue項目對各類庫的版本兼容很狹隘，Vue2/Vue3對應的依賴版本相差很多，可以使用 npm audit fix 檢查全部依賴的關聯性；原生的Vue2 官方文檔 1. 後端 1.1 範例項目架構 -src -main -java -controller -bl(business logic) -blImpl(business logic Implementation) -vo -po(dto) -dao -utils -resources -application.yml -application-prod.yml -application-dev.yml -test 1.2 配置文件 項目裏的配置文件默認為src/main/resources/application.yaml或替代為application.properties，兩者語法不同需注意，下面是一個簡單的例子 spring: application: name: SpringbootDemo datasource: url: jdbc:mysql://localhost:3306/demo_table username: root password: root driver-class-name: com.mysql.cj.jdbc.Driver platform: mysql schema: classpath:schema.sql data: classpath:data.sql initialization: always mybatis: mapper-locations: classpath:mapper/*Mapper.xml server: port: 8090 還可以開發環境配置跟產品上線配置不同，在application.yaml中如下: spring: profiles: active: prod #switch prod/dev 然後生成application-prod.yaml和application-dev.yaml就可以切換 1.3 依賴文件 使用Maven管理項目依賴，下面是一個簡單的例子 &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt; &lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt; &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt; &lt;parent&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt; &lt;version&gt;2.5.5&lt;/version&gt; &lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt; &lt;/parent&gt; &lt;groupId&gt;com.example&lt;/groupId&gt; &lt;artifactId&gt;caseLibrary&lt;/artifactId&gt; &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt; &lt;name&gt;caseLibrary&lt;/name&gt; &lt;description&gt;Demo project for Spring Boot&lt;/description&gt; &lt;properties&gt; &lt;java.version&gt;8&lt;/java.version&gt; &lt;/properties&gt; &lt;dependencies&gt; &lt;dependency&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;org.springdoc&lt;/groupId&gt; &lt;artifactId&gt;springdoc-openapi-ui&lt;/artifactId&gt; &lt;version&gt;1.1.45&lt;/version&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt; &lt;scope&gt;runtime&lt;/scope&gt; &lt;optional&gt;true&lt;/optional&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;mysql&lt;/groupId&gt; &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt; &lt;version&gt;8.0.19&lt;/version&gt; &lt;scope&gt;runtime&lt;/scope&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt; &lt;scope&gt;test&lt;/scope&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt; &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt; &lt;version&gt;1.3.2&lt;/version&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;jdom&lt;/groupId&gt; &lt;artifactId&gt;jdom&lt;/artifactId&gt; &lt;version&gt;1.1&lt;/version&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;org.projectlombok&lt;/groupId&gt; &lt;artifactId&gt;lombok&lt;/artifactId&gt; &lt;version&gt;1.18.20&lt;/version&gt; &lt;/dependency&gt; &lt;/dependencies&gt; &lt;build&gt; &lt;plugins&gt; &lt;plugin&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt; &lt;/plugin&gt; &lt;/plugins&gt; &lt;/build&gt; &lt;/project&gt; 1.4 SpringBoot架構 Springboot開發還是遵循SpringMVC，只不過把其中的View部分轉換成獨立的一個項目而并非包含在Spring項目中，因此後端項目只負責到Controller層。詳細關係為Contorller中注入Service，Service中注入DAO，因此可以把它視爲三層結構。大致關係如下: Frontend -&gt; Controller -&gt; Service -&gt; Repository -&gt; Model(ORM) 1.4.0 Application Main Entrance 繼承 SpringBootServletInitializer 是要讓這個Springboot程序能以WAR包的形式部署到外部Servlet容器中 @SpringBootApplication public class CaseLibraryApplication extends SpringBootServletInitializer{ public static void main(String[] args) { SpringApplication.run(CaseLibraryApplication.class, args); } @Override protected SpringApplicationBuilder configure(SpringApplicationBuilder builder){ return builder.sources(BackendDemoApplication.class); } } 1.4.1 Controller層 @RestController @RequestMapping(&quot;/graph&quot;) public class GraphController { @Autowired private LawService lawService; @Autowired private LinkService linkService; @PostMapping(&quot;/getGraphData&quot;) public ResponseVO getGraphData(@RequestBody SearchTargetVO searchTargetVO){ return linkService.getLinks(searchTargetVO.getSearchTarget()); } @PostMapping(&quot;/addLink&quot;) public ResponseVO addLink(@RequestBody LinkVO linkVO){ return linkService.addLink(linkVO); } @PostMapping(&quot;/deleteLinks&quot;) public ResponseVO deleteLinks(@RequestBody SearchTargetVO searchTargetVO) { return linkService.deleteLink(searchTargetVO.getSearchTarget()); } } @RestController表示這個類是Controller層，并且創造的是REST API @RequestMapping表示HTTP Request的路徑 @Autowired將Service層的類注入到這層也就是Controller層 @PostMapping(&quot;/addLink&quot;)聲明HTTP Request的類別和路徑 @RequestBody可以使Controller接收到HTTP Client傳送的JSON數據，並將數據映射為預先設計好的Java類，例如在上述例子中的addLink()中的LinkVO類便是設計好的Java類，在設計層面上來説這個LinkVO屬於VO(Value Object)，屬於Controller響應前端請求后返回的數據格式，下面是LinkVO的例子: public class LinkVO { private String source; private String target; private String rela; public String getSource() { return source; } public void setSource(String source) { this.source = source; } public String getTarget() { return target; } public void setTarget(String target) { this.target = target; } public String getRela() { return rela; } public void setRela(String rela) { this.rela = rela; } } 有個好用的庫可以簡化手動生成Get/Set方法lombok: 使用時在maven中添加依賴 &lt;dependency&gt; &lt;groupId&gt;org.projectlombok&lt;/groupId&gt; &lt;artifactId&gt;lombok&lt;/artifactId&gt; &lt;version&gt;1.18.20&lt;/version&gt; &lt;/dependency&gt; 簡化項目中的DAO/PO/VO.etc，LinkVO便可簡化為: @Data public class LinkVO { private String source; private String target; private String rela; } 值得一提的是，ResponseVO是默認返回給前端的類，使得前端處理後端返回的數據時不會因爲不同API而有不同的預處理方法，下面是ResponseVO的設計可供參考: public class ResponseVO { // 表示這次請求是否成功 private Boolean success; // 顯示的訊息不管成功或者失敗 private String message; // 返回的數據 private Object content; public static ResponseVO buildSuccess(){ ResponseVO response=new ResponseVO(); response.setSuccess(true); return response; } public static ResponseVO buildSuccess(Object content){ ResponseVO response=new ResponseVO(); response.setContent(content); response.setSuccess(true); return response; } public static ResponseVO buildFailure(String message){ ResponseVO response=new ResponseVO(); response.setSuccess(false); response.setMessage(message); logger.error(message); return response; } } 1.4.2 Service層 也就是Business Logic層，是主要處理數據邏輯的模塊。所有的處理都在這層實現，並不會延申到Controller層(也就是說Controller層只是負責處理Http Request)。設計思路有很多，但是大體可以分爲兩部分: Service Interface和Service Implementation。Interface主要聲明要完成的方法，白話說就是TODO List；Implementation是實現Interface的模塊，下面提供一個例子: LinkService(Interface) public interface LinkService { ResponseVO getLinks(String lawTitle); ResponseVO enterFormData(); ResponseVO getRuleBySourceTitle(String searchTarget); ResponseVO addLink(LinkVO linkVO); ResponseVO deleteLink(String source); } LinkServiceImpl(Implementaiton) @Service public class LinkServiceImpl implements LinkService { @Autowired private LinkRepository linkRepository; @Override public ResponseVO getLinks(String lawTitle) { return ResponseVO.buildSuccess(linkRepository.findBySource(lawTitle)); } ... } @Service表示這個類屬於Service層 LinkRepository類為DAO層，所以在Service層中注入並使用 1.4.3 Model (PO) 在介紹Model和Repository之前，要先介紹Spring Data JPA與其餘ORM的關係。本次介紹使用Spring Data JPA并非傳統JPA Provider(如hibernate)，論層級來説它應該處於JPA之上JPA Provider之下，它默認使用hibernate來實現細節(可以在pom依賴下看到spring-data-jpa有子依賴hibernate-core)。它是獨立于Spring framework上的技術，并且不需要開發者實現細節，只需要根據規則套用注解即可。 @Entity @Table(name = &quot;link&quot;) @Data public class Link { @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Integer id; @NotNull @Column(name = &quot;source&quot;,columnDefinition = &quot;varchar(255)&quot;,nullable = false) private String source; @Column(name = &quot;target&quot;,columnDefinition = &quot;varchar(255)&quot;,nullable = false) private String target; @NotNull @Column(name = &quot;relationship&quot;,columnDefinition = &quot;varchar(255)&quot;,nullable = false) private String relation; } @Entity 是Spring Data JPA中的注解，通常來説添加這個注解就默認生成一個表(這個注解下的類)為表名 @Table(name = &quot;link&quot;)如果要指定特定表名則可以使用此注解 @Id @GeneratedValue 是每個表必要的Id列，@GeneratedValue則制定Id列生成規則 @Column聲明列 1.4.4 Repository (DAO) Spring Data JPA需要我們設計Repository的Interface，在運行過程中它會自動生成這個Repository的實現，避免我們手動生成冗長的代碼如Connection等。因此我們只需專注在SQL語句即可。另外，它兼容原生的SQL語句 public interface LinkRepository extends JpaRepository&lt;Link, Integer&gt; { List&lt;Link&gt; findBySource(String source); @Transactional @Query(value = &quot;select * from link where source like concat(&#39;%&#39;,:source,&#39;%&#39;)&quot;, nativeQuery = true) List&lt;Link&gt; searchBySource(String source); @Transactional @Query(value = &quot;select count(*) from link where &quot; + &quot;source like concat(&#39;%&#39;,:source,&#39;%&#39;) and &quot; + &quot;target like concat(&#39;%&#39;,:target,&#39;%&#39;) and &quot; + &quot;relationship like concat(&#39;%&#39;,:relation,&#39;%&#39;)&quot;, nativeQuery = true) Integer findLinkBySTR(@Param(&quot;source&quot;) String source, @Param(&quot;target&quot;) String target, @Param(&quot;relation&quot;) String relation); @Transactional void deleteLinksBySource(String source); } LinkRepository繼承JpaRepository，它提供很多默認方法如基礎的CRUD: 即使在LinkRepository中沒有聲明find方法，在繼承JpaRepository后仍可依照規則調用。簡單來説，Spring Data JPA是可以讓使用者使用Interface和特定的Function Design來完成ORM的使用。例如在上述例子中，JpaRepository&lt;Link, Integer&gt;使用Link表(1-3-3), ID為Integer類型。Link類中有id, source, target, relation四列；則LinkRepository默認就擁有下列方法: findById(Integer id) ... findAll() deleteById(Integer id) ... deleteAll() save(Link link) ... 可以節省很多時間并且非常直觀，同時也接受Override改變其方法實現 @Transactional表示將此方法視爲一個事務，當此方法失敗則不會影響到其他的事務，若是此方法中其中一個操作失敗則全部一起失敗並rollback數據(可以定義rollback rules) @Query表示詳細的SQL語句，有很多屬性和規則，可在官方文檔查詢 @Param可以指定在SQL中使用:name來代替?1" /> <meta property="og:description" content="前後端分離系統開發介紹(1) 0. 前言 前端為一個項目，後端為一個項目，分別部署后前端調用後端提供的API，總體來説可以看作兩個獨立的項目。通過這樣可以使得雙方專注與自己的部分，并且修改其中一端并不會影響到另一端的運行情況 本次介紹案例都在本地執行，前端使用 Vue+Nginx；後端使用 Springboot+Tomcat springboot: 3.2.2 vue: 2.6.14 vuex: 3.6.2 nginx: 1.25.1 tomcat: 10.1.18 Springboot是SpringMVC的便捷版，可讓開發人員專注在開發細節上而非繁雜的配置； 另外Springboot嵌入在Tomcat、Jetty、Undertow上所以不需要額外部署它 體量比較: SpringMVC &lt; Spring &lt; Springboot Spring使用很多特殊的注解(annotation)作爲輔助，需要查閲官方文檔學習 Vue本次使用 Vue v2 + Vuex v3; Vuex是Vue的狀態管理模式庫，通俗來説就是管理流通在Vue中的各種數據。另外Vue項目對各類庫的版本兼容很狹隘，Vue2/Vue3對應的依賴版本相差很多，可以使用 npm audit fix 檢查全部依賴的關聯性；原生的Vue2 官方文檔 1. 後端 1.1 範例項目架構 -src -main -java -controller -bl(business logic) -blImpl(business logic Implementation) -vo -po(dto) -dao -utils -resources -application.yml -application-prod.yml -application-dev.yml -test 1.2 配置文件 項目裏的配置文件默認為src/main/resources/application.yaml或替代為application.properties，兩者語法不同需注意，下面是一個簡單的例子 spring: application: name: SpringbootDemo datasource: url: jdbc:mysql://localhost:3306/demo_table username: root password: root driver-class-name: com.mysql.cj.jdbc.Driver platform: mysql schema: classpath:schema.sql data: classpath:data.sql initialization: always mybatis: mapper-locations: classpath:mapper/*Mapper.xml server: port: 8090 還可以開發環境配置跟產品上線配置不同，在application.yaml中如下: spring: profiles: active: prod #switch prod/dev 然後生成application-prod.yaml和application-dev.yaml就可以切換 1.3 依賴文件 使用Maven管理項目依賴，下面是一個簡單的例子 &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt; &lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt; &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt; &lt;parent&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt; &lt;version&gt;2.5.5&lt;/version&gt; &lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt; &lt;/parent&gt; &lt;groupId&gt;com.example&lt;/groupId&gt; &lt;artifactId&gt;caseLibrary&lt;/artifactId&gt; &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt; &lt;name&gt;caseLibrary&lt;/name&gt; &lt;description&gt;Demo project for Spring Boot&lt;/description&gt; &lt;properties&gt; &lt;java.version&gt;8&lt;/java.version&gt; &lt;/properties&gt; &lt;dependencies&gt; &lt;dependency&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;org.springdoc&lt;/groupId&gt; &lt;artifactId&gt;springdoc-openapi-ui&lt;/artifactId&gt; &lt;version&gt;1.1.45&lt;/version&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt; &lt;scope&gt;runtime&lt;/scope&gt; &lt;optional&gt;true&lt;/optional&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;mysql&lt;/groupId&gt; &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt; &lt;version&gt;8.0.19&lt;/version&gt; &lt;scope&gt;runtime&lt;/scope&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt; &lt;scope&gt;test&lt;/scope&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt; &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt; &lt;version&gt;1.3.2&lt;/version&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;jdom&lt;/groupId&gt; &lt;artifactId&gt;jdom&lt;/artifactId&gt; &lt;version&gt;1.1&lt;/version&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;org.projectlombok&lt;/groupId&gt; &lt;artifactId&gt;lombok&lt;/artifactId&gt; &lt;version&gt;1.18.20&lt;/version&gt; &lt;/dependency&gt; &lt;/dependencies&gt; &lt;build&gt; &lt;plugins&gt; &lt;plugin&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt; &lt;/plugin&gt; &lt;/plugins&gt; &lt;/build&gt; &lt;/project&gt; 1.4 SpringBoot架構 Springboot開發還是遵循SpringMVC，只不過把其中的View部分轉換成獨立的一個項目而并非包含在Spring項目中，因此後端項目只負責到Controller層。詳細關係為Contorller中注入Service，Service中注入DAO，因此可以把它視爲三層結構。大致關係如下: Frontend -&gt; Controller -&gt; Service -&gt; Repository -&gt; Model(ORM) 1.4.0 Application Main Entrance 繼承 SpringBootServletInitializer 是要讓這個Springboot程序能以WAR包的形式部署到外部Servlet容器中 @SpringBootApplication public class CaseLibraryApplication extends SpringBootServletInitializer{ public static void main(String[] args) { SpringApplication.run(CaseLibraryApplication.class, args); } @Override protected SpringApplicationBuilder configure(SpringApplicationBuilder builder){ return builder.sources(BackendDemoApplication.class); } } 1.4.1 Controller層 @RestController @RequestMapping(&quot;/graph&quot;) public class GraphController { @Autowired private LawService lawService; @Autowired private LinkService linkService; @PostMapping(&quot;/getGraphData&quot;) public ResponseVO getGraphData(@RequestBody SearchTargetVO searchTargetVO){ return linkService.getLinks(searchTargetVO.getSearchTarget()); } @PostMapping(&quot;/addLink&quot;) public ResponseVO addLink(@RequestBody LinkVO linkVO){ return linkService.addLink(linkVO); } @PostMapping(&quot;/deleteLinks&quot;) public ResponseVO deleteLinks(@RequestBody SearchTargetVO searchTargetVO) { return linkService.deleteLink(searchTargetVO.getSearchTarget()); } } @RestController表示這個類是Controller層，并且創造的是REST API @RequestMapping表示HTTP Request的路徑 @Autowired將Service層的類注入到這層也就是Controller層 @PostMapping(&quot;/addLink&quot;)聲明HTTP Request的類別和路徑 @RequestBody可以使Controller接收到HTTP Client傳送的JSON數據，並將數據映射為預先設計好的Java類，例如在上述例子中的addLink()中的LinkVO類便是設計好的Java類，在設計層面上來説這個LinkVO屬於VO(Value Object)，屬於Controller響應前端請求后返回的數據格式，下面是LinkVO的例子: public class LinkVO { private String source; private String target; private String rela; public String getSource() { return source; } public void setSource(String source) { this.source = source; } public String getTarget() { return target; } public void setTarget(String target) { this.target = target; } public String getRela() { return rela; } public void setRela(String rela) { this.rela = rela; } } 有個好用的庫可以簡化手動生成Get/Set方法lombok: 使用時在maven中添加依賴 &lt;dependency&gt; &lt;groupId&gt;org.projectlombok&lt;/groupId&gt; &lt;artifactId&gt;lombok&lt;/artifactId&gt; &lt;version&gt;1.18.20&lt;/version&gt; &lt;/dependency&gt; 簡化項目中的DAO/PO/VO.etc，LinkVO便可簡化為: @Data public class LinkVO { private String source; private String target; private String rela; } 值得一提的是，ResponseVO是默認返回給前端的類，使得前端處理後端返回的數據時不會因爲不同API而有不同的預處理方法，下面是ResponseVO的設計可供參考: public class ResponseVO { // 表示這次請求是否成功 private Boolean success; // 顯示的訊息不管成功或者失敗 private String message; // 返回的數據 private Object content; public static ResponseVO buildSuccess(){ ResponseVO response=new ResponseVO(); response.setSuccess(true); return response; } public static ResponseVO buildSuccess(Object content){ ResponseVO response=new ResponseVO(); response.setContent(content); response.setSuccess(true); return response; } public static ResponseVO buildFailure(String message){ ResponseVO response=new ResponseVO(); response.setSuccess(false); response.setMessage(message); logger.error(message); return response; } } 1.4.2 Service層 也就是Business Logic層，是主要處理數據邏輯的模塊。所有的處理都在這層實現，並不會延申到Controller層(也就是說Controller層只是負責處理Http Request)。設計思路有很多，但是大體可以分爲兩部分: Service Interface和Service Implementation。Interface主要聲明要完成的方法，白話說就是TODO List；Implementation是實現Interface的模塊，下面提供一個例子: LinkService(Interface) public interface LinkService { ResponseVO getLinks(String lawTitle); ResponseVO enterFormData(); ResponseVO getRuleBySourceTitle(String searchTarget); ResponseVO addLink(LinkVO linkVO); ResponseVO deleteLink(String source); } LinkServiceImpl(Implementaiton) @Service public class LinkServiceImpl implements LinkService { @Autowired private LinkRepository linkRepository; @Override public ResponseVO getLinks(String lawTitle) { return ResponseVO.buildSuccess(linkRepository.findBySource(lawTitle)); } ... } @Service表示這個類屬於Service層 LinkRepository類為DAO層，所以在Service層中注入並使用 1.4.3 Model (PO) 在介紹Model和Repository之前，要先介紹Spring Data JPA與其餘ORM的關係。本次介紹使用Spring Data JPA并非傳統JPA Provider(如hibernate)，論層級來説它應該處於JPA之上JPA Provider之下，它默認使用hibernate來實現細節(可以在pom依賴下看到spring-data-jpa有子依賴hibernate-core)。它是獨立于Spring framework上的技術，并且不需要開發者實現細節，只需要根據規則套用注解即可。 @Entity @Table(name = &quot;link&quot;) @Data public class Link { @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Integer id; @NotNull @Column(name = &quot;source&quot;,columnDefinition = &quot;varchar(255)&quot;,nullable = false) private String source; @Column(name = &quot;target&quot;,columnDefinition = &quot;varchar(255)&quot;,nullable = false) private String target; @NotNull @Column(name = &quot;relationship&quot;,columnDefinition = &quot;varchar(255)&quot;,nullable = false) private String relation; } @Entity 是Spring Data JPA中的注解，通常來説添加這個注解就默認生成一個表(這個注解下的類)為表名 @Table(name = &quot;link&quot;)如果要指定特定表名則可以使用此注解 @Id @GeneratedValue 是每個表必要的Id列，@GeneratedValue則制定Id列生成規則 @Column聲明列 1.4.4 Repository (DAO) Spring Data JPA需要我們設計Repository的Interface，在運行過程中它會自動生成這個Repository的實現，避免我們手動生成冗長的代碼如Connection等。因此我們只需專注在SQL語句即可。另外，它兼容原生的SQL語句 public interface LinkRepository extends JpaRepository&lt;Link, Integer&gt; { List&lt;Link&gt; findBySource(String source); @Transactional @Query(value = &quot;select * from link where source like concat(&#39;%&#39;,:source,&#39;%&#39;)&quot;, nativeQuery = true) List&lt;Link&gt; searchBySource(String source); @Transactional @Query(value = &quot;select count(*) from link where &quot; + &quot;source like concat(&#39;%&#39;,:source,&#39;%&#39;) and &quot; + &quot;target like concat(&#39;%&#39;,:target,&#39;%&#39;) and &quot; + &quot;relationship like concat(&#39;%&#39;,:relation,&#39;%&#39;)&quot;, nativeQuery = true) Integer findLinkBySTR(@Param(&quot;source&quot;) String source, @Param(&quot;target&quot;) String target, @Param(&quot;relation&quot;) String relation); @Transactional void deleteLinksBySource(String source); } LinkRepository繼承JpaRepository，它提供很多默認方法如基礎的CRUD: 即使在LinkRepository中沒有聲明find方法，在繼承JpaRepository后仍可依照規則調用。簡單來説，Spring Data JPA是可以讓使用者使用Interface和特定的Function Design來完成ORM的使用。例如在上述例子中，JpaRepository&lt;Link, Integer&gt;使用Link表(1-3-3), ID為Integer類型。Link類中有id, source, target, relation四列；則LinkRepository默認就擁有下列方法: findById(Integer id) ... findAll() deleteById(Integer id) ... deleteAll() save(Link link) ... 可以節省很多時間并且非常直觀，同時也接受Override改變其方法實現 @Transactional表示將此方法視爲一個事務，當此方法失敗則不會影響到其他的事務，若是此方法中其中一個操作失敗則全部一起失敗並rollback數據(可以定義rollback rules) @Query表示詳細的SQL語句，有很多屬性和規則，可在官方文檔查詢 @Param可以指定在SQL中使用:name來代替?1" /> <link rel="canonical" href="http://localhost:4000/demo/2024/01/26/Separated-Frontend-&-Backend-System-Development(1).html" /> <meta property="og:url" content="http://localhost:4000/demo/2024/01/26/Separated-Frontend-&-Backend-System-Development(1).html" /> <meta property="og:site_name" content="Owen’s Blog" /> <meta property="og:type" content="article" /> <meta property="article:published_time" content="2024-01-26T09:04:02+08:00" /> <meta name="twitter:card" content="summary" /> <meta property="twitter:title" content="Separated Frontend &amp; Backend System Development(1)" /> <script type="application/ld+json"> {"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-01-26T09:04:02+08:00","datePublished":"2024-01-26T09:04:02+08:00","description":"前後端分離系統開發介紹(1) 0. 前言 前端為一個項目，後端為一個項目，分別部署后前端調用後端提供的API，總體來説可以看作兩個獨立的項目。通過這樣可以使得雙方專注與自己的部分，并且修改其中一端并不會影響到另一端的運行情況 本次介紹案例都在本地執行，前端使用 Vue+Nginx；後端使用 Springboot+Tomcat springboot: 3.2.2 vue: 2.6.14 vuex: 3.6.2 nginx: 1.25.1 tomcat: 10.1.18 Springboot是SpringMVC的便捷版，可讓開發人員專注在開發細節上而非繁雜的配置； 另外Springboot嵌入在Tomcat、Jetty、Undertow上所以不需要額外部署它 體量比較: SpringMVC &lt; Spring &lt; Springboot Spring使用很多特殊的注解(annotation)作爲輔助，需要查閲官方文檔學習 Vue本次使用 Vue v2 + Vuex v3; Vuex是Vue的狀態管理模式庫，通俗來説就是管理流通在Vue中的各種數據。另外Vue項目對各類庫的版本兼容很狹隘，Vue2/Vue3對應的依賴版本相差很多，可以使用 npm audit fix 檢查全部依賴的關聯性；原生的Vue2 官方文檔 1. 後端 1.1 範例項目架構 -src -main -java -controller -bl(business logic) -blImpl(business logic Implementation) -vo -po(dto) -dao -utils -resources -application.yml -application-prod.yml -application-dev.yml -test 1.2 配置文件 項目裏的配置文件默認為src/main/resources/application.yaml或替代為application.properties，兩者語法不同需注意，下面是一個簡單的例子 spring: application: name: SpringbootDemo datasource: url: jdbc:mysql://localhost:3306/demo_table username: root password: root driver-class-name: com.mysql.cj.jdbc.Driver platform: mysql schema: classpath:schema.sql data: classpath:data.sql initialization: always mybatis: mapper-locations: classpath:mapper/*Mapper.xml server: port: 8090 還可以開發環境配置跟產品上線配置不同，在application.yaml中如下: spring: profiles: active: prod #switch prod/dev 然後生成application-prod.yaml和application-dev.yaml就可以切換 1.3 依賴文件 使用Maven管理項目依賴，下面是一個簡單的例子 &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt; &lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt; &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt; &lt;parent&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt; &lt;version&gt;2.5.5&lt;/version&gt; &lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt; &lt;/parent&gt; &lt;groupId&gt;com.example&lt;/groupId&gt; &lt;artifactId&gt;caseLibrary&lt;/artifactId&gt; &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt; &lt;name&gt;caseLibrary&lt;/name&gt; &lt;description&gt;Demo project for Spring Boot&lt;/description&gt; &lt;properties&gt; &lt;java.version&gt;8&lt;/java.version&gt; &lt;/properties&gt; &lt;dependencies&gt; &lt;dependency&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;org.springdoc&lt;/groupId&gt; &lt;artifactId&gt;springdoc-openapi-ui&lt;/artifactId&gt; &lt;version&gt;1.1.45&lt;/version&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt; &lt;scope&gt;runtime&lt;/scope&gt; &lt;optional&gt;true&lt;/optional&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;mysql&lt;/groupId&gt; &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt; &lt;version&gt;8.0.19&lt;/version&gt; &lt;scope&gt;runtime&lt;/scope&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt; &lt;scope&gt;test&lt;/scope&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt; &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt; &lt;version&gt;1.3.2&lt;/version&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;jdom&lt;/groupId&gt; &lt;artifactId&gt;jdom&lt;/artifactId&gt; &lt;version&gt;1.1&lt;/version&gt; &lt;/dependency&gt; &lt;dependency&gt; &lt;groupId&gt;org.projectlombok&lt;/groupId&gt; &lt;artifactId&gt;lombok&lt;/artifactId&gt; &lt;version&gt;1.18.20&lt;/version&gt; &lt;/dependency&gt; &lt;/dependencies&gt; &lt;build&gt; &lt;plugins&gt; &lt;plugin&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt; &lt;/plugin&gt; &lt;/plugins&gt; &lt;/build&gt; &lt;/project&gt; 1.4 SpringBoot架構 Springboot開發還是遵循SpringMVC，只不過把其中的View部分轉換成獨立的一個項目而并非包含在Spring項目中，因此後端項目只負責到Controller層。詳細關係為Contorller中注入Service，Service中注入DAO，因此可以把它視爲三層結構。大致關係如下: Frontend -&gt; Controller -&gt; Service -&gt; Repository -&gt; Model(ORM) 1.4.0 Application Main Entrance 繼承 SpringBootServletInitializer 是要讓這個Springboot程序能以WAR包的形式部署到外部Servlet容器中 @SpringBootApplication public class CaseLibraryApplication extends SpringBootServletInitializer{ public static void main(String[] args) { SpringApplication.run(CaseLibraryApplication.class, args); } @Override protected SpringApplicationBuilder configure(SpringApplicationBuilder builder){ return builder.sources(BackendDemoApplication.class); } } 1.4.1 Controller層 @RestController @RequestMapping(&quot;/graph&quot;) public class GraphController { @Autowired private LawService lawService; @Autowired private LinkService linkService; @PostMapping(&quot;/getGraphData&quot;) public ResponseVO getGraphData(@RequestBody SearchTargetVO searchTargetVO){ return linkService.getLinks(searchTargetVO.getSearchTarget()); } @PostMapping(&quot;/addLink&quot;) public ResponseVO addLink(@RequestBody LinkVO linkVO){ return linkService.addLink(linkVO); } @PostMapping(&quot;/deleteLinks&quot;) public ResponseVO deleteLinks(@RequestBody SearchTargetVO searchTargetVO) { return linkService.deleteLink(searchTargetVO.getSearchTarget()); } } @RestController表示這個類是Controller層，并且創造的是REST API @RequestMapping表示HTTP Request的路徑 @Autowired將Service層的類注入到這層也就是Controller層 @PostMapping(&quot;/addLink&quot;)聲明HTTP Request的類別和路徑 @RequestBody可以使Controller接收到HTTP Client傳送的JSON數據，並將數據映射為預先設計好的Java類，例如在上述例子中的addLink()中的LinkVO類便是設計好的Java類，在設計層面上來説這個LinkVO屬於VO(Value Object)，屬於Controller響應前端請求后返回的數據格式，下面是LinkVO的例子: public class LinkVO { private String source; private String target; private String rela; public String getSource() { return source; } public void setSource(String source) { this.source = source; } public String getTarget() { return target; } public void setTarget(String target) { this.target = target; } public String getRela() { return rela; } public void setRela(String rela) { this.rela = rela; } } 有個好用的庫可以簡化手動生成Get/Set方法lombok: 使用時在maven中添加依賴 &lt;dependency&gt; &lt;groupId&gt;org.projectlombok&lt;/groupId&gt; &lt;artifactId&gt;lombok&lt;/artifactId&gt; &lt;version&gt;1.18.20&lt;/version&gt; &lt;/dependency&gt; 簡化項目中的DAO/PO/VO.etc，LinkVO便可簡化為: @Data public class LinkVO { private String source; private String target; private String rela; } 值得一提的是，ResponseVO是默認返回給前端的類，使得前端處理後端返回的數據時不會因爲不同API而有不同的預處理方法，下面是ResponseVO的設計可供參考: public class ResponseVO { // 表示這次請求是否成功 private Boolean success; // 顯示的訊息不管成功或者失敗 private String message; // 返回的數據 private Object content; public static ResponseVO buildSuccess(){ ResponseVO response=new ResponseVO(); response.setSuccess(true); return response; } public static ResponseVO buildSuccess(Object content){ ResponseVO response=new ResponseVO(); response.setContent(content); response.setSuccess(true); return response; } public static ResponseVO buildFailure(String message){ ResponseVO response=new ResponseVO(); response.setSuccess(false); response.setMessage(message); logger.error(message); return response; } } 1.4.2 Service層 也就是Business Logic層，是主要處理數據邏輯的模塊。所有的處理都在這層實現，並不會延申到Controller層(也就是說Controller層只是負責處理Http Request)。設計思路有很多，但是大體可以分爲兩部分: Service Interface和Service Implementation。Interface主要聲明要完成的方法，白話說就是TODO List；Implementation是實現Interface的模塊，下面提供一個例子: LinkService(Interface) public interface LinkService { ResponseVO getLinks(String lawTitle); ResponseVO enterFormData(); ResponseVO getRuleBySourceTitle(String searchTarget); ResponseVO addLink(LinkVO linkVO); ResponseVO deleteLink(String source); } LinkServiceImpl(Implementaiton) @Service public class LinkServiceImpl implements LinkService { @Autowired private LinkRepository linkRepository; @Override public ResponseVO getLinks(String lawTitle) { return ResponseVO.buildSuccess(linkRepository.findBySource(lawTitle)); } ... } @Service表示這個類屬於Service層 LinkRepository類為DAO層，所以在Service層中注入並使用 1.4.3 Model (PO) 在介紹Model和Repository之前，要先介紹Spring Data JPA與其餘ORM的關係。本次介紹使用Spring Data JPA并非傳統JPA Provider(如hibernate)，論層級來説它應該處於JPA之上JPA Provider之下，它默認使用hibernate來實現細節(可以在pom依賴下看到spring-data-jpa有子依賴hibernate-core)。它是獨立于Spring framework上的技術，并且不需要開發者實現細節，只需要根據規則套用注解即可。 @Entity @Table(name = &quot;link&quot;) @Data public class Link { @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Integer id; @NotNull @Column(name = &quot;source&quot;,columnDefinition = &quot;varchar(255)&quot;,nullable = false) private String source; @Column(name = &quot;target&quot;,columnDefinition = &quot;varchar(255)&quot;,nullable = false) private String target; @NotNull @Column(name = &quot;relationship&quot;,columnDefinition = &quot;varchar(255)&quot;,nullable = false) private String relation; } @Entity 是Spring Data JPA中的注解，通常來説添加這個注解就默認生成一個表(這個注解下的類)為表名 @Table(name = &quot;link&quot;)如果要指定特定表名則可以使用此注解 @Id @GeneratedValue 是每個表必要的Id列，@GeneratedValue則制定Id列生成規則 @Column聲明列 1.4.4 Repository (DAO) Spring Data JPA需要我們設計Repository的Interface，在運行過程中它會自動生成這個Repository的實現，避免我們手動生成冗長的代碼如Connection等。因此我們只需專注在SQL語句即可。另外，它兼容原生的SQL語句 public interface LinkRepository extends JpaRepository&lt;Link, Integer&gt; { List&lt;Link&gt; findBySource(String source); @Transactional @Query(value = &quot;select * from link where source like concat(&#39;%&#39;,:source,&#39;%&#39;)&quot;, nativeQuery = true) List&lt;Link&gt; searchBySource(String source); @Transactional @Query(value = &quot;select count(*) from link where &quot; + &quot;source like concat(&#39;%&#39;,:source,&#39;%&#39;) and &quot; + &quot;target like concat(&#39;%&#39;,:target,&#39;%&#39;) and &quot; + &quot;relationship like concat(&#39;%&#39;,:relation,&#39;%&#39;)&quot;, nativeQuery = true) Integer findLinkBySTR(@Param(&quot;source&quot;) String source, @Param(&quot;target&quot;) String target, @Param(&quot;relation&quot;) String relation); @Transactional void deleteLinksBySource(String source); } LinkRepository繼承JpaRepository，它提供很多默認方法如基礎的CRUD: 即使在LinkRepository中沒有聲明find方法，在繼承JpaRepository后仍可依照規則調用。簡單來説，Spring Data JPA是可以讓使用者使用Interface和特定的Function Design來完成ORM的使用。例如在上述例子中，JpaRepository&lt;Link, Integer&gt;使用Link表(1-3-3), ID為Integer類型。Link類中有id, source, target, relation四列；則LinkRepository默認就擁有下列方法: findById(Integer id) ... findAll() deleteById(Integer id) ... deleteAll() save(Link link) ... 可以節省很多時間并且非常直觀，同時也接受Override改變其方法實現 @Transactional表示將此方法視爲一個事務，當此方法失敗則不會影響到其他的事務，若是此方法中其中一個操作失敗則全部一起失敗並rollback數據(可以定義rollback rules) @Query表示詳細的SQL語句，有很多屬性和規則，可在官方文檔查詢 @Param可以指定在SQL中使用:name來代替?1","headline":"Separated Frontend &amp; Backend System Development(1)","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/demo/2024/01/26/Separated-Frontend-&-Backend-System-Development(1).html"},"url":"http://localhost:4000/demo/2024/01/26/Separated-Frontend-&-Backend-System-Development(1).html"}</script> <!-- End Jekyll SEO tag --> <!-- RSS --> <link rel="alternate" type="application/atom+xml" title="Owen's Blog" href="http://localhost:4000/feed.xml"/> <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Owen&apos;s Blog" /> <!-- Twitter Cards --> <meta name="twitter:title" content="Separated Frontend & Backend System Development(1)"> <meta name="twitter:description" content=" 前後端分離系統開發介紹(1) 0. 前言 前端為一個項目，後端為一個項目，分別部署后前端調用後端提供的API，總體來説可以看作兩個獨立的項目。通過這樣可以使得雙方專注與自己的部分，并且修改其中一端并不會影響到另一端的運行情況 本次介紹案例都在本地執行，前端..."> <meta name="twitter:card" content="summary"> <meta name="twitter:image" content="http://localhost:4000/assets/img/header/kali.jpg"> <meta name="twitter:image:alt" content="Separated Frontend & Backend System Development(1)"> </head>
+  <body>
+    
+    <header class="site-header"> <!-- Logo and title --> <div class="branding"> <a href="/"> <img alt="logo img" class="avatar" src="/assets/img/triangle.png" loading="lazy"/> </a> <a class="site-title" aria-label="Owen's Blog" href="/"> Owen's Blog </a> </div> <!-- Toggle menu --> <nav class="clear"> <a aria-label="pull" id="pull" class="toggle" href="#"> <i class="fas fa-bars fa-lg"></i> </a> <!-- Menu --> <ul class="hide"> <li class="separator"> | </li> <li> <a class="clear" aria-label="About" title="About" href="/about/"> <span class="navbar-label ">About</span> </a> </li> <li class="separator"> | </li> <li> <a class="clear" aria-label="Portfolio" title="Portfolio" href="/portfolio/"> <span class="navbar-label ">Portfolio</span> </a> </li> <li class="separator"> | </li> <li> <a class="clear" aria-label="Search" title="Search" href="/search/"> <i class="navbar-icon fas fa-search" aria-hidden="true"></i> <span class="navbar-label navbar-label-with-icon">Search</span> </a> </li> <li class="separator"> | </li> <li> <a class="clear" aria-label="Tags" title="Tags" href="/tags/"> <i class="navbar-icon fas fa-tags" aria-hidden="true"></i> <span class="navbar-label navbar-label-with-icon">Tags</span> </a> </li> <li class="separator"> | </li> <li><a id="theme-toggle" title="Separated Frontend & Backend System Development(1) " aria-label="Separated Frontend & Backend System Development(1)" onclick="themeToggle()"></a></li> </ul> </nav> </header>
+    <div class="content">
+      <article >
+    <header id="main" style="">
+        <div class="title-padder">
+            
+                <h1 id="Separated+Frontend+%26+Backend+System+Development%281%29" class="title">Separated Frontend & Backend System Development(1)</h1>
+                
+
+
+<div class="post-info">
+  <div class="post-meta">
+    
+    
+    <p class="meta">January 26, 2024</p>
+  </div>
+  
+</div>
+
+            
+        </div>
+    </header>
+
+    <section class="post-content">
+    
+            <html>
+<body>
+<div style="margin-top: 10px">
+
+      <h1 id="section">前後端分離系統開發介紹(1)</h1>
+
+      <h2 id="section-1">0. 前言</h2>
+      <p>前端為一個項目，後端為一個項目，分別部署后前端調用後端提供的API，總體來説可以看作兩個獨立的項目。通過這樣可以使得雙方專注與自己的部分，并且修改其中一端并不會影響到另一端的運行情況</p>
+      <ul>
+        <li>本次介紹案例都在本地執行，前端使用 <strong>Vue+Nginx</strong>；後端使用 <strong>Springboot+Tomcat</strong>
+          <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  springboot: 3.2.2
+  vue: 2.6.14
+  vuex: 3.6.2
+  nginx: 1.25.1
+  tomcat: 10.1.18
+</code></pre></div>          </div>
+        </li>
+        <li>Springboot是SpringMVC的便捷版，可讓開發人員專注在開發細節上而非繁雜的配置；
+另外Springboot嵌入在Tomcat、Jetty、Undertow上所以不需要額外部署它</li>
+        <li>體量比較: SpringMVC &lt; Spring &lt; Springboot</li>
+        <li>Spring使用很多特殊的注解(annotation)作爲輔助，需要查閲<a href="https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#data">官方文檔</a>學習</li>
+        <li>Vue本次使用 <strong>Vue v2 + Vuex v3</strong>; Vuex是Vue的狀態管理模式庫，通俗來説就是管理流通在Vue中的各種數據。另外Vue項目對各類庫的版本兼容很狹隘，Vue2/Vue3對應的依賴版本相差很多，可以使用 <code class="language-plaintext highlighter-rouge">npm audit fix</code> 檢查全部依賴的關聯性；原生的Vue2 <a href="https://v2.vuejs.org/v2/api">官方文檔</a></li>
+      </ul>
+
+      <h2 id="section-2">1. 後端</h2>
+      <h3 id="section-3">1.1 範例項目架構</h3>
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-src
+    -main
+        -java
+            -controller
+            -bl(business logic)
+            -blImpl(business logic Implementation)
+            -vo
+            -po(dto)
+            -dao
+            -utils
+        -resources
+            -application.yml
+            -application-prod.yml
+            -application-dev.yml
+    -test
+</code></pre></div>      </div>
+      <h3 id="section-4">1.2 配置文件</h3>
+      <p>項目裏的配置文件默認為<code class="language-plaintext highlighter-rouge">src/main/resources/application.yaml</code>或替代為<code class="language-plaintext highlighter-rouge">application.properties</code>，兩者語法不同需注意，下面是一個簡單的例子</p>
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>spring:
+  application:
+    name: SpringbootDemo
+  datasource:
+    url: jdbc:mysql://localhost:3306/demo_table
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    platform: mysql
+    schema: classpath:schema.sql
+    data: classpath:data.sql
+    initialization: always
+mybatis:
+  mapper-locations: classpath:mapper/*Mapper.xml
+server:
+  port: 8090
+</code></pre></div>      </div>
+      <ul>
+        <li>還可以開發環境配置跟產品上線配置不同，在<code class="language-plaintext highlighter-rouge">application.yaml</code>中如下:
+          <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>spring:
+profiles:
+  active: prod  #switch prod/dev
+</code></pre></div>          </div>
+          <p>然後生成<code class="language-plaintext highlighter-rouge">application-prod.yaml</code>和<code class="language-plaintext highlighter-rouge">application-dev.yaml</code>就可以切換</p>
+        </li>
+      </ul>
+
+      <h3 id="section-5">1.3 依賴文件</h3>
+      <p>使用Maven管理項目依賴，下面是一個簡單的例子</p>
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
+	&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+	&lt;parent&gt;
+		&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+		&lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+		&lt;version&gt;2.5.5&lt;/version&gt;
+		&lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;
+	&lt;/parent&gt;
+	&lt;groupId&gt;com.example&lt;/groupId&gt;
+	&lt;artifactId&gt;caseLibrary&lt;/artifactId&gt;
+	&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+	&lt;name&gt;caseLibrary&lt;/name&gt;
+	&lt;description&gt;Demo project for Spring Boot&lt;/description&gt;
+	&lt;properties&gt;
+		&lt;java.version&gt;8&lt;/java.version&gt;
+	&lt;/properties&gt;
+	&lt;dependencies&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;
+		&lt;/dependency&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+		&lt;/dependency&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springdoc&lt;/groupId&gt;
+			&lt;artifactId&gt;springdoc-openapi-ui&lt;/artifactId&gt;
+			&lt;version&gt;1.1.45&lt;/version&gt;
+		&lt;/dependency&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;
+			&lt;scope&gt;runtime&lt;/scope&gt;
+			&lt;optional&gt;true&lt;/optional&gt;
+		&lt;/dependency&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;mysql&lt;/groupId&gt;
+			&lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+			&lt;version&gt;8.0.19&lt;/version&gt;
+			&lt;scope&gt;runtime&lt;/scope&gt;
+		&lt;/dependency&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+			&lt;scope&gt;test&lt;/scope&gt;
+		&lt;/dependency&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;
+			&lt;version&gt;1.3.2&lt;/version&gt;
+		&lt;/dependency&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;jdom&lt;/groupId&gt;
+			&lt;artifactId&gt;jdom&lt;/artifactId&gt;
+			&lt;version&gt;1.1&lt;/version&gt;
+		&lt;/dependency&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.projectlombok&lt;/groupId&gt;
+			&lt;artifactId&gt;lombok&lt;/artifactId&gt;
+			&lt;version&gt;1.18.20&lt;/version&gt;
+		&lt;/dependency&gt;
+	&lt;/dependencies&gt;
+	&lt;build&gt;
+		&lt;plugins&gt;
+			&lt;plugin&gt;
+				&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+				&lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+			&lt;/plugin&gt;
+		&lt;/plugins&gt;
+	&lt;/build&gt;
+&lt;/project&gt;
+</code></pre></div>      </div>
+      <h3 id="springboot">1.4 SpringBoot架構</h3>
+      <p>Springboot開發還是遵循SpringMVC，只不過把其中的View部分轉換成獨立的一個項目而并非包含在Spring項目中，因此後端項目只負責到Controller層。詳細關係為Contorller中注入Service，Service中注入DAO，因此可以把它視爲三層結構。大致關係如下:</p>
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Frontend -&gt; Controller -&gt; Service -&gt; Repository -&gt; Model(ORM)
+</code></pre></div>      </div>
+      <h4 id="application-main-entrance">1.4.0 Application Main Entrance</h4>
+      <ul>
+        <li>繼承 <code class="language-plaintext highlighter-rouge">SpringBootServletInitializer</code> 是要讓這個Springboot程序能以WAR包的形式部署到外部Servlet容器中
+          <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@SpringBootApplication
+public class CaseLibraryApplication extends SpringBootServletInitializer{
+
+  public static void main(String[] args) {
+      SpringApplication.run(CaseLibraryApplication.class, args);
+  }
+
+  @Override
+  protected SpringApplicationBuilder configure(SpringApplicationBuilder builder){
+      return builder.sources(BackendDemoApplication.class);
+  }
+}
+</code></pre></div>          </div>
+          <h4 id="controller">1.4.1 Controller層</h4>
+          <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@RestController
+@RequestMapping("/graph")
+public class GraphController {
+  @Autowired
+  private LawService lawService;
+
+  @Autowired
+  private LinkService linkService;
+
+  @PostMapping("/getGraphData")
+  public ResponseVO getGraphData(@RequestBody SearchTargetVO searchTargetVO){
+      return linkService.getLinks(searchTargetVO.getSearchTarget());
+  }
+  @PostMapping("/addLink")
+  public ResponseVO addLink(@RequestBody LinkVO linkVO){
+      return linkService.addLink(linkVO);
+  }
+
+  @PostMapping("/deleteLinks")
+  public ResponseVO deleteLinks(@RequestBody SearchTargetVO searchTargetVO) {
+      return linkService.deleteLink(searchTargetVO.getSearchTarget());
+  }
+}
+</code></pre></div>          </div>
+        </li>
+        <li><code class="language-plaintext highlighter-rouge">@RestController</code>表示這個類是Controller層，并且創造的是REST API</li>
+        <li><code class="language-plaintext highlighter-rouge">@RequestMapping</code>表示HTTP Request的路徑</li>
+        <li><code class="language-plaintext highlighter-rouge">@Autowired</code>將Service層的類注入到這層也就是Controller層</li>
+        <li><code class="language-plaintext highlighter-rouge">@PostMapping("/addLink")</code>聲明HTTP Request的類別和路徑</li>
+        <li><code class="language-plaintext highlighter-rouge">@RequestBody</code>可以使Controller接收到HTTP Client傳送的JSON數據，並將數據映射為預先設計好的Java類，例如在上述例子中的<code class="language-plaintext highlighter-rouge">addLink()</code>中的<code class="language-plaintext highlighter-rouge">LinkVO</code>類便是設計好的Java類，在設計層面上來説這個<code class="language-plaintext highlighter-rouge">LinkVO</code>屬於VO(Value Object)，屬於Controller響應前端請求后返回的數據格式，下面是<code class="language-plaintext highlighter-rouge">LinkVO</code>的例子:
+          <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class LinkVO {
+  private String source;
+  private String target;
+  private String rela;
+  public String getSource() {
+      return source;
+  }
+  public void setSource(String source) {
+      this.source = source;
+  }
+  public String getTarget() {
+      return target;
+  }
+  public void setTarget(String target) {
+      this.target = target;
+  }
+  public String getRela() {
+      return rela;
+  }
+  public void setRela(String rela) {
+      this.rela = rela;
+  }
+}
+</code></pre></div>          </div>
+        </li>
+        <li>有個好用的庫可以簡化手動生成Get/Set方法<code class="language-plaintext highlighter-rouge">lombok</code>: 使用時在maven中添加依賴</li>
+      </ul>
+
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;dependency&gt;
+	&lt;groupId&gt;org.projectlombok&lt;/groupId&gt;
+	&lt;artifactId&gt;lombok&lt;/artifactId&gt;
+	&lt;version&gt;1.18.20&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre></div>      </div>
+
+      <p>簡化項目中的DAO/PO/VO.etc，<code class="language-plaintext highlighter-rouge">LinkVO</code>便可簡化為:</p>
+
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@Data
+public class LinkVO {
+    private String source;
+    private String target;
+    private String rela;
+}
+</code></pre></div>      </div>
+
+      <ul>
+        <li>值得一提的是，<code class="language-plaintext highlighter-rouge">ResponseVO</code>是默認返回給前端的類，使得前端處理後端返回的數據時不會因爲不同API而有不同的預處理方法，下面是<code class="language-plaintext highlighter-rouge">ResponseVO</code>的設計可供參考:</li>
+      </ul>
+
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class ResponseVO {
+    // 表示這次請求是否成功
+    private Boolean success;
+    // 顯示的訊息不管成功或者失敗
+    private String message;
+    // 返回的數據
+    private Object content;
+
+    public static ResponseVO buildSuccess(){
+        ResponseVO response=new ResponseVO();
+        response.setSuccess(true);
+        return response;
+    }
+    public static ResponseVO buildSuccess(Object content){
+        ResponseVO response=new ResponseVO();
+        response.setContent(content);
+        response.setSuccess(true);
+        return response;
+    }
+    public static ResponseVO buildFailure(String message){
+        ResponseVO response=new ResponseVO();
+        response.setSuccess(false);
+        response.setMessage(message);
+        logger.error(message);
+        return response;
+    }
+}
+</code></pre></div>      </div>
+
+      <h4 id="service">1.4.2 Service層</h4>
+      <p>也就是Business Logic層，是主要處理數據邏輯的模塊。所有的處理都在這層實現，並不會延申到Controller層(也就是說Controller層只是負責處理Http Request)。設計思路有很多，但是大體可以分爲兩部分: Service Interface和Service Implementation。Interface主要聲明要完成的方法，白話說就是TODO List；Implementation是實現Interface的模塊，下面提供一個例子:</p>
+      <ul>
+        <li>LinkService(Interface)</li>
+      </ul>
+
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public interface LinkService {
+    ResponseVO getLinks(String lawTitle);
+    ResponseVO enterFormData();
+    ResponseVO getRuleBySourceTitle(String searchTarget);
+    ResponseVO addLink(LinkVO linkVO);
+    ResponseVO deleteLink(String source);
+}
+</code></pre></div>      </div>
+
+      <ul>
+        <li>LinkServiceImpl(Implementaiton)</li>
+      </ul>
+
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@Service
+public class LinkServiceImpl implements LinkService {
+    @Autowired
+    private LinkRepository linkRepository;
+
+    @Override
+    public ResponseVO getLinks(String lawTitle) {
+        return ResponseVO.buildSuccess(linkRepository.findBySource(lawTitle));
+    }
+    ...
+}
+</code></pre></div>      </div>
+
+      <ul>
+        <li><code class="language-plaintext highlighter-rouge">@Service</code>表示這個類屬於Service層</li>
+        <li><code class="language-plaintext highlighter-rouge">LinkRepository</code>類為DAO層，所以在Service層中注入並使用
+          <h4 id="model-po">1.4.3 Model (PO)</h4>
+          <p>在介紹Model和Repository之前，要先介紹Spring Data JPA與其餘ORM的關係。本次介紹使用Spring Data JPA并非傳統JPA Provider(如hibernate)，論層級來説它應該處於JPA之上JPA Provider之下，它默認使用hibernate來實現細節(可以在pom依賴下看到spring-data-jpa有子依賴hibernate-core)。它是獨立于Spring framework上的技術，并且不需要開發者實現細節，只需要根據規則套用注解即可。</p>
+        </li>
+      </ul>
+
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@Entity
+@Table(name = "link")
+@Data
+public class Link {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @NotNull
+    @Column(name = "source",columnDefinition = "varchar(255)",nullable = false)
+    private String source;
+
+    @Column(name = "target",columnDefinition = "varchar(255)",nullable = false)
+    private String target;
+
+    @NotNull
+    @Column(name = "relationship",columnDefinition = "varchar(255)",nullable = false)
+    private String relation;
+}
+</code></pre></div>      </div>
+
+      <ul>
+        <li><code class="language-plaintext highlighter-rouge">@Entity</code> 是Spring Data JPA中的注解，通常來説添加這個注解就默認生成一個表(這個注解下的類)為表名</li>
+        <li><code class="language-plaintext highlighter-rouge">@Table(name = "link")</code>如果要指定特定表名則可以使用此注解</li>
+        <li><code class="language-plaintext highlighter-rouge">@Id</code> <code class="language-plaintext highlighter-rouge">@GeneratedValue</code> 是每個表必要的Id列，<code class="language-plaintext highlighter-rouge">@GeneratedValue</code>則制定Id列生成規則</li>
+        <li><code class="language-plaintext highlighter-rouge">@Column</code>聲明列
+          <h4 id="repository-dao">1.4.4 Repository (DAO)</h4>
+          <p>Spring Data JPA需要我們設計Repository的Interface，在運行過程中它會自動生成這個Repository的實現，避免我們手動生成冗長的代碼如Connection等。因此我們只需專注在SQL語句即可。另外，它兼容原生的SQL語句</p>
+        </li>
+      </ul>
+
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public interface LinkRepository extends JpaRepository&lt;Link, Integer&gt; {
+
+    List&lt;Link&gt; findBySource(String source);
+
+    @Transactional
+    @Query(value = "select * from link where source like concat('%',:source,'%')", nativeQuery = true)
+    List&lt;Link&gt; searchBySource(String source);
+
+    @Transactional
+    @Query(value = "select count(*) from link where " +
+            "source like concat('%',:source,'%') and " +
+            "target like concat('%',:target,'%') and " +
+            "relationship like concat('%',:relation,'%')",
+            nativeQuery = true)
+    Integer findLinkBySTR(@Param("source") String source, @Param("target") String target, @Param("relation") String relation);
+
+
+    @Transactional
+    void deleteLinksBySource(String source);
+}
+</code></pre></div>      </div>
+
+      <ul>
+        <li><code class="language-plaintext highlighter-rouge">LinkRepository</code>繼承<code class="language-plaintext highlighter-rouge">JpaRepository</code>，它提供很多默認方法如基礎的CRUD: 即使在<code class="language-plaintext highlighter-rouge">LinkRepository</code>中沒有聲明find方法，在繼承<code class="language-plaintext highlighter-rouge">JpaRepository</code>后仍可依照規則調用。簡單來説，Spring Data JPA是可以讓使用者使用Interface和特定的Function Design來完成ORM的使用。例如在上述例子中，<code class="language-plaintext highlighter-rouge">JpaRepository&lt;Link, Integer&gt;</code>使用<code class="language-plaintext highlighter-rouge">Link</code>表(1-3-3), ID為Integer類型。<code class="language-plaintext highlighter-rouge">Link</code>類中有id, source, target, relation四列；則LinkRepository默認就擁有下列方法:</li>
+      </ul>
+
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>findById(Integer id)
+...
+findAll()
+
+deleteById(Integer id)
+...
+deleteAll()
+
+save(Link link)
+...
+</code></pre></div>      </div>
+
+      <ul>
+        <li>可以節省很多時間并且非常直觀，同時也接受Override改變其方法實現</li>
+        <li><code class="language-plaintext highlighter-rouge">@Transactional</code>表示將此方法視爲一個事務，當此方法失敗則不會影響到其他的事務，若是此方法中其中一個操作失敗則全部一起失敗並rollback數據(可以定義rollback rules)</li>
+        <li><code class="language-plaintext highlighter-rouge">@Query</code>表示詳細的SQL語句，有很多屬性和規則，可在<a href="https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html">官方文檔</a>查詢</li>
+        <li><code class="language-plaintext highlighter-rouge">@Param</code>可以指定在SQL中使用<code class="language-plaintext highlighter-rouge">:name</code>來代替<code class="language-plaintext highlighter-rouge">?1</code></li>
+      </ul>
+
+    </div>
+</body>
+</html>
+
+    
+    </section>
+
+    <!-- Social media shares -->
+    
+
+<div class="share-buttons">
+    <ul class="share-buttons">
+        <li class="meta">Share</li>
+        
+        <li>
+            <a href="https://www.facebook.com/sharer/sharer.php?u=http://localhost:4000/demo/2024/01/26/Separated-Frontend-&-Backend-System-Development(1).html" target="_blank"
+               title=" Facebook">
+                <i class="fab fa-facebook-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on Facebook</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://twitter.com/intent/tweet?text=Separated+Frontend+%26+Backend+System+Development%281%29%20http%3A%2F%2Flocalhost%3A4000%2Fdemo%2F2024%2F01%2F26%2FSeparated-Frontend-%26-Backend-System-Development%281%29.html"
+               target="_blank" title="">
+                <i class="fab fa-twitter-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Tweet</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://www.tumblr.com/share?v=3&u=http://localhost:4000/demo/2024/01/26/Separated-Frontend-&-Backend-System-Development(1).html&quote=Separated+Frontend+%26+Backend+System+Development%281%29%20%7C%20Owen%27s+Blog&s="
+               target="_blank" title=" Tumblr">
+                <i class="fab fa-tumblr-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on Tumblr</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://pinterest.com/pin/create/button/?url=http://localhost:4000/demo/2024/01/26/Separated-Frontend-&-Backend-System-Development(1).html&media=$description=%0A%0A%0A%0A++++++%E5%89%8D%E5%BE%8C%E7%AB%AF%E5%88%86%E9%9B%A2%E7%B3%BB%E7%B5%B1%E9%96%8B%E7%99%BC%E4%BB%8B%E7%B4%B9%281%29%0A%0A++++++0.+%E5%89%8D%E8%A8%80%0A++++++%E5%89%8D%E7%AB%AF%E7%82%BA%E4%B8%80%E5%80%8B%E9%A0%85%E7%9B%AE%EF%BC%8C%E5%BE%8C%E7%AB%AF%E7%82%BA%E4%B8%80%E5%80%8B%E9%A0%85%E7%9B%AE%EF%BC%8C%E5%88%86%E5%88%A5%E9%83%A8%E7%BD%B2%E5%90%8E%E5%89%8D%E7%AB%AF%E8%AA%BF%E7%94%A8%E5%BE%8C%E7%AB%AF%E6%8F%90%E4%BE%9B%E7%9A%84API%EF%BC%8C%E7%B8%BD%E9%AB%94%E4%BE%86%E8%AA%AC%E5%8F%AF%E4%BB%A5%E7%9C%8B%E4%BD%9C%E5%85%A9%E5%80%8B%E7%8D%A8%E7%AB%8B%E7%9A%84%E9%A0%85%E7%9B%AE%E3%80%82%E9%80%9A%E9%81%8E%E9%80%99%E6%A8%A3%E5%8F%AF%E4%BB%A5%E4%BD%BF%E5%BE%97%E9%9B%99%E6%96%B9%E5%B0%88%E6%B3%A8%E8%88%87%E8%87%AA%E5%B7%B1%E7%9A%84%E9%83%A8%E5%88%86%EF%BC%8C%E5%B9%B6%E4%B8%94%E4%BF%AE%E6%94%B9%E5%85%B6%E4%B8%AD%E4%B8%80%E7%AB%AF%E5%B9%B6%E4%B8%8D%E6%9C%83%E5%BD%B1%E9%9F%BF%E5%88%B0%E5%8F%A6%E4%B8%80%E7%AB%AF%E7%9A%84%E9%81%8B%E8%A1%8C%E6%83%85%E6%B3%81%0A++++++%0A++++++++%E6%9C%AC%E6%AC%A1%E4%BB%8B%E7%B4%B9%E6%A1%88%E4%BE%8B%E9%83%BD%E5%9C%A8%E6%9C%AC%E5%9C%B0%E5%9F%B7%E8%A1%8C%EF%BC%8C%E5%89%8D%E7%AB%AF%E4%BD%BF%E7%94%A8+Vue%2BNginx%EF%BC%9B%E5%BE%8C%E7%AB%AF%E4%BD%BF%E7%94%A8+Springboot%2BTomcat%0A++++++++++++springboot%3A+3.2.2%0A++vue%3A+2.6.14%0A++vuex%3A+3.6.2%0A++nginx%3A+1.25.1%0A++tomcat%3A+10.1.18%0A++++++++++%0A++++++++%0A++++++++Springboot%E6%98%AFSpringMVC%E7%9A%84%E4%BE%BF%E6%8D%B7%E7%89%88%EF%BC%8C%E5%8F%AF%E8%AE%93%E9%96%8B%E7%99%BC%E4%BA%BA%E5%93%A1%E5%B0%88%E6%B3%A8%E5%9C%A8%E9%96%8B%E7%99%BC%E7%B4%B0%E7%AF%80%E4%B8%8A%E8%80%8C%E9%9D%9E%E7%B9%81%E9%9B%9C%E7%9A%84%E9%85%8D%E7%BD%AE%EF%BC%9B%0A%E5%8F%A6%E5%A4%96Springboot%E5%B5%8C%E5%85%A5%E5%9C%A8Tomcat%E3%80%81Jetty%E3%80%81Undertow%E4%B8%8A%E6%89%80%E4%BB%A5%E4%B8%8D%E9%9C%80%E8%A6%81%E9%A1%8D%E5%A4%96%E9%83%A8%E7%BD%B2%E5%AE%83%0A++++++++%E9%AB%94%E9%87%8F%E6%AF%94%E8%BC%83%3A+SpringMVC+%26lt%3B+Spring+%26lt%3B+Springboot%0A++++++++Spring%E4%BD%BF%E7%94%A8%E5%BE%88%E5%A4%9A%E7%89%B9%E6%AE%8A%E7%9A%84%E6%B3%A8%E8%A7%A3%28annotation%29%E4%BD%9C%E7%88%B2%E8%BC%94%E5%8A%A9%EF%BC%8C%E9%9C%80%E8%A6%81%E6%9F%A5%E9%96%B2%E5%AE%98%E6%96%B9%E6%96%87%E6%AA%94%E5%AD%B8%E7%BF%92%0A++++++++Vue%E6%9C%AC%E6%AC%A1%E4%BD%BF%E7%94%A8+Vue+v2+%2B+Vuex+v3%3B+Vuex%E6%98%AFVue%E7%9A%84%E7%8B%80%E6%85%8B%E7%AE%A1%E7%90%86%E6%A8%A1%E5%BC%8F%E5%BA%AB%EF%BC%8C%E9%80%9A%E4%BF%97%E4%BE%86%E8%AA%AC%E5%B0%B1%E6%98%AF%E7%AE%A1%E7%90%86%E6%B5%81%E9%80%9A%E5%9C%A8Vue%E4%B8%AD%E7%9A%84%E5%90%84%E7%A8%AE%E6%95%B8%E6%93%9A%E3%80%82%E5%8F%A6%E5%A4%96Vue%E9%A0%85%E7%9B%AE%E5%B0%8D%E5%90%84%E9%A1%9E%E5%BA%AB%E7%9A%84%E7%89%88%E6%9C%AC%E5%85%BC%E5%AE%B9%E5%BE%88%E7%8B%B9%E9%9A%98%EF%BC%8CVue2%2FVue3%E5%B0%8D%E6%87%89%E7%9A%84%E4%BE%9D%E8%B3%B4%E7%89%88%E6%9C%AC%E7%9B%B8%E5%B7%AE%E5%BE%88%E5%A4%9A%EF%BC%8C%E5%8F%AF%E4%BB%A5%E4%BD%BF%E7%94%A8+npm+audit+fix+%E6%AA%A2%E6%9F%A5%E5%85%A8%E9%83%A8%E4%BE%9D%E8%B3%B4%E7%9A%84%E9%97%9C%E8%81%AF%E6%80%A7%EF%BC%9B%E5%8E%9F%E7%94%9F%E7%9A%84Vue2+%E5%AE%98%E6%96%B9%E6%96%87%E6%AA%94%0A++++++%0A%0A++++++1.+%E5%BE%8C%E7%AB%AF%0A++++++1.1+%E7%AF%84%E4%BE%8B%E9%A0%85%E7%9B%AE%E6%9E%B6%E6%A7%8B%0A++++++-src%0A++++-main%0A++++++++-java%0A++++++++++++-controller%0A++++++++++++-bl%28business+logic%29%0A++++++++++++-blImpl%28business+logic+Implementation%29%0A++++++++++++-vo%0A++++++++++++-po%28dto%29%0A++++++++++++-dao%0A++++++++++++-utils%0A++++++++-resources%0A++++++++++++-application.yml%0A++++++++++++-application-prod.yml%0A++++++++++++-application-dev.yml%0A++++-test%0A++++++%0A++++++1.2+%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%0A++++++%E9%A0%85%E7%9B%AE%E8%A3%8F%E7%9A%84%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E9%BB%98%E8%AA%8D%E7%82%BAsrc%2Fmain%2Fresources%2Fapplication.yaml%E6%88%96%E6%9B%BF%E4%BB%A3%E7%82%BAapplication.properties%EF%BC%8C%E5%85%A9%E8%80%85%E8%AA%9E%E6%B3%95%E4%B8%8D%E5%90%8C%E9%9C%80%E6%B3%A8%E6%84%8F%EF%BC%8C%E4%B8%8B%E9%9D%A2%E6%98%AF%E4%B8%80%E5%80%8B%E7%B0%A1%E5%96%AE%E7%9A%84%E4%BE%8B%E5%AD%90%0A++++++spring%3A%0A++application%3A%0A++++name%3A+SpringbootDemo%0A++datasource%3A%0A++++url%3A+jdbc%3Amysql%3A%2F%2Flocalhost%3A3306%2Fdemo_table%0A++++username%3A+root%0A++++password%3A+root%0A++++driver-class-name%3A+com.mysql.cj.jdbc.Driver%0A++++platform%3A+mysql%0A++++schema%3A+classpath%3Aschema.sql%0A++++data%3A+classpath%3Adata.sql%0A++++initialization%3A+always%0Amybatis%3A%0A++mapper-locations%3A+classpath%3Amapper%2F%2AMapper.xml%0Aserver%3A%0A++port%3A+8090%0A++++++%0A++++++%0A++++++++%E9%82%84%E5%8F%AF%E4%BB%A5%E9%96%8B%E7%99%BC%E7%92%B0%E5%A2%83%E9%85%8D%E7%BD%AE%E8%B7%9F%E7%94%A2%E5%93%81%E4%B8%8A%E7%B7%9A%E9%85%8D%E7%BD%AE%E4%B8%8D%E5%90%8C%EF%BC%8C%E5%9C%A8application.yaml%E4%B8%AD%E5%A6%82%E4%B8%8B%3A%0A++++++++++spring%3A%0Aprofiles%3A%0A++active%3A+prod++%23switch+prod%2Fdev%0A++++++++++%0A++++++++++%E7%84%B6%E5%BE%8C%E7%94%9F%E6%88%90application-prod.yaml%E5%92%8Capplication-dev.yaml%E5%B0%B1%E5%8F%AF%E4%BB%A5%E5%88%87%E6%8F%9B%0A++++++++%0A++++++%0A%0A++++++1.3+%E4%BE%9D%E8%B3%B4%E6%96%87%E4%BB%B6%0A++++++%E4%BD%BF%E7%94%A8Maven%E7%AE%A1%E7%90%86%E9%A0%85%E7%9B%AE%E4%BE%9D%E8%B3%B4%EF%BC%8C%E4%B8%8B%E9%9D%A2%E6%98%AF%E4%B8%80%E5%80%8B%E7%B0%A1%E5%96%AE%E7%9A%84%E4%BE%8B%E5%AD%90%0A++++++%26lt%3B%3Fxml+version%3D%221.0%22+encoding%3D%22UTF-8%22%3F%26gt%3B%0A%26lt%3Bproject+xmlns%3D%22http%3A%2F%2Fmaven.apache.org%2FPOM%2F4.0.0%22+xmlns%3Axsi%3D%22http%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema-instance%22%0A%09%09+xsi%3AschemaLocation%3D%22http%3A%2F%2Fmaven.apache.org%2FPOM%2F4.0.0+https%3A%2F%2Fmaven.apache.org%2Fxsd%2Fmaven-4.0.0.xsd%22%26gt%3B%0A%09%26lt%3BmodelVersion%26gt%3B4.0.0%26lt%3B%2FmodelVersion%26gt%3B%0A%09%26lt%3Bparent%26gt%3B%0A%09%09%26lt%3BgroupId%26gt%3Borg.springframework.boot%26lt%3B%2FgroupId%26gt%3B%0A%09%09%26lt%3BartifactId%26gt%3Bspring-boot-starter-parent%26lt%3B%2FartifactId%26gt%3B%0A%09%09%26lt%3Bversion%26gt%3B2.5.5%26lt%3B%2Fversion%26gt%3B%0A%09%09%26lt%3BrelativePath%2F%26gt%3B+%26lt%3B%21--+lookup+parent+from+repository+--%26gt%3B%0A%09%26lt%3B%2Fparent%26gt%3B%0A%09%26lt%3BgroupId%26gt%3Bcom.example%26lt%3B%2FgroupId%26gt%3B%0A%09%26lt%3BartifactId%26gt%3BcaseLibrary%26lt%3B%2FartifactId%26gt%3B%0A%09%26lt%3Bversion%26gt%3B0.0.1-SNAPSHOT%26lt%3B%2Fversion%26gt%3B%0A%09%26lt%3Bname%26gt%3BcaseLibrary%26lt%3B%2Fname%26gt%3B%0A%09%26lt%3Bdescription%26gt%3BDemo+project+for+Spring+Boot%26lt%3B%2Fdescription%26gt%3B%0A%09%26lt%3Bproperties%26gt%3B%0A%09%09%26lt%3Bjava.version%26gt%3B8%26lt%3B%2Fjava.version%26gt%3B%0A%09%26lt%3B%2Fproperties%26gt%3B%0A%09%26lt%3Bdependencies%26gt%3B%0A%09%09%26lt%3Bdependency%26gt%3B%0A%09%09%09%26lt%3BgroupId%26gt%3Borg.springframework.boot%26lt%3B%2FgroupId%26gt%3B%0A%09%09%09%26lt%3BartifactId%26gt%3Bspring-boot-starter-data-jpa%26lt%3B%2FartifactId%26gt%3B%0A%09%09%26lt%3B%2Fdependency%26gt%3B%0A%09%09%26lt%3Bdependency%26gt%3B%0A%09%09%09%26lt%3BgroupId%26gt%3Borg.springframework.boot%26lt%3B%2FgroupId%26gt%3B%0A%09%09%09%26lt%3BartifactId%26gt%3Bspring-boot-starter-web%26lt%3B%2FartifactId%26gt%3B%0A%09%09%26lt%3B%2Fdependency%26gt%3B%0A%09%09%26lt%3Bdependency%26gt%3B%0A%09%09%09%26lt%3BgroupId%26gt%3Borg.springdoc%26lt%3B%2FgroupId%26gt%3B%0A%09%09%09%26lt%3BartifactId%26gt%3Bspringdoc-openapi-ui%26lt%3B%2FartifactId%26gt%3B%0A%09%09%09%26lt%3Bversion%26gt%3B1.1.45%26lt%3B%2Fversion%26gt%3B%0A%09%09%26lt%3B%2Fdependency%26gt%3B%0A%09%09%26lt%3Bdependency%26gt%3B%0A%09%09%09%26lt%3BgroupId%26gt%3Borg.springframework.boot%26lt%3B%2FgroupId%26gt%3B%0A%09%09%09%26lt%3BartifactId%26gt%3Bspring-boot-devtools%26lt%3B%2FartifactId%26gt%3B%0A%09%09%09%26lt%3Bscope%26gt%3Bruntime%26lt%3B%2Fscope%26gt%3B%0A%09%09%09%26lt%3Boptional%26gt%3Btrue%26lt%3B%2Foptional%26gt%3B%0A%09%09%26lt%3B%2Fdependency%26gt%3B%0A%09%09%26lt%3Bdependency%26gt%3B%0A%09%09%09%26lt%3BgroupId%26gt%3Bmysql%26lt%3B%2FgroupId%26gt%3B%0A%09%09%09%26lt%3BartifactId%26gt%3Bmysql-connector-java%26lt%3B%2FartifactId%26gt%3B%0A%09%09%09%26lt%3Bversion%26gt%3B8.0.19%26lt%3B%2Fversion%26gt%3B%0A%09%09%09%26lt%3Bscope%26gt%3Bruntime%26lt%3B%2Fscope%26gt%3B%0A%09%09%26lt%3B%2Fdependency%26gt%3B%0A%09%09%26lt%3Bdependency%26gt%3B%0A%09%09%09%26lt%3BgroupId%26gt%3Borg.springframework.boot%26lt%3B%2FgroupId%26gt%3B%0A%09%09%09%26lt%3BartifactId%26gt%3Bspring-boot-starter-test%26lt%3B%2FartifactId%26gt%3B%0A%09%09%09%26lt%3Bscope%26gt%3Btest%26lt%3B%2Fscope%26gt%3B%0A%09%09%26lt%3B%2Fdependency%26gt%3B%0A%09%09%26lt%3Bdependency%26gt%3B%0A%09%09%09%26lt%3BgroupId%26gt%3Borg.mybatis.spring.boot%26lt%3B%2FgroupId%26gt%3B%0A%09%09%09%26lt%3BartifactId%26gt%3Bmybatis-spring-boot-starter%26lt%3B%2FartifactId%26gt%3B%0A%09%09%09%26lt%3Bversion%26gt%3B1.3.2%26lt%3B%2Fversion%26gt%3B%0A%09%09%26lt%3B%2Fdependency%26gt%3B%0A%09%09%26lt%3Bdependency%26gt%3B%0A%09%09%09%26lt%3BgroupId%26gt%3Bjdom%26lt%3B%2FgroupId%26gt%3B%0A%09%09%09%26lt%3BartifactId%26gt%3Bjdom%26lt%3B%2FartifactId%26gt%3B%0A%09%09%09%26lt%3Bversion%26gt%3B1.1%26lt%3B%2Fversion%26gt%3B%0A%09%09%26lt%3B%2Fdependency%26gt%3B%0A%09%09%26lt%3Bdependency%26gt%3B%0A%09%09%09%26lt%3BgroupId%26gt%3Borg.projectlombok%26lt%3B%2FgroupId%26gt%3B%0A%09%09%09%26lt%3BartifactId%26gt%3Blombok%26lt%3B%2FartifactId%26gt%3B%0A%09%09%09%26lt%3Bversion%26gt%3B1.18.20%26lt%3B%2Fversion%26gt%3B%0A%09%09%26lt%3B%2Fdependency%26gt%3B%0A%09%26lt%3B%2Fdependencies%26gt%3B%0A%09%26lt%3Bbuild%26gt%3B%0A%09%09%26lt%3Bplugins%26gt%3B%0A%09%09%09%26lt%3Bplugin%26gt%3B%0A%09%09%09%09%26lt%3BgroupId%26gt%3Borg.springframework.boot%26lt%3B%2FgroupId%26gt%3B%0A%09%09%09%09%26lt%3BartifactId%26gt%3Bspring-boot-maven-plugin%26lt%3B%2FartifactId%26gt%3B%0A%09%09%09%26lt%3B%2Fplugin%26gt%3B%0A%09%09%26lt%3B%2Fplugins%26gt%3B%0A%09%26lt%3B%2Fbuild%26gt%3B%0A%26lt%3B%2Fproject%26gt%3B%0A++++++%0A++++++1.4+SpringBoot%E6%9E%B6%E6%A7%8B%0A++++++Springboot%E9%96%8B%E7%99%BC%E9%82%84%E6%98%AF%E9%81%B5%E5%BE%AASpringMVC%EF%BC%8C%E5%8F%AA%E4%B8%8D%E9%81%8E%E6%8A%8A%E5%85%B6%E4%B8%AD%E7%9A%84View%E9%83%A8%E5%88%86%E8%BD%89%E6%8F%9B%E6%88%90%E7%8D%A8%E7%AB%8B%E7%9A%84%E4%B8%80%E5%80%8B%E9%A0%85%E7%9B%AE%E8%80%8C%E5%B9%B6%E9%9D%9E%E5%8C%85%E5%90%AB%E5%9C%A8Spring%E9%A0%85%E7%9B%AE%E4%B8%AD%EF%BC%8C%E5%9B%A0%E6%AD%A4%E5%BE%8C%E7%AB%AF%E9%A0%85%E7%9B%AE%E5%8F%AA%E8%B2%A0%E8%B2%AC%E5%88%B0Controller%E5%B1%A4%E3%80%82%E8%A9%B3%E7%B4%B0%E9%97%9C%E4%BF%82%E7%82%BAContorller%E4%B8%AD%E6%B3%A8%E5%85%A5Service%EF%BC%8CService%E4%B8%AD%E6%B3%A8%E5%85%A5DAO%EF%BC%8C%E5%9B%A0%E6%AD%A4%E5%8F%AF%E4%BB%A5%E6%8A%8A%E5%AE%83%E8%A6%96%E7%88%B2%E4%B8%89%E5%B1%A4%E7%B5%90%E6%A7%8B%E3%80%82%E5%A4%A7%E8%87%B4%E9%97%9C%E4%BF%82%E5%A6%82%E4%B8%8B%3A%0A++++++Frontend+-%26gt%3B+Controller+-%26gt%3B+Service+-%26gt%3B+Repository+-%26gt%3B+Model%28ORM%29%0A++++++%0A++++++1.4.0+Application+Main+Entrance%0A++++++%0A++++++++%E7%B9%BC%E6%89%BF+SpringBootServletInitializer+%E6%98%AF%E8%A6%81%E8%AE%93%E9%80%99%E5%80%8BSpringboot%E7%A8%8B%E5%BA%8F%E8%83%BD%E4%BB%A5WAR%E5%8C%85%E7%9A%84%E5%BD%A2%E5%BC%8F%E9%83%A8%E7%BD%B2%E5%88%B0%E5%A4%96%E9%83%A8Servlet%E5%AE%B9%E5%99%A8%E4%B8%AD%0A++++++++++%40SpringBootApplication%0Apublic+class+CaseLibraryApplication+extends+SpringBootServletInitializer%7B%0A%0A++public+static+void+main%28String%5B%5D+args%29+%7B%0A++++++SpringApplication.run%28CaseLibraryApplication.class%2C+args%29%3B%0A++%7D%0A%0A++%40Override%0A++protected+SpringApplicationBuilder+configure%28SpringApplicationBuilder+builder%29%7B%0A++++++return+builder.sources%28BackendDemoApplication.class%29%3B%0A++%7D%0A%7D%0A++++++++++%0A++++++++++1.4.1+Controller%E5%B1%A4%0A++++++++++%40RestController%0A%40RequestMapping%28%22%2Fgraph%22%29%0Apublic+class+GraphController+%7B%0A++%40Autowired%0A++private+LawService+lawService%3B%0A%0A++%40Autowired%0A++private+LinkService+linkService%3B%0A%0A++%40PostMapping%28%22%2FgetGraphData%22%29%0A++public+ResponseVO+getGraphData%28%40RequestBody+SearchTargetVO+searchTargetVO%29%7B%0A++++++return+linkService.getLinks%28searchTargetVO.getSearchTarget%28%29%29%3B%0A++%7D%0A++%40PostMapping%28%22%2FaddLink%22%29%0A++public+ResponseVO+addLink%28%40RequestBody+LinkVO+linkVO%29%7B%0A++++++return+linkService.addLink%28linkVO%29%3B%0A++%7D%0A%0A++%40PostMapping%28%22%2FdeleteLinks%22%29%0A++public+ResponseVO+deleteLinks%28%40RequestBody+SearchTargetVO+searchTargetVO%29+%7B%0A++++++return+linkService.deleteLink%28searchTargetVO.getSearchTarget%28%29%29%3B%0A++%7D%0A%7D%0A++++++++++%0A++++++++%0A++++++++%40RestController%E8%A1%A8%E7%A4%BA%E9%80%99%E5%80%8B%E9%A1%9E%E6%98%AFController%E5%B1%A4%EF%BC%8C%E5%B9%B6%E4%B8%94%E5%89%B5%E9%80%A0%E7%9A%84%E6%98%AFREST+API%0A++++++++%40RequestMapping%E8%A1%A8%E7%A4%BAHTTP+Request%E7%9A%84%E8%B7%AF%E5%BE%91%0A++++++++%40Autowired%E5%B0%87Service%E5%B1%A4%E7%9A%84%E9%A1%9E%E6%B3%A8%E5%85%A5%E5%88%B0%E9%80%99%E5%B1%A4%E4%B9%9F%E5%B0%B1%E6%98%AFController%E5%B1%A4%0A++++++++%40PostMapping%28%22%2FaddLink%22%29%E8%81%B2%E6%98%8EHTTP+Request%E7%9A%84%E9%A1%9E%E5%88%A5%E5%92%8C%E8%B7%AF%E5%BE%91%0A++++++++%40RequestBody%E5%8F%AF%E4%BB%A5%E4%BD%BFController%E6%8E%A5%E6%94%B6%E5%88%B0HTTP+Client%E5%82%B3%E9%80%81%E7%9A%84JSON%E6%95%B8%E6%93%9A%EF%BC%8C%E4%B8%A6%E5%B0%87%E6%95%B8%E6%93%9A%E6%98%A0%E5%B0%84%E7%82%BA%E9%A0%90%E5%85%88%E8%A8%AD%E8%A8%88%E5%A5%BD%E7%9A%84Java%E9%A1%9E%EF%BC%8C%E4%BE%8B%E5%A6%82%E5%9C%A8%E4%B8%8A%E8%BF%B0%E4%BE%8B%E5%AD%90%E4%B8%AD%E7%9A%84addLink%28%29%E4%B8%AD%E7%9A%84LinkVO%E9%A1%9E%E4%BE%BF%E6%98%AF%E8%A8%AD%E8%A8%88%E5%A5%BD%E7%9A%84Java%E9%A1%9E%EF%BC%8C%E5%9C%A8%E8%A8%AD%E8%A8%88%E5%B1%A4%E9%9D%A2%E4%B8%8A%E4%BE%86%E8%AA%AC%E9%80%99%E5%80%8BLinkVO%E5%B1%AC%E6%96%BCVO%28Value+Object%29%EF%BC%8C%E5%B1%AC%E6%96%BCController%E9%9F%BF%E6%87%89%E5%89%8D%E7%AB%AF%E8%AB%8B%E6%B1%82%E5%90%8E%E8%BF%94%E5%9B%9E%E7%9A%84%E6%95%B8%E6%93%9A%E6%A0%BC%E5%BC%8F%EF%BC%8C%E4%B8%8B%E9%9D%A2%E6%98%AFLinkVO%E7%9A%84%E4%BE%8B%E5%AD%90%3A%0A++++++++++public+class+LinkVO+%7B%0A++private+String+source%3B%0A++private+String+target%3B%0A++private+String+rela%3B%0A++public+String+getSource%28%29+%7B%0A++++++return+source%3B%0A++%7D%0A++public+void+setSource%28String+source%29+%7B%0A++++++this.source+%3D+source%3B%0A++%7D%0A++public+String+getTarget%28%29+%7B%0A++++++return+target%3B%0A++%7D%0A++public+void+setTarget%28String+target%29+%7B%0A++++++this.target+%3D+target%3B%0A++%7D%0A++public+String+getRela%28%29+%7B%0A++++++return+rela%3B%0A++%7D%0A++public+void+setRela%28String+rela%29+%7B%0A++++++this.rela+%3D+rela%3B%0A++%7D%0A%7D%0A++++++++++%0A++++++++%0A++++++++%E6%9C%89%E5%80%8B%E5%A5%BD%E7%94%A8%E7%9A%84%E5%BA%AB%E5%8F%AF%E4%BB%A5%E7%B0%A1%E5%8C%96%E6%89%8B%E5%8B%95%E7%94%9F%E6%88%90Get%2FSet%E6%96%B9%E6%B3%95lombok%3A+%E4%BD%BF%E7%94%A8%E6%99%82%E5%9C%A8maven%E4%B8%AD%E6%B7%BB%E5%8A%A0%E4%BE%9D%E8%B3%B4%0A++++++%0A%0A++++++%26lt%3Bdependency%26gt%3B%0A%09%26lt%3BgroupId%26gt%3Borg.projectlombok%26lt%3B%2FgroupId%26gt%3B%0A%09%26lt%3BartifactId%26gt%3Blombok%26lt%3B%2FartifactId%26gt%3B%0A%09%26lt%3Bversion%26gt%3B1.18.20%26lt%3B%2Fversion%26gt%3B%0A%26lt%3B%2Fdependency%26gt%3B%0A++++++%0A%0A++++++%E7%B0%A1%E5%8C%96%E9%A0%85%E7%9B%AE%E4%B8%AD%E7%9A%84DAO%2FPO%2FVO.etc%EF%BC%8CLinkVO%E4%BE%BF%E5%8F%AF%E7%B0%A1%E5%8C%96%E7%82%BA%3A%0A%0A++++++%40Data%0Apublic+class+LinkVO+%7B%0A++++private+String+source%3B%0A++++private+String+target%3B%0A++++private+String+rela%3B%0A%7D%0A++++++%0A%0A++++++%0A++++++++%E5%80%BC%E5%BE%97%E4%B8%80%E6%8F%90%E7%9A%84%E6%98%AF%EF%BC%8CResponseVO%E6%98%AF%E9%BB%98%E8%AA%8D%E8%BF%94%E5%9B%9E%E7%B5%A6%E5%89%8D%E7%AB%AF%E7%9A%84%E9%A1%9E%EF%BC%8C%E4%BD%BF%E5%BE%97%E5%89%8D%E7%AB%AF%E8%99%95%E7%90%86%E5%BE%8C%E7%AB%AF%E8%BF%94%E5%9B%9E%E7%9A%84%E6%95%B8%E6%93%9A%E6%99%82%E4%B8%8D%E6%9C%83%E5%9B%A0%E7%88%B2%E4%B8%8D%E5%90%8CAPI%E8%80%8C%E6%9C%89%E4%B8%8D%E5%90%8C%E7%9A%84%E9%A0%90%E8%99%95%E7%90%86%E6%96%B9%E6%B3%95%EF%BC%8C%E4%B8%8B%E9%9D%A2%E6%98%AFResponseVO%E7%9A%84%E8%A8%AD%E8%A8%88%E5%8F%AF%E4%BE%9B%E5%8F%83%E8%80%83%3A%0A++++++%0A%0A++++++public+class+ResponseVO+%7B%0A++++%2F%2F+%E8%A1%A8%E7%A4%BA%E9%80%99%E6%AC%A1%E8%AB%8B%E6%B1%82%E6%98%AF%E5%90%A6%E6%88%90%E5%8A%9F%0A++++private+Boolean+success%3B%0A++++%2F%2F+%E9%A1%AF%E7%A4%BA%E7%9A%84%E8%A8%8A%E6%81%AF%E4%B8%8D%E7%AE%A1%E6%88%90%E5%8A%9F%E6%88%96%E8%80%85%E5%A4%B1%E6%95%97%0A++++private+String+message%3B%0A++++%2F%2F+%E8%BF%94%E5%9B%9E%E7%9A%84%E6%95%B8%E6%93%9A%0A++++private+Object+content%3B%0A%0A++++public+static+ResponseVO+buildSuccess%28%29%7B%0A++++++++ResponseVO+response%3Dnew+ResponseVO%28%29%3B%0A++++++++response.setSuccess%28true%29%3B%0A++++++++return+response%3B%0A++++%7D%0A++++public+static+ResponseVO+buildSuccess%28Object+content%29%7B%0A++++++++ResponseVO+response%3Dnew+ResponseVO%28%29%3B%0A++++++++response.setContent%28content%29%3B%0A++++++++response.setSuccess%28true%29%3B%0A++++++++return+response%3B%0A++++%7D%0A++++public+static+ResponseVO+buildFailure%28String+message%29%7B%0A++++++++ResponseVO+response%3Dnew+ResponseVO%28%29%3B%0A++++++++response.setSuccess%28false%29%3B%0A++++++++response.setMessage%28message%29%3B%0A++++++++logger.error%28message%29%3B%0A++++++++return+response%3B%0A++++%7D%0A%7D%0A++++++%0A%0A++++++1.4.2+Service%E5%B1%A4%0A++++++%E4%B9%9F%E5%B0%B1%E6%98%AFBusiness+Logic%E5%B1%A4%EF%BC%8C%E6%98%AF%E4%B8%BB%E8%A6%81%E8%99%95%E7%90%86%E6%95%B8%E6%93%9A%E9%82%8F%E8%BC%AF%E7%9A%84%E6%A8%A1%E5%A1%8A%E3%80%82%E6%89%80%E6%9C%89%E7%9A%84%E8%99%95%E7%90%86%E9%83%BD%E5%9C%A8%E9%80%99%E5%B1%A4%E5%AF%A6%E7%8F%BE%EF%BC%8C%E4%B8%A6%E4%B8%8D%E6%9C%83%E5%BB%B6%E7%94%B3%E5%88%B0Controller%E5%B1%A4%28%E4%B9%9F%E5%B0%B1%E6%98%AF%E8%AA%AAController%E5%B1%A4%E5%8F%AA%E6%98%AF%E8%B2%A0%E8%B2%AC%E8%99%95%E7%90%86Http+Request%29%E3%80%82%E8%A8%AD%E8%A8%88%E6%80%9D%E8%B7%AF%E6%9C%89%E5%BE%88%E5%A4%9A%EF%BC%8C%E4%BD%86%E6%98%AF%E5%A4%A7%E9%AB%94%E5%8F%AF%E4%BB%A5%E5%88%86%E7%88%B2%E5%85%A9%E9%83%A8%E5%88%86%3A+Service+Interface%E5%92%8CService+Implementation%E3%80%82Interface%E4%B8%BB%E8%A6%81%E8%81%B2%E6%98%8E%E8%A6%81%E5%AE%8C%E6%88%90%E7%9A%84%E6%96%B9%E6%B3%95%EF%BC%8C%E7%99%BD%E8%A9%B1%E8%AA%AA%E5%B0%B1%E6%98%AFTODO+List%EF%BC%9BImplementation%E6%98%AF%E5%AF%A6%E7%8F%BEInterface%E7%9A%84%E6%A8%A1%E5%A1%8A%EF%BC%8C%E4%B8%8B%E9%9D%A2%E6%8F%90%E4%BE%9B%E4%B8%80%E5%80%8B%E4%BE%8B%E5%AD%90%3A%0A++++++%0A++++++++LinkService%28Interface%29%0A++++++%0A%0A++++++public+interface+LinkService+%7B%0A++++ResponseVO+getLinks%28String+lawTitle%29%3B%0A++++ResponseVO+enterFormData%28%29%3B%0A++++ResponseVO+getRuleBySourceTitle%28String+searchTarget%29%3B%0A++++ResponseVO+addLink%28LinkVO+linkVO%29%3B%0A++++ResponseVO+deleteLink%28String+source%29%3B%0A%7D%0A++++++%0A%0A++++++%0A++++++++LinkServiceImpl%28Implementaiton%29%0A++++++%0A%0A++++++%40Service%0Apublic+class+LinkServiceImpl+implements+LinkService+%7B%0A++++%40Autowired%0A++++private+LinkRepository+linkRepository%3B%0A%0A++++%40Override%0A++++public+ResponseVO+getLinks%28String+lawTitle%29+%7B%0A++++++++return+ResponseVO.buildSuccess%28linkRepository.findBySource%28lawTitle%29%29%3B%0A++++%7D%0A++++...%0A%7D%0A++++++%0A%0A++++++%0A++++++++%40Service%E8%A1%A8%E7%A4%BA%E9%80%99%E5%80%8B%E9%A1%9E%E5%B1%AC%E6%96%BCService%E5%B1%A4%0A++++++++LinkRepository%E9%A1%9E%E7%82%BADAO%E5%B1%A4%EF%BC%8C%E6%89%80%E4%BB%A5%E5%9C%A8Service%E5%B1%A4%E4%B8%AD%E6%B3%A8%E5%85%A5%E4%B8%A6%E4%BD%BF%E7%94%A8%0A++++++++++1.4.3+Model+%28PO%29%0A++++++++++%E5%9C%A8%E4%BB%8B%E7%B4%B9Model%E5%92%8CRepository%E4%B9%8B%E5%89%8D%EF%BC%8C%E8%A6%81%E5%85%88%E4%BB%8B%E7%B4%B9Spring+Data+JPA%E8%88%87%E5%85%B6%E9%A4%98ORM%E7%9A%84%E9%97%9C%E4%BF%82%E3%80%82%E6%9C%AC%E6%AC%A1%E4%BB%8B%E7%B4%B9%E4%BD%BF%E7%94%A8Spring+Data+JPA%E5%B9%B6%E9%9D%9E%E5%82%B3%E7%B5%B1JPA+Provider%28%E5%A6%82hibernate%29%EF%BC%8C%E8%AB%96%E5%B1%A4%E7%B4%9A%E4%BE%86%E8%AA%AC%E5%AE%83%E6%87%89%E8%A9%B2%E8%99%95%E6%96%BCJPA%E4%B9%8B%E4%B8%8AJPA+Provider%E4%B9%8B%E4%B8%8B%EF%BC%8C%E5%AE%83%E9%BB%98%E8%AA%8D%E4%BD%BF%E7%94%A8hibernate%E4%BE%86%E5%AF%A6%E7%8F%BE%E7%B4%B0%E7%AF%80%28%E5%8F%AF%E4%BB%A5%E5%9C%A8pom%E4%BE%9D%E8%B3%B4%E4%B8%8B%E7%9C%8B%E5%88%B0spring-data-jpa%E6%9C%89%E5%AD%90%E4%BE%9D%E8%B3%B4hibernate-core%29%E3%80%82%E5%AE%83%E6%98%AF%E7%8D%A8%E7%AB%8B%E4%BA%8ESpring+framework%E4%B8%8A%E7%9A%84%E6%8A%80%E8%A1%93%EF%BC%8C%E5%B9%B6%E4%B8%94%E4%B8%8D%E9%9C%80%E8%A6%81%E9%96%8B%E7%99%BC%E8%80%85%E5%AF%A6%E7%8F%BE%E7%B4%B0%E7%AF%80%EF%BC%8C%E5%8F%AA%E9%9C%80%E8%A6%81%E6%A0%B9%E6%93%9A%E8%A6%8F%E5%89%87%E5%A5%97%E7%94%A8%E6%B3%A8%E8%A7%A3%E5%8D%B3%E5%8F%AF%E3%80%82%0A++++++++%0A++++++%0A%0A++++++%40Entity%0A%40Table%28name+%3D+%22link%22%29%0A%40Data%0Apublic+class+Link+%7B%0A++++%40Id%0A++++%40GeneratedValue%28strategy+%3D+GenerationType.IDENTITY%29%0A++++private+Integer+id%3B%0A%0A++++%40NotNull%0A++++%40Column%28name+%3D+%22source%22%2CcolumnDefinition+%3D+%22varchar%28255%29%22%2Cnullable+%3D+false%29%0A++++private+String+source%3B%0A%0A++++%40Column%28name+%3D+%22target%22%2CcolumnDefinition+%3D+%22varchar%28255%29%22%2Cnullable+%3D+false%29%0A++++private+String+target%3B%0A%0A++++%40NotNull%0A++++%40Column%28name+%3D+%22relationship%22%2CcolumnDefinition+%3D+%22varchar%28255%29%22%2Cnullable+%3D+false%29%0A++++private+String+relation%3B%0A%7D%0A++++++%0A%0A++++++%0A++++++++%40Entity+%E6%98%AFSpring+Data+JPA%E4%B8%AD%E7%9A%84%E6%B3%A8%E8%A7%A3%EF%BC%8C%E9%80%9A%E5%B8%B8%E4%BE%86%E8%AA%AC%E6%B7%BB%E5%8A%A0%E9%80%99%E5%80%8B%E6%B3%A8%E8%A7%A3%E5%B0%B1%E9%BB%98%E8%AA%8D%E7%94%9F%E6%88%90%E4%B8%80%E5%80%8B%E8%A1%A8%28%E9%80%99%E5%80%8B%E6%B3%A8%E8%A7%A3%E4%B8%8B%E7%9A%84%E9%A1%9E%29%E7%82%BA%E8%A1%A8%E5%90%8D%0A++++++++%40Table%28name+%3D+%22link%22%29%E5%A6%82%E6%9E%9C%E8%A6%81%E6%8C%87%E5%AE%9A%E7%89%B9%E5%AE%9A%E8%A1%A8%E5%90%8D%E5%89%87%E5%8F%AF%E4%BB%A5%E4%BD%BF%E7%94%A8%E6%AD%A4%E6%B3%A8%E8%A7%A3%0A++++++++%40Id+%40GeneratedValue+%E6%98%AF%E6%AF%8F%E5%80%8B%E8%A1%A8%E5%BF%85%E8%A6%81%E7%9A%84Id%E5%88%97%EF%BC%8C%40GeneratedValue%E5%89%87%E5%88%B6%E5%AE%9AId%E5%88%97%E7%94%9F%E6%88%90%E8%A6%8F%E5%89%87%0A++++++++%40Column%E8%81%B2%E6%98%8E%E5%88%97%0A++++++++++1.4.4+Repository+%28DAO%29%0A++++++++++Spring+Data+JPA%E9%9C%80%E8%A6%81%E6%88%91%E5%80%91%E8%A8%AD%E8%A8%88Repository%E7%9A%84Interface%EF%BC%8C%E5%9C%A8%E9%81%8B%E8%A1%8C%E9%81%8E%E7%A8%8B%E4%B8%AD%E5%AE%83%E6%9C%83%E8%87%AA%E5%8B%95%E7%94%9F%E6%88%90%E9%80%99%E5%80%8BRepository%E7%9A%84%E5%AF%A6%E7%8F%BE%EF%BC%8C%E9%81%BF%E5%85%8D%E6%88%91%E5%80%91%E6%89%8B%E5%8B%95%E7%94%9F%E6%88%90%E5%86%97%E9%95%B7%E7%9A%84%E4%BB%A3%E7%A2%BC%E5%A6%82Connection%E7%AD%89%E3%80%82%E5%9B%A0%E6%AD%A4%E6%88%91%E5%80%91%E5%8F%AA%E9%9C%80%E5%B0%88%E6%B3%A8%E5%9C%A8SQL%E8%AA%9E%E5%8F%A5%E5%8D%B3%E5%8F%AF%E3%80%82%E5%8F%A6%E5%A4%96%EF%BC%8C%E5%AE%83%E5%85%BC%E5%AE%B9%E5%8E%9F%E7%94%9F%E7%9A%84SQL%E8%AA%9E%E5%8F%A5%0A++++++++%0A++++++%0A%0A++++++public+interface+LinkRepository+extends+JpaRepository%26lt%3BLink%2C+Integer%26gt%3B+%7B%0A%0A++++List%26lt%3BLink%26gt%3B+findBySource%28String+source%29%3B%0A%0A++++%40Transactional%0A++++%40Query%28value+%3D+%22select+%2A+from+link+where+source+like+concat%28%27%25%27%2C%3Asource%2C%27%25%27%29%22%2C+nativeQuery+%3D+true%29%0A++++List%26lt%3BLink%26gt%3B+searchBySource%28String+source%29%3B%0A%0A++++%40Transactional%0A++++%40Query%28value+%3D+%22select+count%28%2A%29+from+link+where+%22+%2B%0A++++++++++++%22source+like+concat%28%27%25%27%2C%3Asource%2C%27%25%27%29+and+%22+%2B%0A++++++++++++%22target+like+concat%28%27%25%27%2C%3Atarget%2C%27%25%27%29+and+%22+%2B%0A++++++++++++%22relationship+like+concat%28%27%25%27%2C%3Arelation%2C%27%25%27%29%22%2C%0A++++++++++++nativeQuery+%3D+true%29%0A++++Integer+findLinkBySTR%28%40Param%28%22source%22%29+String+source%2C+%40Param%28%22target%22%29+String+target%2C+%40Param%28%22relation%22%29+String+relation%29%3B%0A%0A%0A++++%40Transactional%0A++++void+deleteLinksBySource%28String+source%29%3B%0A%7D%0A++++++%0A%0A++++++%0A++++++++LinkRepository%E7%B9%BC%E6%89%BFJpaRepository%EF%BC%8C%E5%AE%83%E6%8F%90%E4%BE%9B%E5%BE%88%E5%A4%9A%E9%BB%98%E8%AA%8D%E6%96%B9%E6%B3%95%E5%A6%82%E5%9F%BA%E7%A4%8E%E7%9A%84CRUD%3A+%E5%8D%B3%E4%BD%BF%E5%9C%A8LinkRepository%E4%B8%AD%E6%B2%92%E6%9C%89%E8%81%B2%E6%98%8Efind%E6%96%B9%E6%B3%95%EF%BC%8C%E5%9C%A8%E7%B9%BC%E6%89%BFJpaRepository%E5%90%8E%E4%BB%8D%E5%8F%AF%E4%BE%9D%E7%85%A7%E8%A6%8F%E5%89%87%E8%AA%BF%E7%94%A8%E3%80%82%E7%B0%A1%E5%96%AE%E4%BE%86%E8%AA%AC%EF%BC%8CSpring+Data+JPA%E6%98%AF%E5%8F%AF%E4%BB%A5%E8%AE%93%E4%BD%BF%E7%94%A8%E8%80%85%E4%BD%BF%E7%94%A8Interface%E5%92%8C%E7%89%B9%E5%AE%9A%E7%9A%84Function+Design%E4%BE%86%E5%AE%8C%E6%88%90ORM%E7%9A%84%E4%BD%BF%E7%94%A8%E3%80%82%E4%BE%8B%E5%A6%82%E5%9C%A8%E4%B8%8A%E8%BF%B0%E4%BE%8B%E5%AD%90%E4%B8%AD%EF%BC%8CJpaRepository%26lt%3BLink%2C+Integer%26gt%3B%E4%BD%BF%E7%94%A8Link%E8%A1%A8%281-3-3%29%2C+ID%E7%82%BAInteger%E9%A1%9E%E5%9E%8B%E3%80%82Link%E9%A1%9E%E4%B8%AD%E6%9C%89id%2C+source%2C+target%2C+relation%E5%9B%9B%E5%88%97%EF%BC%9B%E5%89%87LinkRepository%E9%BB%98%E8%AA%8D%E5%B0%B1%E6%93%81%E6%9C%89%E4%B8%8B%E5%88%97%E6%96%B9%E6%B3%95%3A%0A++++++%0A%0A++++++findById%28Integer+id%29%0A...%0AfindAll%28%29%0A%0AdeleteById%28Integer+id%29%0A...%0AdeleteAll%28%29%0A%0Asave%28Link+link%29%0A...%0A++++++%0A%0A++++++%0A++++++++%E5%8F%AF%E4%BB%A5%E7%AF%80%E7%9C%81%E5%BE%88%E5%A4%9A%E6%99%82%E9%96%93%E5%B9%B6%E4%B8%94%E9%9D%9E%E5%B8%B8%E7%9B%B4%E8%A7%80%EF%BC%8C%E5%90%8C%E6%99%82%E4%B9%9F%E6%8E%A5%E5%8F%97Override%E6%94%B9%E8%AE%8A%E5%85%B6%E6%96%B9%E6%B3%95%E5%AF%A6%E7%8F%BE%0A++++++++%40Transactional%E8%A1%A8%E7%A4%BA%E5%B0%87%E6%AD%A4%E6%96%B9%E6%B3%95%E8%A6%96%E7%88%B2%E4%B8%80%E5%80%8B%E4%BA%8B%E5%8B%99%EF%BC%8C%E7%95%B6%E6%AD%A4%E6%96%B9%E6%B3%95%E5%A4%B1%E6%95%97%E5%89%87%E4%B8%8D%E6%9C%83%E5%BD%B1%E9%9F%BF%E5%88%B0%E5%85%B6%E4%BB%96%E7%9A%84%E4%BA%8B%E5%8B%99%EF%BC%8C%E8%8B%A5%E6%98%AF%E6%AD%A4%E6%96%B9%E6%B3%95%E4%B8%AD%E5%85%B6%E4%B8%AD%E4%B8%80%E5%80%8B%E6%93%8D%E4%BD%9C%E5%A4%B1%E6%95%97%E5%89%87%E5%85%A8%E9%83%A8%E4%B8%80%E8%B5%B7%E5%A4%B1%E6%95%97%E4%B8%A6rollback%E6%95%B8%E6%93%9A%28%E5%8F%AF%E4%BB%A5%E5%AE%9A%E7%BE%A9rollback+rules%29%0A++++++++%40Query%E8%A1%A8%E7%A4%BA%E8%A9%B3%E7%B4%B0%E7%9A%84SQL%E8%AA%9E%E5%8F%A5%EF%BC%8C%E6%9C%89%E5%BE%88%E5%A4%9A%E5%B1%AC%E6%80%A7%E5%92%8C%E8%A6%8F%E5%89%87%EF%BC%8C%E5%8F%AF%E5%9C%A8%E5%AE%98%E6%96%B9%E6%96%87%E6%AA%94%E6%9F%A5%E8%A9%A2%0A++++++++%40Param%E5%8F%AF%E4%BB%A5%E6%8C%87%E5%AE%9A%E5%9C%A8SQL%E4%B8%AD%E4%BD%BF%E7%94%A8%3Aname%E4%BE%86%E4%BB%A3%E6%9B%BF%3F1%0A++++++%0A%0A++++%0A%0A%0A"
+               target="_blank" title="">
+                <i class="fab fa-pinterest-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Pin it</span>
+            </a>
+        </li>
+          
+        <li>
+            <a href="https://www.reddit.com/submit?url=http://localhost:4000/demo/2024/01/26/Separated-Frontend-&-Backend-System-Development(1).html&title=Separated+Frontend+%26+Backend+System+Development%281%29%20%7C%20Owen%27s+Blog"
+               target="_blank" title=" Reddit">
+                <i class="fab fa-reddit-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on Reddit</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://www.linkedin.com/shareArticle?mini=true&url=http://localhost:4000/demo/2024/01/26/Separated-Frontend-&-Backend-System-Development(1).html&title=Separated+Frontend+%26+Backend+System+Development%281%29%20%7C%20Owen%27s+Blog&summary=&source=http://localhost:4000/demo/2024/01/26/Separated-Frontend-&-Backend-System-Development(1).html"
+               target="_blank" title=" LinkedIn">
+                <i class="fab fa-linkedin fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on LinkedIn</span>
+            </a>
+        </li>
+          
+        <li>
+            <a href="mailto:?subject=Separated Frontend & Backend System Development(1)%20%7C%20Owen's Blog&body=http://localhost:4000/demo/2024/01/26/Separated-Frontend-&-Backend-System-Development(1).html"
+               target="_blank" title="">
+                <i class="fas fa-envelope-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Email</span></a>
+        </li>
+        
+    </ul>
+</div>
+
+
+
+
+    <!-- Tag list -->
+    
+    
+
+
+  <div class="tag-list">
+    <ul>
+      
+        <li class="meta">Tag</li>
+      
+
+      
+        <li><a class="button" href="/tags#Tech-Share">
+          <p><i class="fas fa-tag fa-fw fa-sm"></i> Tech-Share</p>
+        </a></li>
+      
+    </ul>
+  </div>
+
+
+
+</article>
+
+
+
+
+<!-- To change color of links in the page --> <style> header#main { background-size: cover; background-repeat: no-repeat; background-position: center; } </style> <!-- Post navigation --> <div id="post-nav"> <div id="previous-post"> <a alt="Separated Frontend & Backend System Development(2)" href="/demo/2024/01/26/Separated-Frontend-&-Backend-System-Development(2).html"> <p>Previous post</p> Separated Frontend & Backend System Development(2) </a> </div> <div id="next-post"> <a alt="LeetCode 746." href="/demo/2024/01/14/LeetCode-746.html"> <p>Next post</p> LeetCode 746. </a> </div> </div> <!-- Giscus --> <!--Utterances--> <!-- Cusdis --> <!-- Disqus -->
+
+
+    </div>
+    
+    <footer class="site-footer"> <p class="text"> Powered by <a href='https://jekyllrb.com/'>Jekyll</a> with <a href='https://github.com/sylhare/Type-on-Strap'>Type on Strap</a></p> <div class="footer-icons"> <ul> <!-- Social icons from Font Awesome, if enabled --> <li> <a feed.xml href="/feed.xml" title="Follow RSS feed" target="_blank"> <span class="fa-stack fa-lg"> <i class="fas fa-circle fa-stack-2x"></i> <i class="fas fa-rss fa-stack-1x fa-inverse"></i> </span> </a> </li> <li> <a href="https://github.com/sylhare" title="Follow on Github" target="_blank" rel="noopener"> <span class="fa-stack fa-lg"> <i class="fas fa-circle fa-stack-2x"></i> <i class="fab fa-github fa-stack-1x fa-inverse"></i> </span> </a> </li> </ul> </div> <script type="module"> mermaid.initialize({ startOnLoad: false, theme: "default" }); mermaid.run({ nodes: [...document.querySelectorAll('.language-mermaid'), ...document.querySelectorAll('.mermaid')] }); </script> </footer>
+  </body>
+</html>

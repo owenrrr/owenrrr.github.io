@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<!--
+    Type on Strap jekyll theme v2.4.12
+    Theme free for personal and commercial use under the MIT license
+    https://github.com/sylhare/Type-on-Strap/blob/master/LICENSE
+-->
+<html lang="en">
+  
+  <head> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=0.5, maximum-scale=5"> <!-- Theme Mode--> <script> const darkBtn = "Dark"; const lightBtn = "Light"; const isAutoTheme = true; const preferredTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; if (isAutoTheme) { document.documentElement.setAttribute('data-theme', sessionStorage.getItem('theme') ?? preferredTheme); } else { document.documentElement.setAttribute('data-theme', "auto"); } </script> <!-- Main JS (navbar.js, katex_init.js and masonry_init.js)--> <script defer src="/assets/js/main.min.js"></script> <!-- CSS --> <link rel="stylesheet" href="/assets/css/main.css"> <!--Favicon--> <link rel="shortcut icon" href="/assets/favicon.ico" type="image/x-icon"> <!-- KaTeX 0.16.11 --> <script defer src="/assets/js/vendor/katex.min.js"></script> <script defer src="/assets/js/vendor/katex.auto-render.min.js" onload="renderMathInElement(document.body);"></script> <!-- Mermaid 11.4.1 --> <script defer src="/assets/js/vendor/mermaid.min.js"></script> <!-- Simple Jekyll Search 1.10.0 --> <script src="/assets/js/vendor/simple-jekyll-search.min.js" type="text/javascript"></script> <!-- Google Analytics / Cookie Consent --> <script> const cookieName = 'cookie-notice-dismissed-http://localhost:4000'; const isCookieConsent = 'false'; const analyticsName = ''; const analyticsNameGA4 = ''; </script> <!-- seo tags --> <meta property="og:image" content="http://localhost:4000/assets/img/header/kali.jpg"> <meta property="og:type" content="website" /> <!-- Begin Jekyll SEO tag v2.8.0 --> <title>Nmap介紹 (1) | Owen’s Blog</title> <meta name="generator" content="Jekyll v4.4.1" /> <meta property="og:title" content="Nmap介紹 (1)" /> <meta property="og:locale" content="en_US" /> <meta name="description" content="Intro 本篇介紹Nmap這個強大的滲透測試工具，常見的功能有： Live Host Discovery(在線主機搜索) Port Scan (端口搜索) Firewall Detection (測試目標主機防火牆設置) 在使用Nmap時，通常是先利用在線主機搜索，得出所有在線主機；然後再利用端口搜索去進一步搜尋開放的端口及端口上運行的服務。通過這樣的實現才不會在離線主機上進行不必要的端口搜索浪費時間。另外關於測試目標主機防火牆設置是通過幾種巧妙的方式來檢測目標主機是否有防火牆設置，這後面會提到，算是Nmap工具功能的延伸。 Host Discovery using ARP nmap -PR -sn TARGET -sn 的意思是不要做端口掃描，因為目前只想要做在線主機搜索 -PR 是告訴nmap使用ARP scan。同時請注意使用 -PR 需要有root權限(原因是ARP屬於Data Link Layer，需要自己構造raw packet。而這一步因為系統安全考慮需要有root權限) 另外這種在線主機查詢的方法只適用於在同一個Subnet中才有效果(原因也很簡單，因為ARP packet只會在同一個Subnet中廣播，沒辦法透過Router傳遞到其他的Subnet，所以這種策略只適用於目標主機段與你處於同一個Subnet) 但如果你指定了 -sn 的情況下與目標主機段處於不同個 Subnet 的話，nmap 會自動將查詢策略轉為使用混合策略： ICMP echo requests, TCP ACK to port 80, TCP SYN to port 443, ICMP timestamp request. 例子： sudo nmap -PR -sn 10.10.210.1/24" /> <meta property="og:description" content="Intro 本篇介紹Nmap這個強大的滲透測試工具，常見的功能有： Live Host Discovery(在線主機搜索) Port Scan (端口搜索) Firewall Detection (測試目標主機防火牆設置) 在使用Nmap時，通常是先利用在線主機搜索，得出所有在線主機；然後再利用端口搜索去進一步搜尋開放的端口及端口上運行的服務。通過這樣的實現才不會在離線主機上進行不必要的端口搜索浪費時間。另外關於測試目標主機防火牆設置是通過幾種巧妙的方式來檢測目標主機是否有防火牆設置，這後面會提到，算是Nmap工具功能的延伸。 Host Discovery using ARP nmap -PR -sn TARGET -sn 的意思是不要做端口掃描，因為目前只想要做在線主機搜索 -PR 是告訴nmap使用ARP scan。同時請注意使用 -PR 需要有root權限(原因是ARP屬於Data Link Layer，需要自己構造raw packet。而這一步因為系統安全考慮需要有root權限) 另外這種在線主機查詢的方法只適用於在同一個Subnet中才有效果(原因也很簡單，因為ARP packet只會在同一個Subnet中廣播，沒辦法透過Router傳遞到其他的Subnet，所以這種策略只適用於目標主機段與你處於同一個Subnet) 但如果你指定了 -sn 的情況下與目標主機段處於不同個 Subnet 的話，nmap 會自動將查詢策略轉為使用混合策略： ICMP echo requests, TCP ACK to port 80, TCP SYN to port 443, ICMP timestamp request. 例子： sudo nmap -PR -sn 10.10.210.1/24" /> <link rel="canonical" href="http://localhost:4000/demo/2025/05/03/Nmap-1.html" /> <meta property="og:url" content="http://localhost:4000/demo/2025/05/03/Nmap-1.html" /> <meta property="og:site_name" content="Owen’s Blog" /> <meta property="og:type" content="article" /> <meta property="article:published_time" content="2025-05-03T00:00:00+08:00" /> <meta name="twitter:card" content="summary" /> <meta property="twitter:title" content="Nmap介紹 (1)" /> <script type="application/ld+json"> {"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2025-05-03T00:00:00+08:00","datePublished":"2025-05-03T00:00:00+08:00","description":"Intro 本篇介紹Nmap這個強大的滲透測試工具，常見的功能有： Live Host Discovery(在線主機搜索) Port Scan (端口搜索) Firewall Detection (測試目標主機防火牆設置) 在使用Nmap時，通常是先利用在線主機搜索，得出所有在線主機；然後再利用端口搜索去進一步搜尋開放的端口及端口上運行的服務。通過這樣的實現才不會在離線主機上進行不必要的端口搜索浪費時間。另外關於測試目標主機防火牆設置是通過幾種巧妙的方式來檢測目標主機是否有防火牆設置，這後面會提到，算是Nmap工具功能的延伸。 Host Discovery using ARP nmap -PR -sn TARGET -sn 的意思是不要做端口掃描，因為目前只想要做在線主機搜索 -PR 是告訴nmap使用ARP scan。同時請注意使用 -PR 需要有root權限(原因是ARP屬於Data Link Layer，需要自己構造raw packet。而這一步因為系統安全考慮需要有root權限) 另外這種在線主機查詢的方法只適用於在同一個Subnet中才有效果(原因也很簡單，因為ARP packet只會在同一個Subnet中廣播，沒辦法透過Router傳遞到其他的Subnet，所以這種策略只適用於目標主機段與你處於同一個Subnet) 但如果你指定了 -sn 的情況下與目標主機段處於不同個 Subnet 的話，nmap 會自動將查詢策略轉為使用混合策略： ICMP echo requests, TCP ACK to port 80, TCP SYN to port 443, ICMP timestamp request. 例子： sudo nmap -PR -sn 10.10.210.1/24","headline":"Nmap介紹 (1)","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/demo/2025/05/03/Nmap-1.html"},"url":"http://localhost:4000/demo/2025/05/03/Nmap-1.html"}</script> <!-- End Jekyll SEO tag --> <!-- RSS --> <link rel="alternate" type="application/atom+xml" title="Owen's Blog" href="http://localhost:4000/feed.xml"/> <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Owen&apos;s Blog" /> <!-- Twitter Cards --> <meta name="twitter:title" content="Nmap介紹 (1)"> <meta name="twitter:description" content=" Intro 本篇介紹Nmap這個強大的滲透測試工具，常見的功能有： Live Host Discovery(在線主機搜索) Port Scan (端口搜索) Firewall Detection (測試目標主機防火牆設置)在使用Nmap時..."> <meta name="twitter:card" content="summary"> <meta name="twitter:image" content="http://localhost:4000/assets/img/header/kali.jpg"> <meta name="twitter:image:alt" content="Nmap介紹 (1)"> </head>
+  <body>
+    
+    <header class="site-header"> <!-- Logo and title --> <div class="branding"> <a href="/"> <img alt="logo img" class="avatar" src="/assets/img/triangle.png" loading="lazy"/> </a> <a class="site-title" aria-label="Owen's Blog" href="/"> Owen's Blog </a> </div> <!-- Toggle menu --> <nav class="clear"> <a aria-label="pull" id="pull" class="toggle" href="#"> <i class="fas fa-bars fa-lg"></i> </a> <!-- Menu --> <ul class="hide"> <li class="separator"> | </li> <li> <a class="clear" aria-label="About" title="About" href="/about/"> <span class="navbar-label ">About</span> </a> </li> <li class="separator"> | </li> <li> <a class="clear" aria-label="Portfolio" title="Portfolio" href="/portfolio/"> <span class="navbar-label ">Portfolio</span> </a> </li> <li class="separator"> | </li> <li> <a class="clear" aria-label="Search" title="Search" href="/search/"> <i class="navbar-icon fas fa-search" aria-hidden="true"></i> <span class="navbar-label navbar-label-with-icon">Search</span> </a> </li> <li class="separator"> | </li> <li> <a class="clear" aria-label="Tags" title="Tags" href="/tags/"> <i class="navbar-icon fas fa-tags" aria-hidden="true"></i> <span class="navbar-label navbar-label-with-icon">Tags</span> </a> </li> <li class="separator"> | </li> <li><a id="theme-toggle" title="Nmap介紹 (1) " aria-label="Nmap介紹 (1)" onclick="themeToggle()"></a></li> </ul> </nav> </header>
+    <div class="content">
+      <article >
+    <header id="main" style="">
+        <div class="title-padder">
+            
+                <h1 id="Nmap%E4%BB%8B%E7%B4%B9+%281%29" class="title">Nmap介紹 (1)</h1>
+                
+
+
+<div class="post-info">
+  <div class="post-meta">
+    
+    
+    <p class="meta">May 03, 2025</p>
+  </div>
+  
+</div>
+
+            
+        </div>
+    </header>
+
+    <section class="post-content">
+    
+            <html>
+<body>
+<div style="margin-top: 10px">
+
+      <h3 id="intro">Intro</h3>
+      <p>本篇介紹Nmap這個強大的滲透測試工具，常見的功能有：</p>
+      <ul>
+        <li>Live Host Discovery(在線主機搜索)</li>
+        <li>Port Scan (端口搜索)</li>
+        <li>Firewall Detection (測試目標主機防火牆設置)
+在使用Nmap時，通常是先利用在線主機搜索，得出所有在線主機；然後再利用端口搜索去進一步搜尋開放的端口及端口上運行的服務。通過這樣的實現才不會在離線主機上進行不必要的端口搜索浪費時間。另外關於測試目標主機防火牆設置是通過幾種巧妙的方式來檢測目標主機是否有防火牆設置，這後面會提到，算是Nmap工具功能的延伸。</li>
+      </ul>
+
+      <h3 id="host-discovery-using-arp">Host Discovery using ARP</h3>
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nmap -PR -sn TARGET
+</code></pre></div>      </div>
+      <ul>
+        <li>-sn 的意思是不要做端口掃描，因為目前只想要做在線主機搜索</li>
+        <li>-PR 是告訴nmap使用ARP scan。同時請注意使用 -PR 需要有root權限(原因是ARP屬於Data Link Layer，需要自己構造raw packet。而這一步因為系統安全考慮需要有root權限)</li>
+        <li>另外這種在線主機查詢的方法只適用於在同一個Subnet中才有效果(原因也很簡單，因為ARP packet只會在同一個Subnet中廣播，沒辦法透過Router傳遞到其他的Subnet，所以這種策略只適用於目標主機段與你處於同一個Subnet)</li>
+        <li>但如果你指定了 -sn 的情況下與目標主機段處於不同個 Subnet 的話，nmap 會自動將查詢策略轉為使用混合策略：
+          <ul>
+            <li>ICMP echo requests,</li>
+            <li>TCP ACK to port 80,</li>
+            <li>TCP SYN to port 443,</li>
+            <li>ICMP timestamp request.</li>
+          </ul>
+        </li>
+        <li>例子：
+          <blockquote>
+            <p>sudo nmap -PR -sn 10.10.210.1/24</p>
+          </blockquote>
+        </li>
+      </ul>
+
+      <h3 id="host-discovery-using-icmp">Host Discovery using ICMP</h3>
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nmap -PE -sn TARGET
+nmap -PP -sn TARGET
+nmap -PM -sn TARGET
+</code></pre></div>      </div>
+      <ul>
+        <li>這三種利用ICMP的檢測方式皆不需要root權限，因為ICMP不需要動到raw packet(ICMP基於IP層)</li>
+        <li>這三種策略都可以支持自己與目標主機段處於不同 Subnet，因為ICMP協議是基於IP協議之上(將整個IP packet包裝為payload)，所以可以將這些ICMP packet傳送到不同 Subnet 來查詢</li>
+        <li>-PE 是告訴nmap使用 ICMP Echo Request</li>
+        <li>-PP 是告訴nmap使用 ICMP Timestamp Request</li>
+        <li>-PM 是告訴nmap使用 ICMP Address Mask Request</li>
+        <li>例子：
+          <blockquote>
+            <p>sudo nmap -PE -sn 10.10.210.1/24<br />
+sudo nmap -PP -sn 10.10.210.1/24<br />
+sudo nmap -PM -sn 10.10.210.1/24</p>
+          </blockquote>
+        </li>
+      </ul>
+
+      <h3 id="host-discovery-using-tcp">Host Discovery using TCP</h3>
+      <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nmap -PS -sn TARGET
+nmap -PA -sn TARGET
+nmap -PU -sn TARGET
+</code></pre></div>      </div>
+      <ul>
+        <li>這三種利用TCP/UDP的檢測方式皆不需要root權限，因為它們也不需要動到raw packet(TCP/UDP基於IP層)</li>
+        <li>這三種策略都可以支持自己與目標主機段處於不同 Subnet，因為TCP/UDP協議是基於IP協議之上(將整個IP packet包裝為payload)，所以可以將這些TCP/UDP packet傳送到不同 Subnet 來查詢</li>
+        <li>-PS 是告訴nmap傳送 TCP SYN，等待 TCP SYN-ACK，並傳回 TCP ACK</li>
+        <li>-PA 是告訴nmap傳送 TCP ACK，並等待 TCP RST (因為target主機會覺得很奇怪，明明都沒有建立tcp連接就收到ACK，所以直接傳回一個RST來回絕這個ACK)</li>
+        <li>-PU 是告訴nmap傳送 UDP packet</li>
+        <li>關於 -PU 我們必須要知道，由於UDP是無狀態的協議(代表說即使目標主機接收到我們傳送的UDP packet，也不會有回覆)，因此我們判斷的條件要與TCP/ICMP反著來。也就是說，TCP/ICMP大多是由接收到回覆包來判斷目標主機是否在線；而UDP則是藉由接收到回覆包來知道目標主機離線。因此在 -PU 這種策略下，若是接收到回覆的話有兩種可能：
+          <ul>
+            <li>ICMP(3,3) Port Unreachable: 代表目標主機可能在線，只不過端口關閉</li>
+            <li>ICMP(3,1) Host Unreachable: 代表目標主機離線</li>
+            <li>最後，如果在timeout過後沒有收到回覆，就代表說目標主機有可能在線</li>
+          </ul>
+        </li>
+        <li>例子：
+          <blockquote>
+            <p>sudo nmap -PS -sn 10.10.210.1/24<br />
+sudo nmap -PA -sn 10.10.210.1/24<br />
+sudo nmap -PU -sn 10.10.210.1/24</p>
+          </blockquote>
+        </li>
+      </ul>
+
+      <h2 id="section">學習資料</h2>
+      <ol>
+        <li>TryHackMe CompTIA Pentest+ / Information Gathering and Vulnerability Scanning / 
+Nmap Live Host Discovery</li>
+        <li><a href="https://nmap.org/book/host-discovery.html">Nmap Host Discovery</a></li>
+      </ol>
+
+    </div>
+</body>
+</html>
+
+    
+    </section>
+
+    <!-- Social media shares -->
+    
+
+<div class="share-buttons">
+    <ul class="share-buttons">
+        <li class="meta">Share</li>
+        
+        <li>
+            <a href="https://www.facebook.com/sharer/sharer.php?u=http://localhost:4000/demo/2025/05/03/Nmap-1.html" target="_blank"
+               title=" Facebook">
+                <i class="fab fa-facebook-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on Facebook</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://twitter.com/intent/tweet?text=Nmap%E4%BB%8B%E7%B4%B9+%281%29%20http%3A%2F%2Flocalhost%3A4000%2Fdemo%2F2025%2F05%2F03%2FNmap-1.html"
+               target="_blank" title="">
+                <i class="fab fa-twitter-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Tweet</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://www.tumblr.com/share?v=3&u=http://localhost:4000/demo/2025/05/03/Nmap-1.html&quote=Nmap%E4%BB%8B%E7%B4%B9+%281%29%20%7C%20Owen%27s+Blog&s="
+               target="_blank" title=" Tumblr">
+                <i class="fab fa-tumblr-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on Tumblr</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://pinterest.com/pin/create/button/?url=http://localhost:4000/demo/2025/05/03/Nmap-1.html&media=$description=%0A%0A%0A%0A++++++Intro%0A++++++%E6%9C%AC%E7%AF%87%E4%BB%8B%E7%B4%B9Nmap%E9%80%99%E5%80%8B%E5%BC%B7%E5%A4%A7%E7%9A%84%E6%BB%B2%E9%80%8F%E6%B8%AC%E8%A9%A6%E5%B7%A5%E5%85%B7%EF%BC%8C%E5%B8%B8%E8%A6%8B%E7%9A%84%E5%8A%9F%E8%83%BD%E6%9C%89%EF%BC%9A%0A++++++%0A++++++++Live+Host+Discovery%28%E5%9C%A8%E7%B7%9A%E4%B8%BB%E6%A9%9F%E6%90%9C%E7%B4%A2%29%0A++++++++Port+Scan+%28%E7%AB%AF%E5%8F%A3%E6%90%9C%E7%B4%A2%29%0A++++++++Firewall+Detection+%28%E6%B8%AC%E8%A9%A6%E7%9B%AE%E6%A8%99%E4%B8%BB%E6%A9%9F%E9%98%B2%E7%81%AB%E7%89%86%E8%A8%AD%E7%BD%AE%29%0A%E5%9C%A8%E4%BD%BF%E7%94%A8Nmap%E6%99%82%EF%BC%8C%E9%80%9A%E5%B8%B8%E6%98%AF%E5%85%88%E5%88%A9%E7%94%A8%E5%9C%A8%E7%B7%9A%E4%B8%BB%E6%A9%9F%E6%90%9C%E7%B4%A2%EF%BC%8C%E5%BE%97%E5%87%BA%E6%89%80%E6%9C%89%E5%9C%A8%E7%B7%9A%E4%B8%BB%E6%A9%9F%EF%BC%9B%E7%84%B6%E5%BE%8C%E5%86%8D%E5%88%A9%E7%94%A8%E7%AB%AF%E5%8F%A3%E6%90%9C%E7%B4%A2%E5%8E%BB%E9%80%B2%E4%B8%80%E6%AD%A5%E6%90%9C%E5%B0%8B%E9%96%8B%E6%94%BE%E7%9A%84%E7%AB%AF%E5%8F%A3%E5%8F%8A%E7%AB%AF%E5%8F%A3%E4%B8%8A%E9%81%8B%E8%A1%8C%E7%9A%84%E6%9C%8D%E5%8B%99%E3%80%82%E9%80%9A%E9%81%8E%E9%80%99%E6%A8%A3%E7%9A%84%E5%AF%A6%E7%8F%BE%E6%89%8D%E4%B8%8D%E6%9C%83%E5%9C%A8%E9%9B%A2%E7%B7%9A%E4%B8%BB%E6%A9%9F%E4%B8%8A%E9%80%B2%E8%A1%8C%E4%B8%8D%E5%BF%85%E8%A6%81%E7%9A%84%E7%AB%AF%E5%8F%A3%E6%90%9C%E7%B4%A2%E6%B5%AA%E8%B2%BB%E6%99%82%E9%96%93%E3%80%82%E5%8F%A6%E5%A4%96%E9%97%9C%E6%96%BC%E6%B8%AC%E8%A9%A6%E7%9B%AE%E6%A8%99%E4%B8%BB%E6%A9%9F%E9%98%B2%E7%81%AB%E7%89%86%E8%A8%AD%E7%BD%AE%E6%98%AF%E9%80%9A%E9%81%8E%E5%B9%BE%E7%A8%AE%E5%B7%A7%E5%A6%99%E7%9A%84%E6%96%B9%E5%BC%8F%E4%BE%86%E6%AA%A2%E6%B8%AC%E7%9B%AE%E6%A8%99%E4%B8%BB%E6%A9%9F%E6%98%AF%E5%90%A6%E6%9C%89%E9%98%B2%E7%81%AB%E7%89%86%E8%A8%AD%E7%BD%AE%EF%BC%8C%E9%80%99%E5%BE%8C%E9%9D%A2%E6%9C%83%E6%8F%90%E5%88%B0%EF%BC%8C%E7%AE%97%E6%98%AFNmap%E5%B7%A5%E5%85%B7%E5%8A%9F%E8%83%BD%E7%9A%84%E5%BB%B6%E4%BC%B8%E3%80%82%0A++++++%0A%0A++++++Host+Discovery+using+ARP%0A++++++nmap+-PR+-sn+TARGET%0A++++++%0A++++++%0A++++++++-sn+%E7%9A%84%E6%84%8F%E6%80%9D%E6%98%AF%E4%B8%8D%E8%A6%81%E5%81%9A%E7%AB%AF%E5%8F%A3%E6%8E%83%E6%8F%8F%EF%BC%8C%E5%9B%A0%E7%82%BA%E7%9B%AE%E5%89%8D%E5%8F%AA%E6%83%B3%E8%A6%81%E5%81%9A%E5%9C%A8%E7%B7%9A%E4%B8%BB%E6%A9%9F%E6%90%9C%E7%B4%A2%0A++++++++-PR+%E6%98%AF%E5%91%8A%E8%A8%B4nmap%E4%BD%BF%E7%94%A8ARP+scan%E3%80%82%E5%90%8C%E6%99%82%E8%AB%8B%E6%B3%A8%E6%84%8F%E4%BD%BF%E7%94%A8+-PR+%E9%9C%80%E8%A6%81%E6%9C%89root%E6%AC%8A%E9%99%90%28%E5%8E%9F%E5%9B%A0%E6%98%AFARP%E5%B1%AC%E6%96%BCData+Link+Layer%EF%BC%8C%E9%9C%80%E8%A6%81%E8%87%AA%E5%B7%B1%E6%A7%8B%E9%80%A0raw+packet%E3%80%82%E8%80%8C%E9%80%99%E4%B8%80%E6%AD%A5%E5%9B%A0%E7%82%BA%E7%B3%BB%E7%B5%B1%E5%AE%89%E5%85%A8%E8%80%83%E6%85%AE%E9%9C%80%E8%A6%81%E6%9C%89root%E6%AC%8A%E9%99%90%29%0A++++++++%E5%8F%A6%E5%A4%96%E9%80%99%E7%A8%AE%E5%9C%A8%E7%B7%9A%E4%B8%BB%E6%A9%9F%E6%9F%A5%E8%A9%A2%E7%9A%84%E6%96%B9%E6%B3%95%E5%8F%AA%E9%81%A9%E7%94%A8%E6%96%BC%E5%9C%A8%E5%90%8C%E4%B8%80%E5%80%8BSubnet%E4%B8%AD%E6%89%8D%E6%9C%89%E6%95%88%E6%9E%9C%28%E5%8E%9F%E5%9B%A0%E4%B9%9F%E5%BE%88%E7%B0%A1%E5%96%AE%EF%BC%8C%E5%9B%A0%E7%82%BAARP+packet%E5%8F%AA%E6%9C%83%E5%9C%A8%E5%90%8C%E4%B8%80%E5%80%8BSubnet%E4%B8%AD%E5%BB%A3%E6%92%AD%EF%BC%8C%E6%B2%92%E8%BE%A6%E6%B3%95%E9%80%8F%E9%81%8ERouter%E5%82%B3%E9%81%9E%E5%88%B0%E5%85%B6%E4%BB%96%E7%9A%84Subnet%EF%BC%8C%E6%89%80%E4%BB%A5%E9%80%99%E7%A8%AE%E7%AD%96%E7%95%A5%E5%8F%AA%E9%81%A9%E7%94%A8%E6%96%BC%E7%9B%AE%E6%A8%99%E4%B8%BB%E6%A9%9F%E6%AE%B5%E8%88%87%E4%BD%A0%E8%99%95%E6%96%BC%E5%90%8C%E4%B8%80%E5%80%8BSubnet%29%0A++++++++%E4%BD%86%E5%A6%82%E6%9E%9C%E4%BD%A0%E6%8C%87%E5%AE%9A%E4%BA%86+-sn+%E7%9A%84%E6%83%85%E6%B3%81%E4%B8%8B%E8%88%87%E7%9B%AE%E6%A8%99%E4%B8%BB%E6%A9%9F%E6%AE%B5%E8%99%95%E6%96%BC%E4%B8%8D%E5%90%8C%E5%80%8B+Subnet+%E7%9A%84%E8%A9%B1%EF%BC%8Cnmap+%E6%9C%83%E8%87%AA%E5%8B%95%E5%B0%87%E6%9F%A5%E8%A9%A2%E7%AD%96%E7%95%A5%E8%BD%89%E7%82%BA%E4%BD%BF%E7%94%A8%E6%B7%B7%E5%90%88%E7%AD%96%E7%95%A5%EF%BC%9A%0A++++++++++%0A++++++++++++ICMP+echo+requests%2C%0A++++++++++++TCP+ACK+to+port+80%2C%0A++++++++++++TCP+SYN+to+port+443%2C%0A++++++++++++ICMP+timestamp+request.%0A++++++++++%0A++++++++%0A++++++++%E4%BE%8B%E5%AD%90%EF%BC%9A%0A++++++++++%0A++++++++++++sudo+nmap+-PR+-sn+10.10.210.1%2F24%0A++++++++++%0A++++++++%0A++++++%0A++++%0A"
+               target="_blank" title="">
+                <i class="fab fa-pinterest-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Pin it</span>
+            </a>
+        </li>
+          
+        <li>
+            <a href="https://www.reddit.com/submit?url=http://localhost:4000/demo/2025/05/03/Nmap-1.html&title=Nmap%E4%BB%8B%E7%B4%B9+%281%29%20%7C%20Owen%27s+Blog"
+               target="_blank" title=" Reddit">
+                <i class="fab fa-reddit-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on Reddit</span>
+            </a>
+        </li>
+         
+        <li>
+            <a href="https://www.linkedin.com/shareArticle?mini=true&url=http://localhost:4000/demo/2025/05/03/Nmap-1.html&title=Nmap%E4%BB%8B%E7%B4%B9+%281%29%20%7C%20Owen%27s+Blog&summary=&source=http://localhost:4000/demo/2025/05/03/Nmap-1.html"
+               target="_blank" title=" LinkedIn">
+                <i class="fab fa-linkedin fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Share on LinkedIn</span>
+            </a>
+        </li>
+          
+        <li>
+            <a href="mailto:?subject=Nmap介紹 (1)%20%7C%20Owen's Blog&body=http://localhost:4000/demo/2025/05/03/Nmap-1.html"
+               target="_blank" title="">
+                <i class="fas fa-envelope-square fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Email</span></a>
+        </li>
+        
+    </ul>
+</div>
+
+
+
+
+    <!-- Tag list -->
+    
+    
+
+
+  <div class="tag-list">
+    <ul>
+      
+        <li class="meta">Tag</li>
+      
+
+      
+        <li><a class="button" href="/tags#Cybersecurity">
+          <p><i class="fas fa-tag fa-fw fa-sm"></i> Cybersecurity</p>
+        </a></li>
+      
+    </ul>
+  </div>
+
+
+
+</article>
+
+
+
+
+<!-- To change color of links in the page --> <style> header#main { background-size: cover; background-repeat: no-repeat; background-position: center; } </style> <!-- Post navigation --> <div id="post-nav"> <div id="next-post"> <a alt="Passive Reconnaissance (1)" href="/demo/2025/04/30/Passive-Reconnaissance-1.html"> <p>Next post</p> Passive Reconnaissance (1) </a> </div> </div> <!-- Giscus --> <!--Utterances--> <!-- Cusdis --> <!-- Disqus -->
+
+
+    </div>
+    
+    <footer class="site-footer"> <p class="text"> Powered by <a href='https://jekyllrb.com/'>Jekyll</a> with <a href='https://github.com/sylhare/Type-on-Strap'>Type on Strap</a></p> <div class="footer-icons"> <ul> <!-- Social icons from Font Awesome, if enabled --> <li> <a feed.xml href="/feed.xml" title="Follow RSS feed" target="_blank"> <span class="fa-stack fa-lg"> <i class="fas fa-circle fa-stack-2x"></i> <i class="fas fa-rss fa-stack-1x fa-inverse"></i> </span> </a> </li> <li> <a href="https://github.com/sylhare" title="Follow on Github" target="_blank" rel="noopener"> <span class="fa-stack fa-lg"> <i class="fas fa-circle fa-stack-2x"></i> <i class="fab fa-github fa-stack-1x fa-inverse"></i> </span> </a> </li> </ul> </div> <script type="module"> mermaid.initialize({ startOnLoad: false, theme: "default" }); mermaid.run({ nodes: [...document.querySelectorAll('.language-mermaid'), ...document.querySelectorAll('.mermaid')] }); </script> </footer>
+  </body>
+</html>
