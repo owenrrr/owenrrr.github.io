@@ -1,35 +1,19 @@
----
----
-
-<!doctype html>
-<html lang="{{ site.locale | slice: 0,2 | default: "en" }}" class="no-js">
-  <head>
-    {% include head.html %}
-    {% include head/custom.html %}
-  </head>
-
-  <body class="layout--{{ page.layout | default: layout.layout }}{% if page.classes or layout.classes %}{{ page.classes | default: layout.classes | join: ' ' | prepend: ' ' }}{% endif %}">
-    {% include_cached skip-links.html %}
-    {% include_cached masthead.html %}
-
-    <div class="initial-content">
+<!DOCTYPE html>
+<!--
+    Type on Strap jekyll theme v2.4.12
+    Theme free for personal and commercial use under the MIT license
+    https://github.com/sylhare/Type-on-Strap/blob/master/LICENSE
+-->
+<html lang="en">
+  {% capture _head %}{% include default/head.liquid %}{% endcapture %}
+  {{ _head | split: " " | join: " "}}
+  <body>
+    {% capture _navbar %}{% include default/navbar.liquid %}{% endcapture %}
+    {{ _navbar | split: " " | join: " "}}
+    <div class="content">
       {{ content }}
-      {% include after-content.html %}
     </div>
-
-    {% if site.search == true %}
-      <div class="search-content">
-        {% include_cached search/search_form.html %}
-      </div>
-    {% endif %}
-
-    <div id="footer" class="page__footer">
-      <footer>
-        {% include footer/custom.html %}
-        {% include_cached footer.html %}
-      </footer>
-    </div>
-
-    {% include scripts.html %}
+    {% capture _footer %}{% include default/footer.liquid %}{% endcapture %}
+    {{ _footer | split: " " | join: " "}}
   </body>
 </html>
