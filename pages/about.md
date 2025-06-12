@@ -14,4 +14,4 @@ Currently I'm persuing a Master degree on cybersecurity, and desire to dig deepe
  
 *My contact info is below:*
 - [Github](https://github.com/owenrrr) 
-- [Mail](abcd0112014@gmail.com)
+- [Mail](mailto:abcd0112014@gmail.com)
