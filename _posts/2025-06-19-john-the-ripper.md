@@ -52,13 +52,20 @@ john --wordlist=rockyou.txt id_rsa_hash
   - 則原本hash.txt中包含 `5f4dcc3b5aa765d61d8327deb882cf99`
   - 就需要改寫為 `lucy:5f4dcc3b5aa765d61d8327deb882cf99`
   - 另外要注意，`--single`模式下要指定 `--format`格式，因爲它不會自動判別；如果沒有指定會報錯
-- `--rules` 或 `--rule=xxx` 指定應用特定規則，通常可在 `/etc/john/john.conf` 中查詢所有規則，還可以有自定義規則供後續使用，詳情可參考[這裏](https://www.openwall.com/john/doc/RULES.shtml)
+- `--rules` 或 `--rule=xxx` 指定應用特定規則，通常可在 `/etc/john/john.conf` 中查詢所有規則，還可以有自定義規則供後續使用，詳情可參考 [這裏](https://www.openwall.com/john/doc/RULES.shtml)
   
   
 ### 小結
-總而言之，`john` 算是一款非常實用的工具，不管是在滲透測試中想要破解各式各樣的密碼(**/etc/shadow**, **Windows SAM**, **加密的zip/rar**, **id_rsa passphrase**, **SQL/LFI中拿到Hash**, **Kerberos TGT/TGS** .etc)還是在社交工程中猜測密碼或其他應用場景都可以使用到John the ripper，所以如果還沒學會這個工具的話可以一起來學習一下。
+總而言之，`john` 算是一款非常實用的工具，它可以被用在滲透測試中:
+- **/etc/shadow**
+- **Windows SAM**
+- **zip/rar passphrase**
+- **id_rsa passphrase**
+- **hash via SQLi/LFI**
+- **Kerberos TGT/TGS**
+- **社交工程密碼猜測**  
   
-謝謝各位看到這邊，如有任何疑問或文章有任何錯漏，歡迎來信與我討論，謝謝！
+所以如果還沒學會這個工具的話可以一起來學習一下。謝謝各位看到這邊，如有任何疑問或文章有任何錯漏，歡迎來信與我討論，謝謝！
 
 ## 學習資料
 1. [TryHackMe/John the Ripper: The Basics](https://tryhackme.com/room/johntheripperbasics) 
