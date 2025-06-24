@@ -3,7 +3,7 @@ layout: post
 title:  "TryHackMe Challenge Writeup: Silver Platter"
 date:   23 June 2025
 categories: Demo
-tags: TryHackMe-Challenge, Writeup
+tags: TryHackMe-Challenge Writeup
 ---
 <html>
 <body>
