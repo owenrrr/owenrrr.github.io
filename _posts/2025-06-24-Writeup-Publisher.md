@@ -215,11 +215,12 @@ think@ip-10-10-54-119:~$ getcap -r / 2>/dev/null
 
 #### 3.6 Attempt with hint
 - 回去看其實在前面有找到一個SUID binary file (run_container)
-- 用linpeas找到有AppArmor，這裏必需知道有些系統限制執行 /bin/bash（如 AppArmor、RBAC），但允許執行載入器
+- 用linpeas找到有AppArmor，這裏必需知道AppArmor的執行方式(總的來説，AppArmor禁止設定中路徑一致的執行方式, 如果你從**沒被列入限制的 soft link 路徑**來執行程式，就能繞過 AppArmor。例如禁止使用默認載入器執行/bin/bash，但是卻沒有禁止使用默認載入器的軟連接執行/bin/bash，所以我們要做的就是利用這個軟鏈接來獲得不同的shell，這樣再使用具有SUID的binary執行的時候就能使用這個shell了)
 - 使用載入器 `/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2` 指定用載入器執行 /bin/bash : `/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 /bin/bash`
-- 再將 `bash -p` 加到 run_container.sh 裡: `echo 'bash -p' >> run_container.sh`
+- 再將 `bash -p` 加到 run_container.sh 裡: `echo 'bash -p' >> run_container.sh` (因爲run_container.sh 權限為777，所以直接在文件後面執行bash來獲得一個新的shell)
 - `bash -p` 是能夠讓有SUID的binary程序提權到owner權限而不是默認降級
 - 最後執行 `run_container.sh` 就可以獲得 root shell  
+- 順帶一提，可以通過 `ldd /bin/bash` 來查看 bash 預設是透過哪一個 loader 啟動的
 
 ### 最後自我總結
 首先到user權限之前其實都還算可以，老實說找到.ssh有點運氣成分但也還行
