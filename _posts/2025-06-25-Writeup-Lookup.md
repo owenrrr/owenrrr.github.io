@@ -44,6 +44,7 @@ http://lookup.thm [200 OK] Apache[2.4.41], Country[RESERVED][ZZ], HTML5, HTTPSer
 ```
 
 - 然後用burp suite先觀察一下它的登錄請求 => 發現用戶名和密碼是明碼傳送，可做字典檔攻擊(先不測試)
+  
 ```yaml
 POST /login.php HTTP/1.1
 Host: lookup.thm
