@@ -222,7 +222,7 @@ think@ip-10-10-54-119:~$ getcap -r / 2>/dev/null
 - 最後執行 `run_container.sh` 就可以獲得 root shell  
 - 順帶一提，可以通過 `ldd /bin/bash` 來查看 bash 預設是透過哪一個 loader 啟動的
 
-### 最後自我總結
+### 自我總結
 首先到user權限之前其實都還算可以，老實說找到.ssh有點運氣成分但也還行
   
 但使用載入器和`bash -p`來提權真的是第一次遇到，非常有趣，希望之後自己能記起來這種手法！

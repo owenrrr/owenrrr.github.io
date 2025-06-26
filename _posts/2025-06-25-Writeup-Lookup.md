@@ -164,7 +164,7 @@ think@ip-10-10-181-141:~$ sudo look '' "$LFILE"
 - 依照GTFOBins上面的步驟，將path_to_file改為/root/.ssh/id_rsa(因為前面發現三個用戶都有.ssh/，可以直接猜測root也有)獲得root金鑰
 - 成功登入為root，獲得root權限
 
-### 最後自我總結
+### 自我總結
 個人覺得的難點:
 - 根據response長度分析合法用戶名和密碼有哪些
 - admin/password123一直嘗試但是都不行，其實要讓ffuf把更多結果跑出來
