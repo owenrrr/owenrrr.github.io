@@ -3,7 +3,7 @@ layout: post
 title:  "Linux Privilege Escalation"
 date:   26 June 2025
 categories: Demo
-tags: TryHackMe-Challenge Writeup
+tags: Cybersecurity
 ---
 <html>
 <body>
@@ -121,8 +121,8 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 **所以我們可以簡化出一個流程用於檢查是否可以利用PATH提權**：
 - PATH中有哪些folder
-- (二則一)這些folder有沒有w權限
-- (二則一)可不可以修改PATH
+- (二擇一)這些folder有沒有w權限
+- (二擇一)可不可以修改PATH
 - 有沒有script/application可以利用的(也就是有使用相對路徑調用的)
 
 **常用指令:**
