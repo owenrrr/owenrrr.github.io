@@ -10,9 +10,18 @@ tags: TryHackMe-Challenge Writeup
 <div markdown="block" style="margin-top: 10px">
     
 ### Intro
-今天來迅速了解關於Linux提權的常用手法，可能會有些簡陋，主要是提供自己一個思路給真正在提權時根據這個思路來走不會漏掉資訊
+今天來迅速了解關於Linux提權的常用手法，可能會有些簡陋，主要是提供自己一個思路。在真正提權時根據這個思路來走才不會忙手忙腳怕漏東漏西
 
 介紹的手法出自 [TryHackMe - Linux Privilege Escalation](https://tryhackme.com/room/linprivesc)，有興趣的朋友可以自行查閱，後續若有看到新的手法會再進行補充
+
+***提權手法:***
+1. [Kernel Exploit](#1-kernel-exploit)
+2. [Sudo -l](#2-sudo--l)
+3. [SUID](#3-suid)
+4. [Capabilities](#4-capabilities)
+5. [Cron Jobs](#5-cron-jobs)
+6. [PATH](#6-path)
+7. [NFS](#7-nfs)
 
 ### 1. Kernel Exploit
 有些Linux版本內核會有漏洞可以利用來提權，這部分可以在最剛開始拿到權限時就進行測試，因為不需要跑什麼腳本，可以通過簡單的查詢來快速排除/利用此項提權手法:
