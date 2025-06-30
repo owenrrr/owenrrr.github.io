@@ -10,7 +10,7 @@ tags: Cybersecurity
 <div markdown="block" style="margin-top: 10px">
     
 ### Intro
-今天來迅速了解關於Linux提權的常用手法，可能會有些簡陋，主要是提供自己一個思路。在真正提權時根據這個思路來走才不會忙手忙腳怕漏東漏西
+今天來迅速了解關於Linux提權的常用手法，可能會有些簡陋，主要是提供自己一個思路。在真正提權時根據這個思路來走才不會忙手忙腳
 
 介紹的手法出自 [TryHackMe - Linux Privilege Escalation](https://tryhackme.com/room/linprivesc)，有興趣的朋友可以自行查閱，後續若有看到新的手法會再進行補充
 

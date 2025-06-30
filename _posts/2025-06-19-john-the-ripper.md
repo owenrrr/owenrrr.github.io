@@ -3,7 +3,7 @@ layout: post
 title:  "John the Ripper"
 date:   19 June 2025
 categories: Demo
-tags: Cybersecurity, Password-Cracking-Tool
+tags: Cybersecurity Password-Cracking-Tool
 ---
 <html>
 <body>
