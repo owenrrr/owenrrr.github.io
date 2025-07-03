@@ -6,16 +6,21 @@ layout: default
         {% assign image = site.header_feature_image | relative_url | split: '.' %}
         .call-out_img {
             background-image: url('{{ image | join: '.' }}');
+            background-size: cover;
+            background-position: center;
+            height: 400px; /* ✅ 這裡是你要加的高度設定 */
         }
         {% if site.header_feature_image_responsive %}
         @media screen and (max-width: 768px) {
             .call-out_img {
                 background-image: url('{{ image[0] | append: '-medium.' | append: image[1] | default: image}}');
+                height: 300px;
             }
         }
         @media screen and (max-width: 576px) {
             .call-out_img {
                 background-image: url('{{ image[0] | append: '-small.' | append: image[1] }}');
+                height: 200px;
             }
         }
         {% endif %}
