@@ -182,7 +182,7 @@ You can visit this challenge on [TryHackMe Challenge: Expose](https://tryhackme.
 - I stuck on directory enumeration with using a different wordlist `xato-xxx`. Due to this I can't get `admin_101` at the beginning and wasting a lot of time on `/phpmyadmin` and fuzzing tests on username and password.
 - Next time testing SQLi on first glimpse, make sure not to use `--batch`. Instead, using manual operations.
 - Use burp suite to set one byte to null byte (0x00) to bypass the validation
-- ***Visit a php file on a browser will lead to a working flow: Browser send PHP file to PHP interpreter -> PHP interpreter executes and transforms the file in HTML format -> Browser loads/renders HTML code***
+- ***When you visit a PHP file in your browser, here's what happens: the browser sends a request to the server, the server passes the PHP file to the PHP interpreter, which runs the code and turns it into HTML. That HTML is then sent back to the browser, which loads and displays it.***
 
 
 ## 學習資料
