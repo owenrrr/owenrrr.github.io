@@ -13,23 +13,23 @@ tags: LeetCode
 This article will contain several top algorithms in interviews and its related LeetCode questions. This is like a note other than a complete and thorough instruction to follow. I would save LeetCode questions that I've done and categorized them which may help you and myself as well to find questions in specific fields.
 
 ### Fields
-- DFS/Backtracking
-- Tree
-- BFS
-- Double Pointers
-- Sliding Window
-- Bisection
-- Stack
-- Heap
-- Union
-- Topology
-- DP
+- [DFS/Backtracking](#dfsbacktracking)
+- [Tree](#tree)
+- [BFS](#bfs)
+- [Double Pointers](#double-pointer)
+- [Sliding Window](#sliding-window)
+- [Bisection](#bisection)
+- [Stack](#stack)
+- [Heap](#heap)
+- [Union](#union)
+- [Topology](#topology)
+- [Dynamic Programming](#dynamic-programming)
 
 ### DFS/Backtracking
 
 | Problem | Difficulty | Solution |
 | -- | -- | -- |
-| [LeetCode 46](https://leetcode.com/problems/permutations/description/) | Med |  |
+| [LeetCode 46](https://leetcode.com/problems/permutations/description/) | Med | [See My Solution](https://owenrrr.github.io/demo/2026/01/12/LeetCode-46.html) |
 | [LeetCode 78](https://leetcode.com/problems/subsets/description/) | Med | |
 | [LeetCode 39](https://leetcode.com/problems/combination-sum/) | Med | |
 | [LeetCode 79](https://leetcode.com/problems/word-search/) | Med | |
