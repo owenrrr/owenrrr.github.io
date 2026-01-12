@@ -28,6 +28,7 @@ This article will contain several top algorithms in interviews and its related L
 ### DFS/Backtracking
 
 | Problem | Difficulty | My Solution |
+| -- | -- | -- |
 | [LeetCode 46](https://leetcode.com/problems/permutations/description/) | Med | None |
 | [LeetCode 78](https://leetcode.com/problems/subsets/description/) | Med |None |
 | [LeetCode 39](https://leetcode.com/problems/combination-sum/) | Med |None |
@@ -37,6 +38,7 @@ This article will contain several top algorithms in interviews and its related L
 ### Tree
 
 | Problem | Difficulty | My Solution |
+| -- | -- | -- |
 | [LeetCode 104](https://leetcode.com/problems/maximum-depth-of-binary-tree/) | Easy | None|
 | [LeetCode 110](https://leetcode.com/problems/balanced-binary-tree/) | Easy | None|
 | [LeetCode 236](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/) | Med | None|
@@ -46,6 +48,7 @@ This article will contain several top algorithms in interviews and its related L
 ### BFS
 
 | Problem | Difficulty | My Solution |
+| -- | -- | -- |
 | [LeetCode 102](https://leetcode.com/problems/binary-tree-level-order-traversal/) | Med | None|
 | [LeetCode 200](https://leetcode.com/problems/number-of-islands/) | Med | None|
 | [LeetCode 994](https://leetcode.com/problems/rotting-oranges/description/) | Med | None|
@@ -54,6 +57,7 @@ This article will contain several top algorithms in interviews and its related L
 ### Double Pointer
 
 | Problem | Difficulty | My Solution |
+| -- | -- | -- |
 | [LeetCode 167](https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/) | Med | None|
 | [LeetCode 15](https://leetcode.com/problems/3sum/) | Med | None|
 | [LeetCode 11](https://leetcode.com/problems/container-with-most-water/) | Med | None|
@@ -62,6 +66,7 @@ This article will contain several top algorithms in interviews and its related L
 ### Sliding Window
 
 | Problem | Difficulty | My Solution |
+| -- | -- | -- |
 | [LeetCode 3](https://leetcode.com/problems/longest-substring-without-repeating-characters/) | Med | None|
 | [LeetCode 76](https://leetcode.com/problems/minimum-window-substring/) | Med | None|
 | [LeetCode 209](https://leetcode.com/problems/minimum-size-subarray-sum/) | Med | None|
