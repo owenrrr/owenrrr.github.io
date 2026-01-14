@@ -39,8 +39,8 @@ This article will contain several top algorithms in interviews and its related L
 
 | Problem | Difficulty | My Solution |
 | -- | -- | -- |
-| [LeetCode 104](https://leetcode.com/problems/maximum-depth-of-binary-tree/) | Easy | |
-| [LeetCode 110](https://leetcode.com/problems/balanced-binary-tree/) | Easy | |
+| [LeetCode 104](https://leetcode.com/problems/maximum-depth-of-binary-tree/) | Easy | [See My Solution](https://owenrrr.github.io/demo/2026/01/14/LeetCode-104.html)|
+| [LeetCode 110](https://leetcode.com/problems/balanced-binary-tree/) | Easy | [See My Solution](https://owenrrr.github.io/demo/2026/01/14/LeetCode-110.html)|
 | [LeetCode 236](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/) | Med | |
 | [LeetCode 543](https://leetcode.com/problems/diameter-of-binary-tree/description/) | Easy | |
 | [LeetCode 98](https://leetcode.com/problems/validate-binary-search-tree/) | Med | |
