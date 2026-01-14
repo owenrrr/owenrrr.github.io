@@ -35,6 +35,11 @@ layout: page
     <div class="posts">
         {% for tag in tags %}
         <details class="tag-block" id="{{ tag | cgi_escape }}">
+        <summary class="tag-summary">
+            <span class="tag-summary-left">
+            <i class="fas fa-tag fa-fw fa-sm"></i> {{ tag }}
+            </span>
+        </summary>
 
         <div class="tag-posts">
             <!-- Pages -->
