@@ -30,7 +30,7 @@ This article will contain several top algorithms in interviews and its related L
 | Problem | Difficulty | Solution |
 | -- | -- | -- |
 | [LeetCode 46](https://leetcode.com/problems/permutations/description/) | Med | [See My Solution](https://owenrrr.github.io/demo/2026/01/12/LeetCode-46.html) |
-| [LeetCode 78](https://leetcode.com/problems/subsets/description/) | Med | |
+| [LeetCode 78](https://leetcode.com/problems/subsets/description/) | Med | [See My Solution](https://owenrrr.github.io/demo/2026/01/14/LeetCode-78.html)|
 | [LeetCode 39](https://leetcode.com/problems/combination-sum/) | Med | |
 | [LeetCode 79](https://leetcode.com/problems/word-search/) | Med | |
 | [LeetCode 22](https://leetcode.com/problems/generate-parentheses/) | Med | |
