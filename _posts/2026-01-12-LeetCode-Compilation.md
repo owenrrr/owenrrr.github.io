@@ -10,7 +10,7 @@ tags: LeetCode
 <div markdown="block" style="margin-top: 10px">
     
 ### Intro
-This article will contain several top algorithms in interviews and its related LeetCode questions. This is like a note other than a complete and thorough instruction to follow. I would save LeetCode questions that I've done and categorized them which may help you and myself as well to find questions in specific fields.
+This compilation contains several frequently-asked algorithms in interviews and its related LeetCode questions. This is like a note other than a complete and thorough instruction to follow. I recorded LeetCode questions that I've done and categorized them which may help you and myself as well to find questions in specific fields in a convenient way.
 
 ### Fields
 - [DFS/Backtracking](#dfsbacktracking)
@@ -49,9 +49,9 @@ This article will contain several top algorithms in interviews and its related L
 
 | Problem | Difficulty | My Solution |
 | -- | -- | -- |
-| [LeetCode 102](https://leetcode.com/problems/binary-tree-level-order-traversal/) | Med | |
-| [LeetCode 200](https://leetcode.com/problems/number-of-islands/) | Med | |
-| [LeetCode 994](https://leetcode.com/problems/rotting-oranges/description/) | Med | |
+| [LeetCode 102](https://leetcode.com/problems/binary-tree-level-order-traversal/) | Med | [See My Solution](https://owenrrr.github.io/demo/2026/01/21/LeetCode-102.html)|
+| [LeetCode 200](https://leetcode.com/problems/number-of-islands/) | Med | [See My Solution](https://owenrrr.github.io/demo/2026/01/21/LeetCode-200.html)|
+| [LeetCode 994](https://leetcode.com/problems/rotting-oranges/description/) | Med | [See My Solution](https://owenrrr.github.io/demo/2026/01/21/LeetCode-994.html)|
 | [LeetCode 127](https://leetcode.com/problems/word-ladder/) | Hard | |
 
 ### Double Pointer
