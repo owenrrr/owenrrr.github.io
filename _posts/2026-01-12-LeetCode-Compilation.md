@@ -3,7 +3,7 @@ layout: post
 title:  "LeetCode Compilation"
 date:   2026-01-12 12:47:02 +0800
 categories: Demo
-tags: LeetCode
+tags: Compilation
 ---
 <html>
 <body>
@@ -68,9 +68,9 @@ This compilation contains several frequently-asked algorithms in interviews and 
 | Problem | Difficulty | My Solution |
 | -- | -- | -- |
 | [LeetCode 3](https://leetcode.com/problems/longest-substring-without-repeating-characters/) | Med | [See My Solution](https://owenrrr.github.io/demo/2026/01/21/LeetCode-3.html)|
-| [LeetCode 76](https://leetcode.com/problems/minimum-window-substring/) | Med | |
-| [LeetCode 209](https://leetcode.com/problems/minimum-size-subarray-sum/) | Med | |
-| [LeetCode 424](https://leetcode.com/problems/longest-repeating-character-replacement/description/) | Med | |
+| [LeetCode 76](https://leetcode.com/problems/minimum-window-substring/) | Hard | [See My Solution](https://owenrrr.github.io/demo/2026/01/26/LeetCode-76.html)|
+| [LeetCode 209](https://leetcode.com/problems/minimum-size-subarray-sum/) | Med | [See My Solution](https://owenrrr.github.io/demo/2026/01/26/LeetCode-209.html)|
+| [LeetCode 424](https://leetcode.com/problems/longest-repeating-character-replacement/description/) | Med | [See My Solution](https://owenrrr.github.io/demo/2026/01/26/LeetCode-424.html)|
 
 ### Bisection
 
