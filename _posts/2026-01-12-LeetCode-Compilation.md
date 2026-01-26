@@ -76,9 +76,9 @@ This compilation contains several frequently-asked algorithms in interviews and 
 
 | Problem | Difficulty | My Solution |
 | -- | -- | -- |
-| [LeetCode 704](https://leetcode.com/problems/binary-search/description/) | Easy | |
-| [LeetCode 34](https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/description/) | Med | |
-| [LeetCode 153](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/description/) | Med | |
+| [LeetCode 704](https://leetcode.com/problems/binary-search/description/) | Easy | [See My Solution](https://owenrrr.github.io/demo/2026/01/26/LeetCode-704.html)|
+| [LeetCode 34](https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/description/) | Med | [See My Solution](https://owenrrr.github.io/demo/2026/01/26/LeetCode-34.html)|
+| [LeetCode 153](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/description/) | Med | [See My Solution](https://owenrrr.github.io/demo/2026/01/26/LeetCode-153.html)|
 | [LeetCode 875](https://leetcode.com/problems/koko-eating-bananas) | Med | |
 
 ### Stack
