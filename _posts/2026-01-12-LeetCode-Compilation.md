@@ -24,6 +24,7 @@ This compilation contains several frequently-asked algorithms in interviews and 
 - [Union](#union)
 - [Topology](#topology)
 - [Dynamic Programming](#dynamic-programming)
+- [Dijkstra](#dijkstra)
 
 ### DFS/Backtracking
 
@@ -123,6 +124,13 @@ This compilation contains several frequently-asked algorithms in interviews and 
 | [LeetCode 300](https://leetcode.com/problems/longest-increasing-subsequence) | Med | |
 | [LeetCode 1143](https://leetcode.com/problems/longest-common-subsequence) | Med | |
 | [LeetCode 416](https://leetcode.com/problems/partition-equal-subset-sum) | Med | |
+
+### Dijkstra
+| Problem | Difficulty | My Solution |
+| -- | -- | -- |
+| [LeetCode 3650](https://leetcode.com/problems/minimum-cost-path-with-edge-reversals) | Med | [See My Solution](https://owenrrr.github.io/demo/2026/01/27/LeetCode-3650.html)|
+| [LeetCode 743](https://leetcode.com/problems/network-delay-time/) | Med | [See My Solution](https://owenrrr.github.io/demo/2026/01/27/LeetCode-743.html)|
+| [LeetCode 1631](https://leetcode.com/problems/path-with-minimum-effort/) | Med | [See My Solution](https://owenrrr.github.io/demo/2026/01/27/LeetCode-1631.html)|
 
 ## Materials
 - [LeetCode Problems](https://leetcode.com/problemset/)
