@@ -118,7 +118,7 @@ This compilation contains several frequently-asked algorithms in interviews and 
 
 | Problem | Difficulty | My Solution |
 | -- | -- | -- |
-| [LeetCode 2976](https://leetcode.com/problems/minimum-cost-to-convert-string-i) | Medium | |
+| [LeetCode 2976](https://leetcode.com/problems/minimum-cost-to-convert-string-i) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/01/29/LeetCode-2976.html)|
 | [LeetCode 70](https://leetcode.com/problems/climbing-stairs) | Easy | [See My Solution](https://owenrrr.github.io/demo/2026/02/15/LeetCode-70.html)|
 | [LeetCode 198](https://leetcode.com/problems/house-robber) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/02/15/LeetCode-198.html)|
 | [LeetCode 322](https://leetcode.com/problems/coin-change) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/02/15/LeetCode-322.html)|
