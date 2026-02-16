@@ -122,9 +122,9 @@ This compilation contains several frequently-asked algorithms in interviews and 
 | [LeetCode 70](https://leetcode.com/problems/climbing-stairs) | Easy | [See My Solution](https://owenrrr.github.io/demo/2026/02/15/LeetCode-70.html)|
 | [LeetCode 198](https://leetcode.com/problems/house-robber) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/02/15/LeetCode-198.html)|
 | [LeetCode 322](https://leetcode.com/problems/coin-change) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/02/15/LeetCode-322.html)|
-| [LeetCode 300](https://leetcode.com/problems/longest-increasing-subsequence) | Medium | |
-| [LeetCode 1143](https://leetcode.com/problems/longest-common-subsequence) | Medium | |
-| [LeetCode 416](https://leetcode.com/problems/partition-equal-subset-sum) | Medium | |
+| [LeetCode 300](https://leetcode.com/problems/longest-increasing-subsequence) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/02/15/LeetCode-300.html)|
+| [LeetCode 1143](https://leetcode.com/problems/longest-common-subsequence) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/02/15/LeetCode-1143.html)|
+| [LeetCode 416](https://leetcode.com/problems/partition-equal-subset-sum) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/02/15/LeetCode-416.html)|
 
 ### Dijkstra
 
