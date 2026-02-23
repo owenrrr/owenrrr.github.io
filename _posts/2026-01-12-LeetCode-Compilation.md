@@ -113,8 +113,8 @@ This compilation contains several frequently-asked algorithms in interviews and 
 
 | Problem | Difficulty | My Solution |
 | -- | -- | -- |
-| [LeetCode 207](https://leetcode.com/problems/course-schedule) | Medium | |
-| [LeetCode 210](https://leetcode.com/problems/course-schedule-ii) | Medium | |
+| [LeetCode 207](https://leetcode.com/problems/course-schedule) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/02/22/LeetCode-207.html)|
+| [LeetCode 210](https://leetcode.com/problems/course-schedule-ii) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/02/22/LeetCode-210.html)|
 
 ### Dynamic Programming
 
