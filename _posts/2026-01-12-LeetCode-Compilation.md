@@ -26,6 +26,7 @@ This compilation contains several frequently-asked algorithms in interviews and 
 - [Topology](#topology)
 - [Dynamic Programming](#dynamic-programming)
 - [Dijkstra](#dijkstra)
+- [Bit](#bit)
 
 ### DFS/Backtracking
 
@@ -95,18 +96,18 @@ This compilation contains several frequently-asked algorithms in interviews and 
 
 | Problem | Difficulty | My Solution |
 | -- | -- | -- |
-| [LeetCode 215](https://leetcode.com/problems/kth-largest-element-in-an-array) | Medium | |
-| [LeetCode 347](https://leetcode.com/problems/top-k-frequent-elements) | Medium | |
-| [LeetCode 23](https://leetcode.com/problems/merge-k-sorted-lists) | Hard | |
-| [LeetCode 295](https://leetcode.com/problems/find-Mediumian-from-data-stream) | Hard | |
+| [LeetCode 215](https://leetcode.com/problems/kth-largest-element-in-an-array) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/02/22/LeetCode-215.html)|
+| [LeetCode 347](https://leetcode.com/problems/top-k-frequent-elements) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/02/22/LeetCode-347.html)|
+| [LeetCode 23](https://leetcode.com/problems/merge-k-sorted-lists) | Hard | [See My Solution](https://owenrrr.github.io/demo/2026/02/22/LeetCode-23.html)|
+| [LeetCode 295](https://leetcode.com/problems/find-median-from-data-stream) | Hard | [See My Solution](https://owenrrr.github.io/demo/2026/02/22/LeetCode-295.html)|
 
 ### Union
 
 | Problem | Difficulty | My Solution |
 | -- | -- | -- |
-| [LeetCode 547](https://leetcode.com/problems/number-of-provinces) | Medium | |
-| [LeetCode 684](https://leetcode.com/problems/redundant-connection) | Medium | |
-| [LeetCode 721](https://leetcode.com/problems/accounts-merge) | Medium | |
+| [LeetCode 547](https://leetcode.com/problems/number-of-provinces) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/02/22/LeetCode-547.html)|
+| [LeetCode 684](https://leetcode.com/problems/redundant-connection) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/02/22/LeetCode-684.html)|
+| [LeetCode 721](https://leetcode.com/problems/accounts-merge) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/02/22/LeetCode-721.html)|
 
 ### Topology
 
@@ -134,6 +135,12 @@ This compilation contains several frequently-asked algorithms in interviews and 
 | [LeetCode 3650](https://leetcode.com/problems/minimum-cost-path-with-edge-reversals) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/01/27/LeetCode-3650.html)|
 | [LeetCode 743](https://leetcode.com/problems/network-delay-time/) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/01/27/LeetCode-743.html)|
 | [LeetCode 1631](https://leetcode.com/problems/path-with-minimum-effort/) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/01/27/LeetCode-1631.html)|
+
+### Bit
+
+| Problem | Difficulty | My Solution |
+| -- | -- | -- |
+| [LeetCode 401](https://leetcode.com/problems/binary-watch) | Easy | [See My Solution](https://owenrrr.github.io/demo/2026/02/16/LeetCode-401.html)|
 
 ## Materials
 - [LeetCode Problems](https://leetcode.com/problemset/)
