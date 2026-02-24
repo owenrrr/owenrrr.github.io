@@ -5,7 +5,7 @@
 
   {% assign pinned_posts = site.posts | where_exp: "p", "p.pinned == true" %}
   {% if paginator.page == 1 and pinned_posts.size > 0 %}
-    {% for post in pinned_posts limit:1 %}
+    {% for post in pinned_posts limit:5 %}
       <div class="post-teaser">
         {% if post.thumbnail %}
         <div class="post-img">
