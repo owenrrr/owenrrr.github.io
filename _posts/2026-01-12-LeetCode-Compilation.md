@@ -37,6 +37,7 @@ This compilation contains several frequently-asked algorithms in interviews and 
 | [LeetCode 39](https://leetcode.com/problems/combination-sum/) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/01/14/LeetCode-39.html)|
 | [LeetCode 79](https://leetcode.com/problems/word-search/) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/01/14/LeetCode-79.html)|
 | [LeetCode 22](https://leetcode.com/problems/generate-parentheses/) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/01/14/LeetCode-22.html)|
+| [LeetCode 130](https://leetcode.com/problems/surrounded-regions/) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/02/24/LeetCode-130.html)|
 
 ### Tree
 
@@ -56,6 +57,7 @@ This compilation contains several frequently-asked algorithms in interviews and 
 | [LeetCode 200](https://leetcode.com/problems/number-of-islands/) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/01/21/LeetCode-200.html)|
 | [LeetCode 994](https://leetcode.com/problems/rotting-oranges/description/) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/01/21/LeetCode-994.html)|
 | [LeetCode 127](https://leetcode.com/problems/word-ladder/) | Hard | [See My Solution](https://owenrrr.github.io/demo/2026/01/21/LeetCode-127.html)|
+| [LeetCode 133](https://leetcode.com/problems/clone-graph/) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/02/24/LeetCode-133.html)|
 
 ### Double Pointer
 
@@ -65,6 +67,8 @@ This compilation contains several frequently-asked algorithms in interviews and 
 | [LeetCode 15](https://leetcode.com/problems/3sum/) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/01/21/LeetCode-15.html)|
 | [LeetCode 11](https://leetcode.com/problems/container-with-most-water/) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/01/21/LeetCode-11.html)|
 | [LeetCode 141](https://leetcode.com/problems/linked-list-cycle/) | Easy | [See My Solution](https://owenrrr.github.io/demo/2026/01/21/LeetCode-141.html)|
+| [LeetCode 19](https://leetcode.com/problems/remove-nth-node-from-end-of-list/) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/02/24/LeetCode-19.html)|
+| [LeetCode 24](https://leetcode.com/problems/swap-nodes-in-pairs/) | Medium | [See My Solution](https://owenrrr.github.io/demo/2026/02/24/LeetCode-24.html)|
 
 ### Sliding Window
 
