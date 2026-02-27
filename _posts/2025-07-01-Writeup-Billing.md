@@ -3,7 +3,7 @@ layout: post
 title:  "Writeup | Billing"
 date:   2 July 2025
 categories: Demo
-tags: TryHackMe-Challenge Writeup
+tags: Writeup
 ---
 <html>
 <body>

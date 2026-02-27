@@ -3,7 +3,7 @@ layout: post
 title:  "TryHackMe Challenge Writeup: Opacity"
 date:   30 June 2025
 categories: Demo
-tags: TryHackMe-Challenge Writeup
+tags: Writeup
 ---
 <html>
 <body>

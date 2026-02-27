@@ -3,7 +3,7 @@ layout: post
 title:  "TryHackMe Challenge Writeup: Creative"
 date:   1 July 2025
 categories: Demo
-tags: TryHackMe-Challenge Writeup
+tags: Writeup
 ---
 <html>
 <body>
