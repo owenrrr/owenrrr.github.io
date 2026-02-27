@@ -18,6 +18,7 @@ In this writeup, we will start from the beginning of pwning OWASP Juice Shop to 
 - [Score Board](#score-board)
 - [1-Star Challenge](#1-star-challenge)
 
+<br><br>
 
 ### Installation(Docker)
 There're multiple ways to install juice shop on your machine. I choose docker because it's already installed on my machine. Furthermore, docker is isolated in the environment so it won't affect the existing programs or services.
@@ -37,10 +38,13 @@ docker run -d -p 127.0.0.1:3000:3000 bkimminich/juice-shop
 curl -I http://localhost:3000
 ```
 
+<br><br>
+
 ### Score Board
 There's a scoreboard provided by Juice Shop which is hidden in the URL. We can access it through adding `score-board` to the URL and find out how many vaulnerabilities are there in this vulerable website. It also provides learners a decent way to record how many vulnerabilities are left in the website. The challenges are rated with a difficulty level between 1-star to 6-star. We will likely to complete it from the easist to the most difficult ones.
 ![OWASP Juice Shop Scoreboard](https://pwning.owasp-juice.shop/companion-guide/latest/_images/part1/score-board_partly.png)
 
+<br><br>
 
 ### 1-Star Challenge
 
