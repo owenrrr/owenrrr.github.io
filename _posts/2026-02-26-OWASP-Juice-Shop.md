@@ -14,9 +14,9 @@ pinned: true
 In this writeup, we will start from the beginning of pwning OWASP Juice Shop to a comprehensive walkthrough. Let's don't talk too much and get started! Here's the OWASP Juice Shop official document: [OWASP Juice Shop](https://pwning.owasp-juice.shop/companion-guide/latest/index.html).
   
 ### Outline
-- Installation
-- Score Board
-- 1-Star Challenge
+- [Installation](#installationdocker)
+- [Score Board](#score-board)
+- [1-Star Challenge](#1-star-challenge)
 
 
 ### Installation(Docker)
