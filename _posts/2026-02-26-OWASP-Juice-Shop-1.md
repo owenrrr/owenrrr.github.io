@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "OWASP Juice Shop Walkthrough (1)"
-date:   2025-02-26 11:15:55 +0800
+date:   2026-02-26 11:15:55 +0800
 categories: Demo
 tags: OWASP-Juice-Shop
 pinned: true
