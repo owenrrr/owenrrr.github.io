@@ -78,6 +78,7 @@ The searchbox logic contains **DOM sink** (*A sink is a potentially dangerous Ja
 #### Remediation
 The advice is to avoid allowing data from any untrusted source to dynamically alter the value that is transmitted to any sink. If you still want to include sinks, you should process the input before transmitting to them. For example, you could do Javascript encoding/URL encoding during processing URL.
 
+<br>
 
 #### 1.2 Bonus Payload
 ```
@@ -92,6 +93,8 @@ Same as [1.1 Root Cause](#11-dom-xss). The searchbox logic contains **DOM sink**
 #### Remediation
 The advice is to avoid allowing data from any untrusted source to dynamically alter the value that is transmitted to any sink. If you still want to include sinks, you should process the input before transmitting to them. For example, you could do Javascript encoding/URL encoding during processing URL.
 
+<br>
+
 #### 1.3 Privacy Policy
 ```
 Read our privacy policy.
@@ -99,12 +102,16 @@ Read our privacy policy.
 
 Just Register an account and read privacy policy.
 
+<br>
+
 #### 1.4 Bully Chatbot
 ```
 Receive a coupon code from the support chatbot.
 ```
 
 Just simply communicate with chatbot and try to bypass it. There're at least two responses from the chatbot to get the coupon. The first response is "You should check out our social media channel for monthly coupon..." and we could get the coupon from Juice Shop Reddit which we could find on About Me page. The second would be "Oooookay, if you promise to stop nagging me here's a 10% coupon code for you: XXXXXXX".
+
+<br>
 
 #### 1.5 Confidential Document
 ```
@@ -118,6 +125,8 @@ Sensitive documents were stored in a publicly accessible ftp directory without p
 
 #### Remediation
 Remove confidential files from publicly accessible directories and enforce proper authentication(e.g. additional layer of login) for document access.
+
+<br>
 
 #### 1.6 Error Handling
 ```
@@ -133,6 +142,8 @@ The website returns verbose error responses to users (in this case `403 Error: O
 #### Remediation
 The most effective way is to replace verbose errors with generic messages (e.g. all errors look the same) and disable stacktrace details in production. Revealing debug messages is unnecessary.
 
+<br>
+
 #### 1.7 Exposed Metrics
 ```
 Find the endpoint that serves usage data to be scraped by a popular monitoring system.
@@ -147,12 +158,16 @@ The website exposed its Prometheus metrics endpoint (`/metrics`) to unauthentica
 #### Remediation
 Restrict access to the metrics endpoint (for example, require authentication or limit access to trusted IPs only), and avoid leaving default monitoring endpoints publicly reachable on public deployments.
 
+<br>
+
 #### 1.8 Mass Dispel
 ```
 Close multiple "Challenge solved"-notifications in one go.
 ```
 
 On the [official document](https://pwning.owasp-juice.shop/companion-guide/latest/part1/challenges.html), it says - *you can simply Shift-click one of their X-buttons to dismiss all at the same time.*
+
+<br>
 
 #### 1.9 Missing Encoding
 ```
@@ -167,6 +182,8 @@ The image includes invalid characters (unsafe ASCII characters & control charact
 #### Remediation
 Properly URL encoding file paths. In addition, restrict uploaded filenames to a safe character set so that reserved URL characters do not appear unencoded in public asset URLs.
 
+<br>
+
 #### 1.10 Outdated Allowlist
 ```
 Let us redirect you to one of our crypto currency addresses which are not promoted any longer.
@@ -179,6 +196,8 @@ Deprecated code still remains in client-side functions. In this case, outdated f
 
 #### Remediation
 Remove deprecated URLs from the redirect logic and from any client-side code that still references them, and validate `to` parameter only against a current approved allowlist. In this way, there's no entrypoint and most attacks will be prevented. 
+
+<br>
 
 #### 1.11 Repetitive registration
 ```
@@ -195,6 +214,7 @@ The registration flow used incomplete cross-field validation: the `passwordRepea
 #### Remediation
 Revalidate the password confirmation whenever either password field changes, and enforce a mandatory server-side check that rejects registration unless `password` and `passwordRepeat` are identical. Client-side validation may improve usability, but the server must remain the main validation layer. (Because most validation on the front-end side can be bypassed)
 
+<br>
 
 #### 1.12 Web3 Sandbox
 ```
@@ -208,6 +228,8 @@ A developer-only sandbox `/web3-sandbox` was accessible in the production fronte
 
 #### Remediation
 Remove non-production or developer-only routes from production builds, or gate them behind feature flags that are disabled in production. If the feature must exist, it should enforce server-side authorization.
+
+<br>
 
 #### 1.13 Zero Stars
 ```

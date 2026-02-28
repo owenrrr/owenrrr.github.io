@@ -44,6 +44,8 @@ A developer was careless with hardcoding unused, but still valid credentials for
 
 While we did one-star challenges viewing `main.js`, we found something interesting that there's a testing account revealed in multiple places. `testingUsername="testing@juice-sh.op"; testingPassword="IamUsedForTesting"`.
 
+<br>
+
 #### 2.2 Login Admin
 ```
 Log in with the administrator's user account.
@@ -51,12 +53,16 @@ Log in with the administrator's user account.
 
 When we browse through the About me page, there's a customer comment that catches my eye with the email `***in@juice-sh.op`. Combined with the admin's account, we can take a easy guess that admin's email address is `admin@juice-sh.op`. As long as we don't know the password is, we can use SQL injection to bypass the login authentication.
 
+<br>
+
 #### 2.3 Admin Section
 ```
 Access the administration section of the store.
 ```
 
 Try `/administration`, `admin` and `administrator`. The `/administration` is valid.
+
+<br>
 
 #### 2.4 Password Strendth
 ```
@@ -68,6 +74,8 @@ Of course we intercepts login requests using burp suite. We note that this reque
 ```bash
 hydra -l admin@juice-sh.op -P /usr/share/seclists/Passwords/xato-net-10-million-passwords-100000.txt -s 3000 localhost http-post-form '/rest/user/login:{"email"\:"^USER^","password"\:"^PASS^"}:H=Content-Type\:application/json:1=:S=200' -V -t 20
 ```
+
+<br>
 
 #### 2.5 View Basket
 ```
@@ -87,6 +95,8 @@ Accept-Encoding: gzip, deflate, br
 
 The number in the URL looks like the userid which controls whose basket should be displayed. We then tried to modify the number: `/rest/basket/7` and forward it to the website. As what we thought, it successfully displays another user's basket.
 
+<br>
+
 #### 2.6 Deprecated Interface
 ```
 Use a deprecated B2B interface that was not properly shut down.
@@ -101,6 +111,8 @@ There's one place that supports users to upload their invoices that is the Custo
 
 Furthermore, we can still use Burp Suite to first upload a file in pdf format, intercept it, and modify the file format to XML.
 
+<br>
+
 #### 2.7 Empty User Registration
 ```
 Register a user with an empty email and password.
@@ -114,6 +126,8 @@ Host: localhost:3000
 {"email":"demo@gmail.com","password":"demo1","passwordRepeat":"demo1","securityQuestion":{"id":1,"question":"Your eldest siblings middle name?","createdAt":"2026-02-27T16:07:44.898Z","updatedAt":"2026-02-27T16:07:44.898Z"},"securityAnswer":"1"}
 ```
 
+<br>
+
 #### 2.8 Five-Star Feedback
 ```
 Get rid of all 5-star customer feedback.
@@ -121,12 +135,16 @@ Get rid of all 5-star customer feedback.
 
 This one is easy. Just simply access admin portal(`/administration`) and remove a 5-star customer feedback.
 
+<br>
+
 #### 2.9 Login MC SafeSearch
 ```
 Log in with MC SafeSearch's original user credentials without applying SQL Injection or any other bypass.
 ```
 
 As we access admin's portal(`administration`), we note a MC SafeSearch account whose email is `mc.safesearch@juice-sh.op`. MC SafeSearch is a rapper who produced a song called "Protect Ya' Passwordz". In the song, we got a clue what his password would be. He said he would use his favorite pet's name as password, and he doesn't bother if you know this pattern because he will change all letter "o" into number "0". As what he said, his pet's name is "Mr. Noodles".
+
+<br>
 
 #### 2.10 Meta Geo Stalking
 ```
@@ -178,6 +196,8 @@ GPS Position                    : 36 deg 57' 31.38" N, 84 deg 20' 53.58" W
 
 We got the GPS Position which is **36 deg 57' 31.38" N, 84 deg 20' 53.58" W**. We then search on Google for where it indicates - **Daniel Boone National Forest**. Therefore, the answer for his security question "What's your favorite place to go hiking" is revealed.
 
+<br>
+
 #### 2.11 NFT Takeover
 ```
 Take over the wallet containing our official Soul Bound Token (NFT).
@@ -189,6 +209,8 @@ Here're some useful articles about NFT and its related concepts and terminologie
 - [What are NFTs?](https://ethereum.org/nft/)
 - [Ethereum accounts](https://ethereum.org/developers/docs/accounts/)
 - [Keys in proof-of-stake Ethereum](https://ethereum.org/developers/docs/consensus-mechanisms/pos/keys/)
+
+<br>
 
 #### 2.12 Security Policy
 ```
@@ -207,6 +229,8 @@ Csaf: http://localhost:3000/.well-known/csaf/provider-metadata.json
 Expires: Sat, 27 Feb 2027 16:08:00 GMT
 ```
 
+<br>
+
 #### 2.13 Visual Geo Stalking
 ```
 Determine the answer to Emma's security question by looking at an upload of her to the Photo Wall and use it to reset her password via the Forgot Password mechanism
@@ -216,6 +240,7 @@ The security question for Emma is "Company you first work for as an adult". Let'
 
 After that, I was wondering why this challenge named "Visual Geo Stalking"? Do we have to look carefully on this image somehow? So we took a closer look at this picture and finally got some ideas. **ITsec** appears in a vague way.
 
+<br>
 
 #### 2.14 Weird Crypto
 ```
