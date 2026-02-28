@@ -9,13 +9,13 @@ tags: OWASP-Juice-Shop
 <body>
 <div markdown="block" style="margin-top: 10px">
     
-### Introduction:
+## Introduction:
 In this writeup, we will start from the beginning of pwning OWASP Juice Shop to a comprehensive walkthrough. Let's don't talk too much and get started! Here's the OWASP Juice Shop official document: [OWASP Juice Shop](https://pwning.owasp-juice.shop/companion-guide/latest/index.html).
 This article includes all two star challenges!
 
 <br><br>
 
-### Outline
+## Outline
 
 | Challenge | Vulnerability |
 | --- | --- |
@@ -36,8 +36,8 @@ This article includes all two star challenges!
 
 <br><br>
 
-### 2 Star Challenge
-#### 2.1 Exposed Credentials
+## 2 Star Challenge
+### 2.1 Exposed Credentials
 ```
 A developer was careless with hardcoding unused, but still valid credentials for a testing account on the client-side.
 ```
@@ -46,7 +46,7 @@ While we did one-star challenges viewing `main.js`, we found something interesti
 
 <br>
 
-#### 2.2 Login Admin
+### 2.2 Login Admin
 ```
 Log in with the administrator's user account.
 ```
@@ -55,7 +55,7 @@ When we browse through the About me page, there's a customer comment that catche
 
 <br>
 
-#### 2.3 Admin Section
+### 2.3 Admin Section
 ```
 Access the administration section of the store.
 ```
@@ -64,7 +64,7 @@ Try `/administration`, `admin` and `administrator`. The `/administration` is val
 
 <br>
 
-#### 2.4 Password Strendth
+### 2.4 Password Strendth
 ```
 Log in with the administrator's user credentials without previously changing them or applying SQL Injection.
 ```
@@ -77,7 +77,7 @@ hydra -l admin@juice-sh.op -P /usr/share/seclists/Passwords/xato-net-10-million-
 
 <br>
 
-#### 2.5 View Basket
+### 2.5 View Basket
 ```
 View another user's shopping basket.
 ```
@@ -97,7 +97,7 @@ The number in the URL looks like the userid which controls whose basket should b
 
 <br>
 
-#### 2.6 Deprecated Interface
+### 2.6 Deprecated Interface
 ```
 Use a deprecated B2B interface that was not properly shut down.
 ```
@@ -113,7 +113,7 @@ Furthermore, we can still use Burp Suite to first upload a file in pdf format, i
 
 <br>
 
-#### 2.7 Empty User Registration
+### 2.7 Empty User Registration
 ```
 Register a user with an empty email and password.
 ```
@@ -128,7 +128,7 @@ Host: localhost:3000
 
 <br>
 
-#### 2.8 Five-Star Feedback
+### 2.8 Five-Star Feedback
 ```
 Get rid of all 5-star customer feedback.
 ```
@@ -137,7 +137,7 @@ This one is easy. Just simply access admin portal(`/administration`) and remove 
 
 <br>
 
-#### 2.9 Login MC SafeSearch
+### 2.9 Login MC SafeSearch
 ```
 Log in with MC SafeSearch's original user credentials without applying SQL Injection or any other bypass.
 ```
@@ -146,7 +146,7 @@ As we access admin's portal(`administration`), we note a MC SafeSearch account w
 
 <br>
 
-#### 2.10 Meta Geo Stalking
+### 2.10 Meta Geo Stalking
 ```
 Determine the answer to John's security question by looking at an upload of him to the Photo Wall and use it to reset his password via the Forgot Password mechanism.
 ```
@@ -198,7 +198,7 @@ We got the GPS Position which is **36 deg 57' 31.38" N, 84 deg 20' 53.58" W**. W
 
 <br>
 
-#### 2.11 NFT Takeover
+### 2.11 NFT Takeover
 ```
 Take over the wallet containing our official Soul Bound Token (NFT).
 ```
@@ -212,7 +212,7 @@ Here're some useful articles about NFT and its related concepts and terminologie
 
 <br>
 
-#### 2.12 Security Policy
+### 2.12 Security Policy
 ```
 Behave like any "white-hat" should before getting into the action.
 ```
@@ -231,7 +231,7 @@ Expires: Sat, 27 Feb 2027 16:08:00 GMT
 
 <br>
 
-#### 2.13 Visual Geo Stalking
+### 2.13 Visual Geo Stalking
 ```
 Determine the answer to Emma's security question by looking at an upload of her to the Photo Wall and use it to reset her password via the Forgot Password mechanism
 ```
@@ -242,7 +242,7 @@ After that, I was wondering why this challenge named "Visual Geo Stalking"? Do w
 
 <br>
 
-#### 2.14 Weird Crypto
+### 2.14 Weird Crypto
 ```
 Inform the shop about an algorithm or library it should definitely not use the way it does.
 ```

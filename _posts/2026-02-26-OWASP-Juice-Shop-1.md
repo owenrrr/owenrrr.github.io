@@ -80,7 +80,7 @@ The advice is to avoid allowing data from any untrusted source to dynamically al
 
 <br>
 
-#### 1.2 Bonus Payload
+### 1.2 Bonus Payload
 ```
 Use the bonus payload <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/771984076&color=%23ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true"></iframe> in the DOM XSS challenge.
 ```
@@ -95,7 +95,7 @@ The advice is to avoid allowing data from any untrusted source to dynamically al
 
 <br>
 
-#### 1.3 Privacy Policy
+### 1.3 Privacy Policy
 ```
 Read our privacy policy.
 ```
@@ -104,7 +104,7 @@ Just Register an account and read privacy policy.
 
 <br>
 
-#### 1.4 Bully Chatbot
+### 1.4 Bully Chatbot
 ```
 Receive a coupon code from the support chatbot.
 ```
@@ -113,7 +113,7 @@ Just simply communicate with chatbot and try to bypass it. There're at least two
 
 <br>
 
-#### 1.5 Confidential Document
+### 1.5 Confidential Document
 ```
 Access a confidential document
 ```
@@ -128,7 +128,7 @@ Remove confidential files from publicly accessible directories and enforce prope
 
 <br>
 
-#### 1.6 Error Handling
+### 1.6 Error Handling
 ```
 Provoke an error that is neither very gracefully nor consistently handled.
 ```
@@ -144,7 +144,7 @@ The most effective way is to replace verbose errors with generic messages (e.g. 
 
 <br>
 
-#### 1.7 Exposed Metrics
+### 1.7 Exposed Metrics
 ```
 Find the endpoint that serves usage data to be scraped by a popular monitoring system.
 p.s popular monitoring system: prometheus
@@ -160,7 +160,7 @@ Restrict access to the metrics endpoint (for example, require authentication or 
 
 <br>
 
-#### 1.8 Mass Dispel
+### 1.8 Mass Dispel
 ```
 Close multiple "Challenge solved"-notifications in one go.
 ```
@@ -169,7 +169,7 @@ On the [official document](https://pwning.owasp-juice.shop/companion-guide/lates
 
 <br>
 
-#### 1.9 Missing Encoding
+### 1.9 Missing Encoding
 ```
 Retrieve the photo of Bjoern's cat in "melee combat-mode".
 ```
@@ -184,7 +184,7 @@ Properly URL encoding file paths. In addition, restrict uploaded filenames to a 
 
 <br>
 
-#### 1.10 Outdated Allowlist
+### 1.10 Outdated Allowlist
 ```
 Let us redirect you to one of our crypto currency addresses which are not promoted any longer.
 ```
@@ -199,7 +199,7 @@ Remove deprecated URLs from the redirect logic and from any client-side code tha
 
 <br>
 
-#### 1.11 Repetitive registration
+### 1.11 Repetitive registration
 ```
 Follow the DRY principle while registering a user.
 ```
@@ -216,7 +216,7 @@ Revalidate the password confirmation whenever either password field changes, and
 
 <br>
 
-#### 1.12 Web3 Sandbox
+### 1.12 Web3 Sandbox
 ```
 Find an accidentally deployed code sandbox for writing smart contracts on the fly.
 ```
@@ -231,7 +231,7 @@ Remove non-production or developer-only routes from production builds, or gate t
 
 <br>
 
-#### 1.13 Zero Stars
+### 1.13 Zero Stars
 ```
 Give a devastating zero-star feedback to the store.
 ```
