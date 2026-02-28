@@ -251,7 +251,9 @@ Enforce server-side validation that requires a valid rating before saving feedba
 2. [DOM-based vulerabilities - PortSwigger](https://portswigger.net/web-security/dom-based)
 3. [DOM-based XSS - PortSwigger](https://portswigger.net/web-security/cross-site-scripting/dom-based)
 
-## Related Articles
+<br><br>
+
+## Next Article
 [OWASP Juice Shop Walkthrough (2)](https://owenrrr.github.io/demo/2026/02/27/OWASP-Juice-Shop-2.html)
 
 </div>
