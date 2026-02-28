@@ -72,10 +72,10 @@ Perform a DOM XSS attack with <iframe src="javascript:alert(`xss`)">
 
 After I browse the website for a while, I found there's a direct way to insert this DOM XSS that is the search box. For this vulnerability, just directly type `<iframe src="javascript:alert('xss')">` in the searchbox.
 
-#### Root Cause
+- **Root Cause**
 The searchbox logic contains **DOM sink** (*A sink is a potentially dangerous JavaScript function or DOM object that can cause undesirable effects if attacker-controlled data is passed to it. - portswigger*) while Javascript takes data from an attacker-controllable source (in this case the input from searchbox) and passes it to a sink that supports dynamic code execution (e.g. `eval()`, `innerHTML`).
 
-#### Remediation
+- **Remediation**
 The advice is to avoid allowing data from any untrusted source to dynamically alter the value that is transmitted to any sink. If you still want to include sinks, you should process the input before transmitting to them. For example, you could do Javascript encoding/URL encoding during processing URL.
 
 <br>
@@ -87,10 +87,10 @@ Use the bonus payload <iframe width="100%" height="166" scrolling="no" framebord
 
 We could take a closer look at this payload. It's supposed to be a video/audio recording due to `allow="autoplay"` iframe attribute.
 
-#### Root Cause
+- **Root Cause**
 Same as [1.1 Root Cause](#11-dom-xss). The searchbox logic contains **DOM sink** (*A sink is a potentially dangerous JavaScript function or DOM object that can cause undesirable effects if attacker-controlled data is passed to it. - portswigger*) while Javascript takes data from an attacker-controllable source (in this case the input from searchbox) and passes it to a sink that supports dynamic code execution (e.g. `eval()`, `innerHTML`).
 
-#### Remediation
+- **Remediation**
 The advice is to avoid allowing data from any untrusted source to dynamically alter the value that is transmitted to any sink. If you still want to include sinks, you should process the input before transmitting to them. For example, you could do Javascript encoding/URL encoding during processing URL.
 
 <br>
@@ -120,10 +120,10 @@ Access a confidential document
 
 The entry-point of this vulnerability is About me page. There's a link which directs me to `http://localhost:3000/ftp/legal.md`. Now, we should wonder what files are under `ftp/` directory as long as we know that FTP is a file management service for managing files. After accessing `ftp/` we found that there're several files and one folder named `quarantine`. Just simply viewing some files.
 
-#### Root Cause
+- **Root Cause**
 Sensitive documents were stored in a publicly accessible ftp directory without proper access control. (It's still unsafe to just ban users viewing files in some specific formats: `Only .md and .pdf files are allowed!`)
 
-#### Remediation
+- **Remediation**
 Remove confidential files from publicly accessible directories and enforce proper authentication(e.g. additional layer of login) for document access.
 
 <br>
@@ -135,11 +135,11 @@ Provoke an error that is neither very gracefully nor consistently handled.
 
 If we try out the way on previous steps viewing files under `ftp/` directory, we may provoke a 403 Error with an error message: "Only .md and .pdf files are allowed!".
 
-#### Root Cause
+- **Root Cause**
 The website returns verbose error responses to users (in this case `403 Error: Only .md and .pdf files are allowed!`, the version of Express, and detailed stacktrace), exposing internal implementation details such as stack traces and SQL-related error information.
 ![Error handling](/assets/img/post-img/JS-1-5.png)
 
-#### Remediation
+- **Remediation**
 The most effective way is to replace verbose errors with generic messages (e.g. all errors look the same) and disable stacktrace details in production. Revealing debug messages is unnecessary.
 
 <br>
@@ -152,10 +152,10 @@ p.s popular monitoring system: prometheus
 
 Prometheus is a systems and monitoring system. This type of project requires configuration settings including paths. We can search for default endpoints/paths for serving usage data. We found that `./data` for data storage and `/metrics` for HTTP metric endpoint. Try `/metrics`.
 
-#### Root Cause
+- **Root Cause**
 The website exposed its Prometheus metrics endpoint (`/metrics`) to unauthenticated users, making internal usage and technical monitoring data publicly accessible.
 
-#### Remediation
+- **Remediation**
 Restrict access to the metrics endpoint (for example, require authentication or limit access to trusted IPs only), and avoid leaving default monitoring endpoints publicly reachable on public deployments.
 
 <br>
@@ -176,10 +176,10 @@ Retrieve the photo of Bjoern's cat in "melee combat-mode".
 
 Speak to photo, we found there's a Photo Wall on the side navigation bar. As we viewed the Photo Wall page, we observed that the first image is invalid due to its src attribute. It contains some invalid characters so that the interpreter can not recognize the URL. We could URLEncode it and replace it afterwards `%E1%93%9A%E1%98%8F%E1%97%A2-%23zatschi-%23whoneedsfourlegs-1572600969477.jpg`. Note that the prefix cannot be modified `assets/public/images/uploads/`. Otherwise the scoreboard can't detect the success. (However, it still work)
 
-#### Root Cause
+- **Root Cause**
 The image includes invalid characters (unsafe ASCII characters & control characters) without proper URL encoding. In this case, the image uses `#` so the browser interpreted part of the path incorrectly. (`#` without encoding will be considered as fragment delimiter).
 
-#### Remediation
+- **Remediation**
 Properly URL encoding file paths. In addition, restrict uploaded filenames to a safe character set so that reserved URL characters do not appear unencoded in public asset URLs.
 
 <br>
@@ -191,10 +191,10 @@ Let us redirect you to one of our crypto currency addresses which are not promot
 
 Most of these code will be written in JS file. We simply do a check on all JS files. Searching keyword "redirect" which seems to appear in the redirect URL and found that there're three JS files containing redirect keyword: `main.js`, `989.js` and `vendor.js`. After a quick glimpse, only `main.js` contains some suspicious and valid URL which formats like `url='./redirect?to=xxx'`. We simply try all of them(3) and found the one contains `https://blockchain.com` is the correct one.
 
-#### Root Cause
+- **Root Cause**
 Deprecated code still remains in client-side functions. In this case, outdated function still exists in `main.js`.
 
-#### Remediation
+- **Remediation**
 Remove deprecated URLs from the redirect logic and from any client-side code that still references them, and validate `to` parameter only against a current approved allowlist. In this way, there's no entrypoint and most attacks will be prevented. 
 
 <br>
@@ -208,10 +208,10 @@ The description leads us to the Registration page. We got an email input, a pass
 
 There's also an easier way to achieve this challenge. Just use burp suite, catch the request and modify the repeat password (`repeatPassword`) value, finally send the request.
 
-#### Root Cause
+- **Root Cause**
 The registration flow used incomplete cross-field validation: the `passwordRepeat` check was not revalidated when the original password changed, and the backend failed to enforce that both password fields matched before creating the account.
 
-#### Remediation
+- **Remediation**
 Revalidate the password confirmation whenever either password field changes, and enforce a mandatory server-side check that rejects registration unless `password` and `passwordRepeat` are identical. Client-side validation may improve usability, but the server must remain the main validation layer. (Because most validation on the front-end side can be bypassed)
 
 <br>
@@ -223,10 +223,10 @@ Find an accidentally deployed code sandbox for writing smart contracts on the fl
 
 We searched Web3 Sandbox default path in Google and found that the path is generally `/web3-sandbox`.
 
-#### Root Cause
+- **Root Cause**
 A developer-only sandbox `/web3-sandbox` was accessible in the production frontend. The path is still visible in `main.js` so anyone inspecting the code could discover and access it.
 
-#### Remediation
+- **Remediation**
 Remove non-production or developer-only routes from production builds, or gate them behind feature flags that are disabled in production. If the feature must exist, it should enforce server-side authorization.
 
 <br>
@@ -238,10 +238,10 @@ Give a devastating zero-star feedback to the store.
 
 Same as challenge [1.11 Repetitive Registration](#111-repetitive-registeration). Use burp suite to catch the request and modify the rating value.
 
-#### Root Cause
+- **Root Cause**
 The feedback form relied on client-side UI controls (a disabled submit button) to enforce rating selection, but the server failed to validate that the submitted rating was present and within the allowed range. This allowed a zero-star feedback submission by bypassing the frontend restriction.
 
-#### Remediation
+- **Remediation**
 Enforce server-side validation that requires a valid rating before saving feedback, and reject any value outside the allowed range.
 
 <br><br>
