@@ -15,9 +15,9 @@ This article includes all two star challenges!
 
 <br><br>
 
-### Outlines
-| Challenge | Vulerability |
-| --------- | ------------ |
+### Outline
+| Challenge | Vulnerability |
+| :--------- | :------------ |
 | [Exposed Credentials](#21-exposed-credentials) | Sensitive Data Exposure |
 | [Login Admin](#22-login-admin) | SQL Injection |
 | [Admin Section](#23-admin-section) | Broken Access Control | 

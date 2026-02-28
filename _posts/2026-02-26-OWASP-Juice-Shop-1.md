@@ -42,9 +42,9 @@ There's a scoreboard provided by Juice Shop which is hidden in the URL. We can a
 
 <br><br>
 
-### Outlines
-| Challenge | Vulerability |
-| --------- | ------------ |
+### Outline
+| Challenge | Vulnerability |
+| :--------- | :------------ |
 | [DOM XSS](#11-dom-xss) | DOM XSS |
 | [Bonus Payload](#12-bonus-payload) | DOM XSS |
 | [Privacy Policy](#13-privacy-policy) | Misc. | 
@@ -55,7 +55,7 @@ There's a scoreboard provided by Juice Shop which is hidden in the URL. We can a
 | [Mass Dispel](#18-mass-dispel) | Misc. |  
 | [Missing Encoding](#19-missing-encoding) | Improper Input Validation |  
 | [Outdated Allowlist](#110-outdated-allowlist) | Unvalidated Redirects |  
-| [Repetitive Registration](#111-repetitive-registeration) | Improper Input Validation |  
+| [Repetitive Registration](#111-repetitive-registration) | Improper Input Validation |  
 | [Web3 Sandbox](#112-web3-sandbox) | Broken Access Control |  
 | [Zero Stars](#113-zero-stars) | Improper Input Validation |  
 
@@ -176,7 +176,7 @@ Deprecated code still remains in client-side functions. In this case, outdated f
 ##### Remediation
 Remove deprecated URLs from the redirect logic and from any client-side code that still references them, and validate `to` parameter only against a current approved allowlist. In this way, there's no entrypoint and most attacks will be prevented. 
 
-#### 1.11 Repetitive registeration
+#### 1.11 Repetitive registration
 ```
 Follow the DRY principle while registering a user.
 ```
