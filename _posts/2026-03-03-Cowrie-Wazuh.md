@@ -3,8 +3,8 @@ layout: post
 title:  "Cowrie Honeypot & Wazuh Threat Monitoring Lab"
 date:   2026-03-03 02:17:55 +0800
 categories: Demo
-feature-img: "assets/img/post_img/wazuh/day1-home.png"
-img: "assets/img/post_img/wazuh/day1-home.png"
+feature-img: "assets/img/post-img/wazuh/day1-home.png"
+img: "assets/img/post-img/wazuh/day1-home.png"
 tags: Cybersecurity
 pinned: true
 ---

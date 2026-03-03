@@ -1,8 +1,8 @@
 ---
 layout: post
 title: Cowrie Honeypot & Wazuh Threat Monitoring Lab
-feature-img: "assets/img/post_img/wazuh/day1-home.png"
-img: "assets/img/post_img/wazuh/day1-home.png"
+feature-img: "assets/img/post-img/wazuh/day1-home.png"
+img: "assets/img/post-img/wazuh/day1-home.png"
 date: 3 Mar 2025
 tags: [Project]
 ---
