@@ -46,19 +46,19 @@ There's a scoreboard provided by Juice Shop which is hidden in the URL. We can a
 
 | Challenge | Vulnerability |
 | --- | --- |
-| [DOM XSS](#11-dom-xss) | DOM XSS |
-| [Bonus Payload](#12-bonus-payload) | DOM XSS |
-| [Privacy Policy](#13-privacy-policy) | Misc. | 
-| [Bully Chatbot](#14-bully-chatbot) | Misc. | 
-| [Confidential Document](#15-confidential-document) | Sensitive Data Exposure | 
-| [Error Handling](#16-error-handling) | Security Misconfiguration |  
-| [Exposed Metrics](#17-exposed-metrics) | Observability Failures |  
-| [Mass Dispel](#18-mass-dispel) | Misc. |  
-| [Missing Encoding](#19-missing-encoding) | Improper Input Validation |  
-| [Outdated Allowlist](#110-outdated-allowlist) | Unvalidated Redirects |  
-| [Repetitive Registration](#111-repetitive-registration) | Improper Input Validation |  
-| [Web3 Sandbox](#112-web3-sandbox) | Broken Access Control |  
-| [Zero Stars](#113-zero-stars) | Improper Input Validation |  
+| [1.1 DOM XSS](#dom-xss) | DOM XSS |
+| [1.2 Bonus Payload](#bonus-payload) | DOM XSS |
+| [1.3 Privacy Policy](#privacy-policy) | Misc. | 
+| [1.4 Bully Chatbot](#bully-chatbot) | Misc. | 
+| [1.5 Confidential Document](#confidential-document) | Sensitive Data Exposure | 
+| [1.6 Error Handling](#error-handling) | Security Misconfiguration |  
+| [1.7 Exposed Metrics](#exposed-metrics) | Observability Failures |  
+| [1.8 Mass Dispel](#mass-dispel) | Misc. |  
+| [1.9 Missing Encoding](#missing-encoding) | Improper Input Validation |  
+| [1.10 Outdated Allowlist](#outdated-allowlist) | Unvalidated Redirects |  
+| [1.11 Repetitive Registration](#repetitive-registration) | Improper Input Validation |  
+| [1.12 Web3 Sandbox](#web3-sandbox) | Broken Access Control |  
+| [1.13 Zero Stars](#zero-stars) | Improper Input Validation |  
 
 
 <br><br>

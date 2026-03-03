@@ -19,20 +19,20 @@ This article includes all two star challenges!
 
 | Challenge | Vulnerability |
 | --- | --- |
-| [Exposed Credentials](#21-exposed-credentials) | Sensitive Data Exposure |
-| [Login Admin](#22-login-admin) | SQL Injection |
-| [Admin Section](#23-admin-section) | Broken Access Control | 
-| [Password Strenght](#24-password-strendth) | Broken Authentication | 
-| [View Basket](#25-view-basket) | Broken Access Control | 
-| [Deprecated Interface](#26-deprecated-interface) | Security Misconfiguration |  
-| [Empty User Registration](#27-empty-user-registration) | Improper Input Validation |  
-| [Five Star Feedback](#28-five-star-feedback) | Broken Access Control |  
-| [Login MC SafeSearch](#29-login-mc-safesearch) | Sensitive Data Exposure |  
-| [Meta Geo Stalking](#210-meta-geo-stalking) | Sensitive Data Exposure |  
-| [NFT Takeover](#211-nft-takeover) | Sensitive Data Exposure |  
-| [Security Policy](#212-security-policy) | Misc. |  
-| [Visual Geo Stalking](#213-visual-geo-stalking) | Sensitive Data Exposure | 
-| [Weird Crypto](#214-weird-crypto) | Cryptographic Issues | 
+| [2.1 Exposed Credentials](#exposed-credentials) | Sensitive Data Exposure |
+| [2.2 Login Admin](#login-admin) | SQL Injection |
+| [2.3 Admin Section](#admin-section) | Broken Access Control | 
+| [2.4 Password Strenght](#password-strendth) | Broken Authentication | 
+| [2.5 View Basket](#view-basket) | Broken Access Control | 
+| [2.6 Deprecated Interface](#deprecated-interface) | Security Misconfiguration |  
+| [2.7 Empty User Registration](#empty-user-registration) | Improper Input Validation |  
+| [2.8 Five Star Feedback](#five-star-feedback) | Broken Access Control |  
+| [2.9 Login MC SafeSearch](#login-mc-safesearch) | Sensitive Data Exposure |  
+| [2.10 Meta Geo Stalking](#meta-geo-stalking) | Sensitive Data Exposure |  
+| [2.11 NFT Takeover](#nft-takeover) | Sensitive Data Exposure |  
+| [2.12 Security Policy](#security-policy) | Misc. |  
+| [2.13 Visual Geo Stalking](#visual-geo-stalking) | Sensitive Data Exposure | 
+| [2.14 Weird Crypto](#weird-crypto) | Cryptographic Issues | 
 
 <br><br>
 
@@ -247,7 +247,7 @@ After that, I was wondering why this challenge named "Visual Geo Stalking"? Do w
 Inform the shop about an algorithm or library it should definitely not use the way it does.
 ```
 
-In **Meta Geo Stalking** challenge, after we input the coorect answer for John's security question, we got a HTTP response including a suspicious password hash. 
+In **Meta Geo Stalking** challenge, after we input the correct answer for John's security question, we got a HTTP response including a suspicious password hash. 
 ```
 HTTP/1.1 200 OK
 ...
