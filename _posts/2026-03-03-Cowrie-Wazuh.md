@@ -301,6 +301,20 @@ sudo /var/ossec/bin/agent_control -l
 Right now, we have a Cowrie honeypot running with a Wazuh agent, sending logs to the Wazuh Server(Manager) for analysis and monitoring. This is a great project to enhance the ability for further analyzing cyber attacks or getting some practical experience to build up a comprehensive home lab. I'll let them running for like a half month to collect the data and will update after that. See ya!
 ![Wazuh Manager Dashboard](/assets/img/post-img/wazuh-2.png)
 
+This is the dashboard I'm using. I created fix visualizations including total connections, successful logins, failed logins, unique interacted sessions, and file download events.
+
+| Title | Filter |
+| -- | -- |
+| Total connection | agent.name:"cowrie-vps-01" and data.eventid:"cowrie.session.connect" |
+| Total successful connection | agent.name:"cowrie-vps-01" and data.eventid:"cowrie.login.success" |
+| Total failed connection | agent.name:"cowrie-vps-01" and data.eventid:"cowrie.login.failed" |
+| Total unique interacted session | agent.name:"cowrie-vps-01" and data.eventid:"cowrie.command.input" |
+| File Download Events | agent.name:"cowrie-vps-01" and data.eventid:"cowrie.session.file_download" |
+
+### Day 1
+![Wazuh Home](/assets/img/post-img/wazuh/day1-home.png)
+![Wazuh Dashboard](/assets/img/post-img/wazuh/day1-dash.png)
+
 
 <br><br>
 
