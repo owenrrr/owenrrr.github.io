@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Cowrie Honeypot & Wazuh Threat Monitoring Lab"
-date:   2026-03-04 02:17:55 +0800
+date:   2026-03-03 02:17:55 +0800
 categories: Demo
 tags: Cybersecurity
 ---
