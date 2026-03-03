@@ -301,7 +301,8 @@ sudo /var/ossec/bin/agent_control -l
 <br>
 
 ## SSH Tunnel
-Currently, our Wazuh Manager is exposed to the public which is extremely insecure. We should do something to make it only expose to ourself. We can use SSH tunnel method to achieve that.
+Currently, our Wazuh Manager is exposed to the public which is extremely insecure. We should do something to make it only expose to ourself. We can use SSH tunnel method to achieve that. First, here's some basic concepts for SSH tunnel.
+![SSH tunnel](https://iximiuz.com/ssh-tunnels/ssh-tunnels-2000-opt.png)
 
 - Delete ufw 443/tcp rule
 
