@@ -30,22 +30,26 @@ VPS2(Cowrie + Wazuh agent)
 
 ## Wazuh Server(VPS1)
 - 1. Install Wazuh Server
+
 ```bash
 curl -sO https://packages.wazuh.com/4.14/wazuh-install.sh && sudo bash ./wazuh-install.sh -a
 ```
 
 - 2. Get Default User & Password
+
 ```bash
 User: admin
 Password: 9xxxxxxxxxxxxxxxxxxxxxxxx8
 ```
 
 - 3. You can find password using this command
+
 ```bash
 sudo tar -O -xvf wazuh-install-files.tar wazuh-install-files/wazuh-passwords.txt
 ```
 
 - 4. Next, try if you can access Wazuh dashboard by directly accessing `https://WAZUH_SERVER_PUBLIC_IP`. If you can't, let's debug and find what the problem is.
+
 ```bash
 # Ensure these three services is active
 sudo systemctl status wazuh-dashboard
@@ -88,6 +92,7 @@ curl -I https://127.0.0.1
 
 ## Allow connection from VPS2(Honeypot) to VPS1(Wazuh Server)
 - In VPS1, allow access from agent
+
 ```bash
 sudo ufw allow from <HONEYPOT_PUBLIC_IP> to any port 1514 proto tcp
 sudo ufw allow from <HONEYPOT_PUBLIC_IP> to any port 1515 proto tcp
@@ -96,6 +101,7 @@ sudo ufw status verbose
 
 ## VPS2(Honeypot) SSH Setting
 - Change actual SSH port to 22222
+
 ```bash
 sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
 sudo sed -i 's/^#Port 22/Port 22222/' /etc/ssh/sshd_config
@@ -113,17 +119,20 @@ sudo systemctl restart ssh
 
 ## Install Cowrie on VPS2(Honeypot)
 - 1. Install dependencies
+
 ```bash
 sudo apt-get update
 sudo apt-get install -y git python3-pip python3-venv libssl-dev libffi-dev build-essential libpython3-dev python3-minimal authbind
 ```
 
 - 2. Create a user to run Cowrie. Because we don't want use `root`.
+
 ```bash
 sudo adduser --disabled-password cowrie
 ```
 
 - 3. Git clone Cowrie project, use python venv and install pip libs
+
 ```bash
 sudo -u cowrie -H bash -lc '
 cd ~
@@ -137,6 +146,7 @@ python -m pip install -e .
 ```
 
 - 4. Change the port which Cowrie uses
+
 ```bash
 sudo touch /etc/authbind/byport/22
 sudo chown cowrie:cowrie /etc/authbind/byport/22
@@ -149,12 +159,14 @@ EOF'
 ```
 
 - 5. Allow inbound 22/tcp in VPS2(Honeypot)
+
 ```bash
 sudo ufw allow 22/tcp
 sudo ufw status verbose
 ```
 
 - 6. Run Cowrie
+
 ```bash
 sudo -u cowrie -H bash -lc '
 cd /home/cowrie/cowrie
@@ -164,6 +176,7 @@ AUTHBIND_ENABLED=yes cowrie start
 ```
 
 - 7. Check logs on Cowrie
+
 ```bash
 sudo -u cowrie -H bash -lc 'cd /home/cowrie/cowrie && tail -n 50 var/log/cowrie/cowrie.log'
 sudo ss -lntp | grep ':22'
@@ -173,6 +186,7 @@ sudo ss -lntp | grep ':22'
 
 ## Install Wazuh Agent
 - 1. Add Wazuh repo
+
 ```bash
 sudo apt-get install -y gnupg apt-transport-https
 curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | \
@@ -184,6 +198,7 @@ sudo apt-get update
 ```
 
 - 2. Install wazuh-agent. Note that `<WAZUH_SERVER_IP>` should be replaced with your VPS1 public IP.
+
 ```bash
 sudo WAZUH_MANAGER="<WAZUH_SERVER_IP>" apt-get install -y wazuh-agent
 sudo systemctl daemon-reload
@@ -192,6 +207,7 @@ sudo systemctl start wazuh-agent
 ```
 
 - 3. Check the status and logs of wazuh-agent
+
 ```bash
 sudo systemctl status wazuh-agent 
 sudo journalctl -u wazuh-agent -n 50 
@@ -201,6 +217,7 @@ sudo journalctl -u wazuh-agent -n 50
 
 ## Connect Cowrie with Wazuh-Agent
 - 1. Add cowrie JSON output file to wazuh-agent
+
 ```bash
 sudo vim /var/ossec/etc/ossec.conf
 # Add the following to /var/ossec/etc/ossec.conf
@@ -212,6 +229,7 @@ sudo vim /var/ossec/etc/ossec.conf
 ```
 
 - 2. Restart the service
+
 ```bash
 sudo systemctl restart wazuh-agent
 sudo systemctl status wazuh-agent
@@ -225,6 +243,7 @@ You should go check out the dashboard on VPS1 via `https://VPS1_PUBLIC_IP`, logi
 ![Wazuh Manager Dashboard](/assets/img/post-img/wazuh-3.png)
 
 2. Check on VPS2
+
 ```bash
 # Check the logs first
 journalctl -u wazuh-agent -f
@@ -238,22 +257,24 @@ tail -n 100 /var/ossec/logs/ossec.log
 
 3. If you have the same problem as mine, do the following on VPS2(honeypot):
 - Modify the `/var/ossec/etc/ossec.conf` file:
+
 ```bash
 vim /var/ossec/etc/ossec.conf
 ```
 
-- Add `<enrollment></enrollment>` part which changes the agent name of VPS2
+- Add `<enrollment></enrollment>` part which changes the agent name of VPS2. You should replace WAZUH_SERVER_IP_ADDRESS with your actual Wazuh Server IP address(VPS1).
+
 ```xml
 <client>
   <server>
-    <address>149.28.118.25</address>
+    <address>WAZUH_SERVER_IP_ADDRESS</address>
     <port>1514</port>
     <protocol>tcp</protocol>
   </server>
 
   <enrollment>
     <enabled>yes</enabled>
-    <manager_address>149.28.118.25</manager_address>
+    <manager_address>WAZUH_SERVER_IP_ADDRESS</manager_address>
     <port>1515</port>
     <agent_name>cowrie-vps-01</agent_name>
   </enrollment>
@@ -261,12 +282,14 @@ vim /var/ossec/etc/ossec.conf
 ```
 
 - 4. Restart `wazuh-agent` service again
+
 ```bash
 sudo systemctl restart wazuh-agent
 sudo tail -f /var/ossec/logs/ossec.log
 ```
 
 - 5. Check on Wazuh Server Dashboard or via CLI:
+
 ```bash
 # You should see new agent's name appeared in the log
 sudo /var/ossec/bin/agent_control -l
