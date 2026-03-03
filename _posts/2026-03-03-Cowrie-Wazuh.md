@@ -11,19 +11,19 @@ pinned: true
 <div markdown="block" style="margin-top: 10px">
     
 ## Introduction:
-This article includes the overall process of building up a honeypot using Cowrie with a SIEM/XDE tool(Wazuh) to detect and analyze attacks. Here's the following configuration settings:
+This article includes the overall process of building up a honeypot using Cowrie with a SIEM/XDE tool(Wazuh) to detect and analyze attacks. At the end, we also use SSH tunnel to protect our Wazuh Manager website. Here's the following configuration settings:
 
 ```bash
 VPS1(Wazuh Server)
 - vCPU: 4
 - RAM: 8GiB
-- Storage: 120GiB
+- Storage: 150GiB
 - System: Ubuntu 24.04
 
 VPS2(Cowrie + Wazuh agent)
 - vCPU: 2
 - RAM: 2GiB
-- Storage: 75GiB
+- Storage: 50GiB
 - System: Ubuntu 24.04
 ```
 
@@ -297,6 +297,35 @@ sudo tail -f /var/ossec/logs/ossec.log
 # You should see new agent's name appeared in the log
 sudo /var/ossec/bin/agent_control -l
 ```
+
+<br>
+
+## SSH Tunnel
+Currently, our Wazuh Manager is exposed to the public which is extremely insecure. We should do something to make it only expose to ourself. We can use SSH tunnel method to achieve that.
+
+- Delete ufw 443/tcp rule
+
+```bash
+sudo ufw status numbered
+
+[ 1] 22/tcp                     ALLOW IN    Anywhere                  
+[ 2] 1514/tcp                   ALLOW IN    216.128.147.148           
+[ 3] 1515/tcp                   ALLOW IN    216.128.147.148           
+[ 4] 443/tcp                    ALLOW IN    Anywhere                  
+[ 5] 22/tcp (v6)                ALLOW IN    Anywhere (v6)             
+[ 6] 443/tcp (v6)               ALLOW IN    Anywhere (v6)
+
+sudo ufw delete 6
+sudo ufw delete 4
+```
+
+- Open a SSH tunnel, port forwarding VPS2 443/tcp to our localhost port 8000. Note that this localhost is not either VPS1 or VPS2. It's the machine that you open Wazuh Manager for monitoring.
+
+```bash
+ssh root@WAZUH_SERVER_IP -L 8000:localhost:443
+```
+
+- Right now you can test two things. First accessing original exposed `https://HONEYPOT_IP`. It's supposed to be no service which we deny all source to access port 443 using ufw. Second accessing on your localhost using `https://localhost:8000` which you should be directed to the original Wazuh Manager(Dashboard). By doing this, we could have an extra layer of authentication using ssh to protect our Wazuh Manager. In addtion, if attackers try port/service scanning, it won't expose to them too.
 
 <br>
 
