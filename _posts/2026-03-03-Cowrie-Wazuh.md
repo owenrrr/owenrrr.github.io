@@ -4,6 +4,7 @@ title:  "Cowrie Honeypot & Wazuh Threat Monitoring Lab"
 date:   2026-03-03 02:17:55 +0800
 categories: Demo
 tags: Cybersecurity
+pinned: true
 ---
 <html>
 <body>
@@ -29,26 +30,26 @@ VPS2(Cowrie + Wazuh agent)
 <br><br>
 
 ## Wazuh Server(VPS1)
-1. Install Wazuh Server
+- Install Wazuh Server
 
 ```bash
 curl -sO https://packages.wazuh.com/4.14/wazuh-install.sh && sudo bash ./wazuh-install.sh -a
 ```
 
-2. Get Default User & Password
+- Get Default User & Password
 
 ```bash
 User: admin
 Password: 9xxxxxxxxxxxxxxxxxxxxxxxx8
 ```
 
-3. You can find password using this command
+- You can find password using this command
 
 ```bash
 sudo tar -O -xvf wazuh-install-files.tar wazuh-install-files/wazuh-passwords.txt
 ```
 
-4. Next, try if you can access Wazuh dashboard by directly accessing `https://WAZUH_SERVER_PUBLIC_IP`. If you can't, let's debug and find what the problem is.
+- Next, try if you can access Wazuh dashboard by directly accessing `https://WAZUH_SERVER_PUBLIC_IP`. If you can't, let's debug and find what the problem is.
 
 ```bash
 # Ensure these three services is active
@@ -85,7 +86,7 @@ ufw status verbose
 curl -I https://127.0.0.1
 ```
 
-5. Finally, access Wazuh dashboard via `https://WAZUH_SERVER_PUBLIC_IP`
+- Finally, access Wazuh dashboard via `https://WAZUH_SERVER_PUBLIC_IP`
 ![Wazuh Dashboard](/assets/img/post-img/wazuh-1.png)
 
 <br>
@@ -240,11 +241,11 @@ sudo systemctl status wazuh-agent
 ## Examination
 This process is the most difficult and annoying part because you may encounter many issues depending on individual settings. I can provide several issues that I encountered during this examination process.
 
-1. Check Wazuh-Server Dashboard on VPS1
+- Check Wazuh-Server Dashboard on VPS1
 You should go check out the dashboard on VPS1 via `https://VPS1_PUBLIC_IP`, login in, and check the top left corner which describes the connected agents. If there's no agent there, it means something goes wrong.
 ![Wazuh Manager Dashboard](/assets/img/post-img/wazuh-3.png)
 
-2. Check on VPS2
+- Check on VPS2
 
 ```bash
 # Check the logs first
@@ -257,14 +258,14 @@ grep ^status /var/ossec/var/run/wazuh-agentd.state
 tail -n 100 /var/ossec/logs/ossec.log
 ```
 
-3. If you have the same problem as mine, do the following on VPS2(honeypot):
-- Modify the `/var/ossec/etc/ossec.conf` file:
+- If you have the same problem as mine, do the following on VPS2(honeypot):
+  - Modify the `/var/ossec/etc/ossec.conf` file:
 
 ```bash
 vim /var/ossec/etc/ossec.conf
 ```
 
-- Add `<enrollment></enrollment>` part which changes the agent name of VPS2. You should replace WAZUH_SERVER_IP_ADDRESS with your actual Wazuh Server IP address(VPS1).
+  - Add `<enrollment></enrollment>` part which changes the agent name of VPS2. You should replace WAZUH_SERVER_IP_ADDRESS with your actual Wazuh Server IP address(VPS1).
 
 ```xml
 <client>
@@ -283,14 +284,14 @@ vim /var/ossec/etc/ossec.conf
 </client>
 ```
 
-4. Restart `wazuh-agent` service again
+- Restart `wazuh-agent` service again
 
 ```bash
 sudo systemctl restart wazuh-agent
 sudo tail -f /var/ossec/logs/ossec.log
 ```
 
-5. Check on Wazuh Server Dashboard or via CLI:
+- Check on Wazuh Server Dashboard or via CLI:
 
 ```bash
 # You should see new agent's name appeared in the log
