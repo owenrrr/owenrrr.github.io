@@ -347,9 +347,12 @@ This is the dashboard I'm using. I created fix visualizations including total co
 | File Download Events | agent.name:"cowrie-vps-01" and data.eventid:"cowrie.session.file_download" |
 
 ### Day 1
-![Wazuh Home](/assets/img/post-img/wazuh/day1-home.png)
-![Wazuh Dashboard](/assets/img/post-img/wazuh/day1-dash.png)
+![Wazuh Home Day 1](/assets/img/post-img/wazuh/day1-home.png)
+![Wazuh Dashboard Day 1](/assets/img/post-img/wazuh/day1-dash.png)
 
+### Day 2
+![Wazuh Home Day 2](/assets/img/post-img/wazuh/day2-home.png)
+![Wazuh Dashboard Day 2](/assets/img/post-img/wazuh/day2-dash.png)
 
 <br><br>
 
