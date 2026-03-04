@@ -353,6 +353,8 @@ This is the dashboard I'm using. I created fix visualizations including total co
 ### Day 2
 ![Wazuh Home Day 2](/assets/img/post-img/wazuh/day2-home.png)
 ![Wazuh Dashboard Day 2](/assets/img/post-img/wazuh/day2-dash.png)
+We also find some interesting attack paths. We could discover the pattern and more things in the future.
+![Suspicious Attacks](/assets/img/post-img/wazuh/day2-sus1.png)
 
 <br><br>
 
