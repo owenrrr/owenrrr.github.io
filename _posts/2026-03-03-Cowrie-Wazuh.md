@@ -360,6 +360,10 @@ We also find some interesting attack paths. We could discover the pattern and mo
 ![Wazuh Home Day 3](/assets/img/post-img/wazuh/day3-home.png)
 ![Wazuh Dashboard Day 3](/assets/img/post-img/wazuh/day3-dash.png)
 
+### Day 4
+![Wazuh Home Day 4](/assets/img/post-img/wazuh/day4-home.png)
+![Wazuh Dashboard Day 4](/assets/img/post-img/wazuh/day4-dash.png)
+
 <br><br>
 
 ## Materials
