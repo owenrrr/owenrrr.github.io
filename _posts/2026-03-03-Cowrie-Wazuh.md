@@ -368,6 +368,9 @@ We also find some interesting attack paths. We could discover the pattern and mo
 ![Wazuh Home Day 5](/assets/img/post-img/wazuh/day5-home.png)
 ![Wazuh Dashboard Day 5](/assets/img/post-img/wazuh/day5-dash.png)
 
+### Day 6
+Start analyzing attacker paths and patterns. Observed one attacker session that values something. You can refer this article [Cowrie Honeypot: Shell Script Loader/Dropper TTP Analysis](https://owenrrr.github.io/demo/2026/03/08/Cowrie-Analysis-1.html).
+
 <br><br>
 
 ## Materials
