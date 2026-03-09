@@ -369,7 +369,7 @@ We also find some interesting attack paths. We could discover the pattern and mo
 ![Wazuh Dashboard Day 5](/assets/img/post-img/wazuh/day5-dash.png)
 
 ### Day 6
-Start analyzing attacker paths and patterns. Observed one attacker session that values something. You can refer this article [Cowrie Honeypot: Shell Script Loader/Dropper TTP Analysis](https://owenrrr.github.io/demo/2026/03/08/Cowrie-Analysis-1.html).
+I started analyzing hacker's pattern and TTP(Tactic, Technique, Procedure). You can refer this article [Cowrie Honeypot: Shell Script Loader/Dropper TTP Analysis](https://owenrrr.github.io/demo/2026/03/08/Cowrie-Analysis-1.html) for more information. In short, this shellscript is for paralyzing and taking over Tecent Cloud servers and it could be considered as a loader/dropper.
 
 <br><br>
 
@@ -378,6 +378,7 @@ Start analyzing attacker paths and patterns. Observed one attacker session that 
 2. [Wazuh Setup - Detail Process (Youtube)](https://www.youtube.com/watch?v=bltbJ2TUQWU)
 3. [Wazuh Official Documentation - QuickStart](https://documentation.wazuh.com/current/quickstart.html)
 4. [Wazuh Github](https://github.com/wazuh/wazuh)
+5. [Cowrie Output Event Code Reference](https://docs.cowrie.org/en/latest/OUTPUT.html)
 
 </div>
 </body>

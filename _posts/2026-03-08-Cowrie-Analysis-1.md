@@ -399,6 +399,7 @@ exit 0
 **Impact:**
 While the script itself is not overtly destructive, it significantly increases risk by impairing defenses—specifically, it stops/masks Tencent Cloud-related agents (e.g., YunJing/YDService and TAT agent), disables firewall protections, and then downloads and launches second-stage payloads. It also attempts to erase authentication and system logs to hinder investigation. This pattern is frequently seen in cloud server compromise scenarios leading to cryptomining (commonly XMR/Monero) or botnet activity.
 
+<br><br>
 
 ## Materials
 1. [IBM - MITRE ATT&CK](https://www.ibm.com/think/topics/mitre-attack)
