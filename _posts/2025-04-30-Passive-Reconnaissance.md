@@ -4,7 +4,6 @@ title:  "Passive Reconnaissance"
 date:   2025-04-30 21:00:55 +0800
 categories: Demo
 tags: Cybersecurity
-pinned: true
 ---
 <html>
 <body>

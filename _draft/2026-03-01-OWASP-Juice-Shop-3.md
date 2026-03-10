@@ -4,7 +4,6 @@ title:  "OWASP Juice Shop Walkthrough (1)"
 date:   2026-03-01 11:15:55 +0800
 categories: Demo
 tags: OWASP-Juice-Shop
-pinned: true
 ---
 <html>
 <body>
