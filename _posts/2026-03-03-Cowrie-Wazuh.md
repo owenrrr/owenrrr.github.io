@@ -371,6 +371,78 @@ We also find some interesting attack paths. We could discover the pattern and mo
 ### Day 6
 I started analyzing hacker's pattern and TTP(Tactic, Technique, Procedure). You can refer this article [Cowrie Honeypot: Shell Script Loader/Dropper TTP Analysis](https://owenrrr.github.io/demo/2026/03/08/Cowrie-Analysis-1.html) for more information. In short, this shellscript is for paralyzing and taking over Tecent Cloud servers and it could be considered as a loader/dropper.
 
+### Day 7
+![Wazuh Home Day 7](/assets/img/post-img/wazuh/day7-home.png)
+![Wazuh Dashboard Day 7](/assets/img/post-img/wazuh/day7-dash.png)
+
+In the Day7 image provided above, we observed that the file download event counts are abnormally larger than previous 6 days. As a result, we further query the top 10 files which these attackers most likely download.
+
+```
+GET wazuh-archives-*/_search
+{
+  "size": 0,
+  "query": {
+    "term": {
+      "data.eventid": "cowrie.session.file_download"
+    }
+  },
+  "aggs": {
+    "top_destfile": {
+      "terms": {
+        "field": "data.destfile",
+        "size": 10
+      }
+    }
+  }
+}
+```
+
+```json
+{
+  "took": 4,
+  "timed_out": false,
+  "_shards": {
+    "total": 12,
+    "successful": 12,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 195,
+      "relation": "eq"
+    },
+    "max_score": null,
+    "hits": []
+  },
+  "aggregations": {
+    "top_destfile": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": "/root/.ssh/authorized_keys",
+          "doc_count": 185
+        },
+        {
+          "key": "/etc/hosts.deny",
+          "doc_count": 10
+        }
+      ]
+    }
+  }
+}
+```
+
+And we got the result where they most likely download `/root/.ssh/authorized_keys` and `/etc/hosts.deny`. First, `/root/.ssh/authorized_keys` records a whitelist of OpenSSH public keys. If attackers grab this file, they can easily use these keys to login as root without password. Next, attackers may target `/etc/hosts.deny` because it’s a simple way to control or restrict network access to services (via TCP Wrappers on systems where it’s honored). Common motives include:
+
+- Locking down the host after compromise: Add deny rules to reduce the chance other attackers can access the same machine.
+- Disrupting defenders and recovery: Block known admin to make legitimate SSH access harder during incident response.
+- Stabilizing their foothold: Limit inbound connections to decrease noise that could expose their activity.
+- Recon/testing for legacy access controls: Many automated scripts check whether TCP Wrappers is in use; downloading `hosts.deny` helps them decide if it’s a viable control point on that system.
+
+From my perspective, in a honeypot context like ours, attackers may simply be running a standard post-login script that touches this file regardless of whether it actually takes effect.
+
 <br><br>
 
 ## Materials
