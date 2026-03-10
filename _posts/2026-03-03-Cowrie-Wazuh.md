@@ -12,7 +12,7 @@ pinned: true
 <body>
 <div markdown="block" style="margin-top: 10px">
     
-## Introduction:
+# Introduction:
 This article includes the overall process of building up a honeypot using Cowrie with a SIEM/XDE tool(Wazuh) to detect and analyze attacks. At the end, we also use SSH tunnel to protect our Wazuh Manager website. Here's the following configuration settings:
 
 ```bash
@@ -31,6 +31,28 @@ VPS2(Cowrie + Wazuh agent)
 
 <br><br>
 
+# Outline
+- [Setup, Config, Run](#setup-config-run)
+  - [Wazuh Server(VPS1)](#wazuh-servervps1)
+  - [Connect between VPS1 and VPS2](#allow-connection-from-vps2honeypot-to-vps1wazuh-server)
+  - [Honeypot SSH Setting(VPS2)](#vps2honeypot-ssh-setting)
+  - [Cowrie(VPS2)](#install-cowrie-on-vps2honeypot)
+  - [Wazuh Agent(VPS2)](#install-wazuh-agent)
+  - [Connect Cowrie and Wazuh Agent](#connect-cowrie-with-wazuh-agent)
+  - [Examination](#examination)
+  - [SSH Tunnel](#ssh-tunnel)
+- [Result](#result)
+  - [Day 1](#day-1)
+  - [Day 2](#day-2)
+  - [Day 3](#day-3)
+  - [Day 4](#day-4)
+  - [Day 5](#day-5)
+  - [Day 6](#day-6)
+  - [Day 7](#day-7)
+
+<br><br>
+
+# Setup, Config, Run
 ## Wazuh Server(VPS1)
 - Install Wazuh Server
 
@@ -332,7 +354,7 @@ ssh root@WAZUH_SERVER_IP -L 8000:localhost:443
 
 <br>
 
-## Result
+# Result
 Right now, we have a Cowrie honeypot running with a Wazuh agent, sending logs to the Wazuh Server(Manager) for analysis and monitoring. This is a great project to enhance the ability for further analyzing cyber attacks or getting some practical experience to build up a comprehensive home lab. I'll let them running for like a half month to collect the data and will update after that. See ya!
 ![Wazuh Manager Dashboard](/assets/img/post-img/wazuh-2.png)
 
@@ -346,32 +368,32 @@ This is the dashboard I'm using. I created fix visualizations including total co
 | Total unique interacted session | agent.name:"cowrie-vps-01" and data.eventid:"cowrie.command.input" |
 | File Download Events | agent.name:"cowrie-vps-01" and data.eventid:"cowrie.session.file_download" |
 
-### Day 1
+## Day 1
 ![Wazuh Home Day 1](/assets/img/post-img/wazuh/day1-home.png)
 ![Wazuh Dashboard Day 1](/assets/img/post-img/wazuh/day1-dash.png)
 
-### Day 2
+## Day 2
 ![Wazuh Home Day 2](/assets/img/post-img/wazuh/day2-home.png)
 ![Wazuh Dashboard Day 2](/assets/img/post-img/wazuh/day2-dash.png)
 We also find some interesting attack paths. We could discover the pattern and more things in the future.
 ![Suspicious Attacks](/assets/img/post-img/wazuh/day2-sus1.png)
 
-### Day 3
+## Day 3
 ![Wazuh Home Day 3](/assets/img/post-img/wazuh/day3-home.png)
 ![Wazuh Dashboard Day 3](/assets/img/post-img/wazuh/day3-dash.png)
 
-### Day 4
+## Day 4
 ![Wazuh Home Day 4](/assets/img/post-img/wazuh/day4-home.png)
 ![Wazuh Dashboard Day 4](/assets/img/post-img/wazuh/day4-dash.png)
 
-### Day 5
+## Day 5
 ![Wazuh Home Day 5](/assets/img/post-img/wazuh/day5-home.png)
 ![Wazuh Dashboard Day 5](/assets/img/post-img/wazuh/day5-dash.png)
 
-### Day 6
+## Day 6
 I started analyzing hacker's pattern and TTP(Tactic, Technique, Procedure). You can refer this article [Cowrie Honeypot: Shell Script Loader/Dropper TTP Analysis](https://owenrrr.github.io/demo/2026/03/08/Cowrie-Analysis-1.html) for more information. In short, this shellscript is for paralyzing and taking over Tecent Cloud servers and it could be considered as a loader/dropper.
 
-### Day 7
+## Day 7
 ![Wazuh Home Day 7](/assets/img/post-img/wazuh/day7-home.png)
 ![Wazuh Dashboard Day 7](/assets/img/post-img/wazuh/day7-dash.png)
 
